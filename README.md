@@ -58,13 +58,13 @@ Eigenständige, schlanke 2D-UWP-App als Ersatz für die auf HoloLens 1 nicht meh
 
 **Wichtiger Hinweis:** Die App nutzt intern denselben `WebView`-Steuerelement-Typ (EdgeHTML-Engine), den auch die Edge-App verwendet. Falls Edge wegen veralteter Root-Zertifikate oder abgeschalteter TLS-Versionen bricht – HoloLens 1 ist seit Dezember 2024 „end of support" und bekommt keine Updates mehr –, kann dasselbe Problem hier bei HTTPS-Seiten auftreten. Einen Versuch ist es trotzdem wert, da Edge auf HoloLens oft aus anderen Gründen ausfällt (z. B. abgeschaltete Cloud-Dienste für Startseite/Sync). Falls auch diese App bei allen Seiten fehlschlägt, ist das ein Zertifikats-/OS-Problem, das sich nicht pauschal per App umgehen lässt.
 
-Enthalten sind nur die eigentlichen App-Dateien (`MainPage.xaml`, `MainPage.xaml.cs`) – das Visual-Studio-Projekt (`.csproj`/`.sln`) drumherum lässt sich zuverlässiger über den VS-Projektassistenten erzeugen als von Hand nachzubauen:
+Das komplette Visual-Studio-Projekt liegt in `SimpleBrowser/` (`SimpleBrowser.csproj`, `App.xaml(.cs)`, `MainPage.xaml(.cs)`, `Package.appxmanifest`, `Assets/` mit Platzhalter-Icons, Ziel-SDK 10.0.17763.0):
 
-1. Visual Studio: **Neues Projekt** → Vorlage **„Leere App (Universelles Windows)"** ("Blank App, Universal Windows") → Name **SimpleBrowser**, im Ordner `SimpleBrowser/` dieses Repos anlegen.
-2. Bei der Zielversionsabfrage: Zielversion/Minimalversion auf **10.0.17763.0** setzen (bzw. mindestens diese Minimalversion).
-3. Die generierten `MainPage.xaml` und `MainPage.xaml.cs` durch die beiden Dateien aus diesem Ordner ersetzen.
-4. `Package.appxmanifest` öffnen → Tab **Capabilities** → **Internet (Client)** aktivieren (für lokale Netzwerkziele zusätzlich **Privates Netzwerk (Client/Server)**).
-5. Build-Konfiguration **Release / x86** wählen (HoloLens 1 = x86, siehe oben) und auf Gerät oder Emulator deployen.
+1. `SimpleBrowser/SimpleBrowser.csproj` in Visual Studio öffnen (VS bietet beim ersten Öffnen an, eine `.sln` dazu anzulegen).
+2. Build-Konfiguration **Debug oder Release / x86** wählen (HoloLens 1 = x86, siehe oben) und auf Gerät oder Emulator deployen. Die `internetClient`-Capability ist im Manifest bereits gesetzt.
+3. Die Tile-/Splash-Bilder in `Assets/` sind einfarbige Platzhalter (per Skript erzeugt, da hier kein Bildeditor zur Verfügung stand) – rein kosmetisch, für einen funktionierenden Build nicht relevant, aber bei Gelegenheit durch echte Icons ersetzbar.
+
+**CI:** `.github/workflows/simplebrowser-build.yml` baut das Projekt bei jedem Push/PR, der `SimpleBrowser/**` berührt, automatisch auf einem `windows-2022`-Runner (Debug/x86, Signierung deaktiviert). Das validiert nur, dass der Code kompiliert – kein Deploy, kein Emulator-Lauf, kein Laufzeitverhalten. Ein grüner Check heißt also „baut fehlerfrei", nicht „funktioniert auf echter Hardware".
 
 ## Quellen
 
