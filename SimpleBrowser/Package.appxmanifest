@@ -1,14 +1,17 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Package
   xmlns="http://schemas.microsoft.com/appx/manifest/foundation/windows10"
+  xmlns:mp="http://schemas.microsoft.com/appx/2014/phone/manifest"
   xmlns:uap="http://schemas.microsoft.com/appx/manifest/uap/windows10"
   xmlns:rescap="http://schemas.microsoft.com/appx/manifest/foundation/windows10/restrictedcapabilities"
-  IgnorableNamespaces="uap rescap">
+  IgnorableNamespaces="uap mp rescap">
 
   <Identity
     Name="hololens-instruct.SimpleBrowser"
     Publisher="CN=hololens-instruct"
     Version="1.0.0.0" />
+
+  <mp:PhoneIdentity PhoneProductId="c7edf6f2-ae65-4379-8162-86ff2019fe59" PhonePublisherId="00000000-0000-0000-0000-000000000000" />
 
   <Properties>
     <DisplayName>SimpleBrowser</DisplayName>
