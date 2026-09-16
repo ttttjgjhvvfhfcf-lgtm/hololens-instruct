@@ -13,14 +13,23 @@
             <RowDefinition Height="*" />
         </Grid.RowDefinitions>
 
-        <StackPanel Orientation="Horizontal" Grid.Row="0" Padding="8" Spacing="8">
-            <Button x:Name="BackButton" Content="&#xE72B;" FontFamily="Segoe MDL2 Assets" Click="BackButton_Click" IsEnabled="False" ToolTipService.ToolTip="Zurück" />
-            <Button x:Name="ForwardButton" Content="&#xE72A;" FontFamily="Segoe MDL2 Assets" Click="ForwardButton_Click" IsEnabled="False" ToolTipService.ToolTip="Vor" />
-            <Button x:Name="ReloadButton" Content="&#xE72C;" FontFamily="Segoe MDL2 Assets" Click="ReloadButton_Click" ToolTipService.ToolTip="Neu laden" />
-            <Button x:Name="HomeButton" Content="&#xE80F;" FontFamily="Segoe MDL2 Assets" Click="HomeButton_Click" ToolTipService.ToolTip="Startseite" />
-            <TextBox x:Name="AddressBar" Width="600" VerticalAlignment="Center" KeyDown="AddressBar_KeyDown" />
-            <Button x:Name="GoButton" Content="Los" Click="GoButton_Click" />
-        </StackPanel>
+        <Grid Grid.Row="0" Padding="8">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="Auto" />
+            </Grid.ColumnDefinitions>
+
+            <Button Grid.Column="0" x:Name="BackButton" Content="&#xE72B;" FontFamily="Segoe MDL2 Assets" Click="BackButton_Click" IsEnabled="False" ToolTipService.ToolTip="Zurück" Margin="0,0,8,0" />
+            <Button Grid.Column="1" x:Name="ForwardButton" Content="&#xE72A;" FontFamily="Segoe MDL2 Assets" Click="ForwardButton_Click" IsEnabled="False" ToolTipService.ToolTip="Vor" Margin="0,0,8,0" />
+            <Button Grid.Column="2" x:Name="ReloadButton" Content="&#xE72C;" FontFamily="Segoe MDL2 Assets" Click="ReloadButton_Click" ToolTipService.ToolTip="Neu laden" Margin="0,0,8,0" />
+            <Button Grid.Column="3" x:Name="HomeButton" Content="&#xE80F;" FontFamily="Segoe MDL2 Assets" Click="HomeButton_Click" ToolTipService.ToolTip="Startseite" Margin="0,0,8,0" />
+            <TextBox Grid.Column="4" x:Name="AddressBar" VerticalAlignment="Center" Margin="0,0,8,0" KeyDown="AddressBar_KeyDown" />
+            <Button Grid.Column="5" x:Name="GoButton" Content="Los" Click="GoButton_Click" />
+        </Grid>
 
         <WebView x:Name="Browser" Grid.Row="1" />
     </Grid>
