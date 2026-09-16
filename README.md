@@ -52,6 +52,20 @@ ProjectSettings/
 
 `TapToCycleColor.cs` ist ein minimales Beispiel, das zeigt, wie ein MRTK-Pointer-Event (Air-Tap, Controller-Klick, …) verarbeitet wird. Für die meisten MRTK-Bausteine (Interactable, ObjectManipulator, SpeechInputHandler, …) braucht es kein eigenes Skript – die werden nach Paketinstallation direkt als Komponenten im Inspector hinzugefügt.
 
+## SimpleBrowser (Edge-Ersatz)
+
+Eigenständige, schlanke 2D-UWP-App als Ersatz für die auf HoloLens 1 nicht mehr funktionierende Edge-App: Adressleiste + Zurück/Vor/Neu laden/Startseite, läuft wie jede 2D-UWP-App als schwebende Kachel im Holographic Shell (kein Unity/MRTK nötig).
+
+**Wichtiger Hinweis:** Die App nutzt intern denselben `WebView`-Steuerelement-Typ (EdgeHTML-Engine), den auch die Edge-App verwendet. Falls Edge wegen veralteter Root-Zertifikate oder abgeschalteter TLS-Versionen bricht – HoloLens 1 ist seit Dezember 2024 „end of support" und bekommt keine Updates mehr –, kann dasselbe Problem hier bei HTTPS-Seiten auftreten. Einen Versuch ist es trotzdem wert, da Edge auf HoloLens oft aus anderen Gründen ausfällt (z. B. abgeschaltete Cloud-Dienste für Startseite/Sync). Falls auch diese App bei allen Seiten fehlschlägt, ist das ein Zertifikats-/OS-Problem, das sich nicht pauschal per App umgehen lässt.
+
+Enthalten sind nur die eigentlichen App-Dateien (`MainPage.xaml`, `MainPage.xaml.cs`) – das Visual-Studio-Projekt (`.csproj`/`.sln`) drumherum lässt sich zuverlässiger über den VS-Projektassistenten erzeugen als von Hand nachzubauen:
+
+1. Visual Studio: **Neues Projekt** → Vorlage **„Leere App (Universelles Windows)"** ("Blank App, Universal Windows") → Name **SimpleBrowser**, im Ordner `SimpleBrowser/` dieses Repos anlegen.
+2. Bei der Zielversionsabfrage: Zielversion/Minimalversion auf **10.0.17763.0** setzen (bzw. mindestens diese Minimalversion).
+3. Die generierten `MainPage.xaml` und `MainPage.xaml.cs` durch die beiden Dateien aus diesem Ordner ersetzen.
+4. `Package.appxmanifest` öffnen → Tab **Capabilities** → **Internet (Client)** aktivieren (für lokale Netzwerkziele zusätzlich **Privates Netzwerk (Client/Server)**).
+5. Build-Konfiguration **Release / x86** wählen (HoloLens 1 = x86, siehe oben) und auf Gerät oder Emulator deployen.
+
 ## Quellen
 
 - [Choosing a Unity version and XR plugin](https://learn.microsoft.com/en-us/windows/mixed-reality/develop/unity/choosing-unity-version)

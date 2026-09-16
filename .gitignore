@@ -42,3 +42,13 @@ sysinfo.txt
 
 # Crashlytics generated file
 crashlytics-build.properties
+
+# UWP build output (SimpleBrowser)
+[Bb]in/
+[Aa]ppPackages/
+BundleArtifacts/
+
+# The above Unity-oriented rules would also hide SimpleBrowser's own
+# hand-maintained project files - keep those tracked.
+!SimpleBrowser/**/*.csproj
+!SimpleBrowser/**/*.sln
