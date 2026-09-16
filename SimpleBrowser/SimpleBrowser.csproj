@@ -66,9 +66,9 @@
     </Page>
   </ItemGroup>
   <ItemGroup>
-    <Content Include="Package.appxmanifest">
+    <AppxManifest Include="Package.appxmanifest">
       <SubType>Designer</SubType>
-    </Content>
+    </AppxManifest>
     <Content Include="Assets\Square44x44Logo.png" />
     <Content Include="Assets\Square150x150Logo.png" />
     <Content Include="Assets\Wide310x150Logo.png" />
