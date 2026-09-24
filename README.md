@@ -42,6 +42,8 @@ Assets/
   Scripts/
     Interactions/
       TapToCycleColor.cs     # Beispiel: Air-Tap-Interaktion über IMixedRealityPointerHandler
+    Graphics/
+      SpinningShapesDemo.cs  # Beispiel: einfache 3D-Grafik-Demo (rotierende Primitives)
   Prefabs/
   Materials/
 Packages/
@@ -51,6 +53,8 @@ ProjectSettings/
 ```
 
 `TapToCycleColor.cs` ist ein minimales Beispiel, das zeigt, wie ein MRTK-Pointer-Event (Air-Tap, Controller-Klick, …) verarbeitet wird. Für die meisten MRTK-Bausteine (Interactable, ObjectManipulator, SpeechInputHandler, …) braucht es kein eigenes Skript – die werden nach Paketinstallation direkt als Komponenten im Inspector hinzugefügt.
+
+`SpinningShapesDemo.cs` ist eine einfache 3D-Grafik-Demo ganz ohne MRTK: Sie erzeugt beim Start per Code drei rotierende Primitives (Würfel, Kugel, Zylinder) ~2m vor der Kamera – bewusst als Laufzeit-Erzeugung statt als Prefab/Szene, da sich Letztere hier ohne Unity-Editor nicht verlässlich von Hand anlegen lassen. Einfach auf ein leeres GameObject in der Szene ziehen (z. B. „DemoRoot"), fertig; Abstand, Größe, Abstand zueinander und Rotationsgeschwindigkeit sind im Inspector einstellbar (`distanceFromCamera`, `shapeScale`, `shapeSpacing`, `rotationSpeedDegreesPerSecond`).
 
 ## SimpleBrowser (Edge-Ersatz)
 
