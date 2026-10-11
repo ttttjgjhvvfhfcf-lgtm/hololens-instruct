@@ -155,7 +155,9 @@ confirm() {
 
 sudo_keepalive() {
   sudo -v || die "sudo funktioniert nicht - Passwort des Benutzers '${USER_NAME}' pruefen."
-  ( while true; do sleep 50; sudo -n true 2>/dev/null || exit 0; done ) &
+  # Ausgabe nach /dev/null: sonst haelt das verwaiste "sleep" die Protokoll-Leitung (tee) bis zu
+  # 50 s offen und die letzten Zeilen erscheinen erst nach dem Shell-Prompt.
+  ( while true; do sleep 50; sudo -n true 2>/dev/null || exit 0; done ) >/dev/null 2>&1 &
   SUDO_KEEP_PID=$!
   trap 'kill "${SUDO_KEEP_PID}" 2>/dev/null || true' EXIT
 }
@@ -258,7 +260,7 @@ check_toolchain() {
   case "$lib" in
     /*) if [ -f "$lib" ]; then ok "ARM-Toolchain vollstaendig (libc_nano fuer Cortex-M7 vorhanden)"; return 0; fi ;;
   esac
-  die "ARM-Toolchain unvollstaendig: libc_nano fuer Cortex-M7 fehlt (${lib:-nicht gefunden}). Der Firmware-Build wuerde mit 'cannot find -lc_nano' scheitern."
+  die "ARM-Toolchain unvollstaendig: libc_nano fuer Cortex-M7 fehlt (${lib:-nicht gefunden}). Der Firmware-Build wuerde mit 'cannot find -lc_nano' scheitern. Reparieren: sudo apt-get install --reinstall ${NEWLIB_PKG}"
 }
 
 # Nach einer abgebrochenen Installation (z. B. "No space left on device") bleiben Pakete halb
@@ -825,9 +827,18 @@ start_services() {
   done
 }
 
+# Adresse, unter der das Board im Netz erreichbar ist: die der Standardroute. "hostname -I" waere
+# falsch - es nennt zuerst die Docker-Bruecken (172.17.0.1 ...), die auf dem UNO Q vorhanden sind.
+primary_ip() {
+  local addr
+  addr="$(ip -4 route get 1.1.1.1 2>/dev/null | awk '{for (i = 1; i <= NF; i++) if ($i == "src") { print $(i + 1); exit }}' || true)"
+  if [ -z "$addr" ]; then addr="$(hostname -I 2>/dev/null | awk '{print $1}' || true)"; fi
+  printf '%s' "$addr"
+}
+
 print_summary() {
   local ip host url
-  ip="$(hostname -I 2>/dev/null | awk '{print $1}')"
+  ip="$(primary_ip)"
   host="$(hostname 2>/dev/null || true)"
   url="http://${ip:-<IP-des-UNO-Q>}"
   [ "$PORT" = "80" ] || url="${url}:${PORT}"
