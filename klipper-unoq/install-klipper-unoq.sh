@@ -42,7 +42,19 @@ MAINSAIL_DIR="${HOME}/mainsail"
 MAINSAIL_CFG_DIR="${HOME}/mainsail-config"
 FW_DIR="${HOME}/m8p-firmware"
 LOG_FILE="${HOME}/klipper-install.log"
-MIN_FREE_MB=3000
+MIN_FREE_MB=3000       # frei im Home-Verzeichnis (Quellcode, Python-Umgebungen, Firmware-Build)
+MIN_FREE_ROOT_MB=1700  # Rueckfall fuer die Root-Partition, wenn apt den Bedarf nicht berechnen kann
+ROOT_MARGIN_MB=500     # Reserve fuer die Pakete, die Moonraker selbst per apt nachinstalliert
+
+# Ohne "Recommends" installieren: apt wuerde sonst libstdc++-arm-none-eabi-newlib (C++-Bibliothek
+# fuer den ARM-Compiler, ~2 GB entpackt) mitziehen. Klipper-Firmware ist reines C; die C-Bibliothek
+# libnewlib-arm-none-eabi wird dagegen zum Linken gebraucht (sonst "cannot find -lc_nano").
+APT_PKGS=(
+  git curl wget unzip ca-certificates
+  build-essential python3 python3-dev python3-virtualenv libffi-dev libncurses-dev
+  dfu-util stm32flash gcc-arm-none-eabi binutils-arm-none-eabi libnewlib-arm-none-eabi
+  nginx usbutils libinput-tools xinput evtest xserver-xorg-input-libinput
+)
 
 M8P_CFG_NAME="generic-bigtreetech-manta-m8p-V2_0.cfg"
 M8P_CFG_URL="https://raw.githubusercontent.com/bigtreetech/Manta-M8P/master/V2.0/Firmware/${M8P_CFG_NAME}"
@@ -70,6 +82,8 @@ on_err() {
   local code="$1" line="$2" cmd="$3"
   printf '\n%sABBRUCH%s in Zeile %s (Exit-Code %s): %s\n' "$C_R" "$C_N" "$line" "$code" "$cmd" >&2
   printf 'Protokoll: %s - die Installation laesst sich gefahrlos erneut starten.\n' "$LOG_FILE" >&2
+  printf 'Freier Platz (apt installiert nach /, nicht nach %s):\n' "$HOME" >&2
+  df -h / "$HOME" 2>&1 | sed 's/^/    /' >&2 || true
 }
 trap 'on_err "$?" "$LINENO" "$BASH_COMMAND"' ERR
 
@@ -114,6 +128,76 @@ sudo_keepalive() {
   ( while true; do sleep 50; sudo -n true 2>/dev/null || exit 0; done ) &
   SUDO_KEEP_PID=$!
   trap 'kill "${SUDO_KEEP_PID}" 2>/dev/null || true' EXIT
+}
+
+# ------------------------------------------------- Platz auf der Root-Partition
+# apt schreibt nach /usr und /var. Auf dem UNO Q liegt "/" auf einer anderen (kleineren)
+# Partition als /home/arduino - der freie Platz im Home-Verzeichnis sagt dazu nichts.
+to_mb() {  # "3,499 MB" | "615 kB" | "1.2 GB"  ->  ganze MB
+  awk -v s="$1" 'BEGIN {
+    split(s, a, " "); v = a[1]; gsub(",", "", v); u = a[2]
+    if (u == "kB") v /= 1024; else if (u == "GB") v *= 1024; else if (u == "B") v /= 1048576
+    printf "%d", v + 0.5 }'
+}
+
+# Download + entpackte Groesse der noch fehlenden Pakete laut "apt-get -s" (leer/Fehler: unbekannt)
+apt_need_mb() {
+  local sim dl inst mb=0
+  sim="$(LC_ALL=C apt-get -s install --no-install-recommends "${APT_PKGS[@]}" 2>&1 || true)"
+  if grep -q '^E:' <<<"$sim"; then return 1; fi
+  # "Need to get 176 MB of archives." oder, bei teilweise geladenen Paketen, "... 12.3 MB/615 MB of archives."
+  dl="$(sed -n 's/^Need to get \(.*\) of archives.*/\1/p' <<<"$sim" | head -n1)"
+  dl="${dl##*/}"
+  inst="$(sed -n 's/^After this operation, \(.*\) of additional disk space will be used.*/\1/p' <<<"$sim" | head -n1)"
+  if [ -n "$dl" ]; then mb=$((mb + $(to_mb "$dl"))); fi
+  if [ -n "$inst" ]; then mb=$((mb + $(to_mb "$inst"))); fi
+  printf '%d' "$mb"
+}
+
+dpkg_unfinished() { [ -n "$(dpkg --audit 2>/dev/null)" ]; }
+
+check_root_space() {
+  local free_mb need_mb total src
+  free_mb="$(df -Pm / | awk 'NR==2 {print $4}')"
+  if dpkg_unfinished; then
+    warn "dpkg meldet eine abgebrochene Paketinstallation - 'install' repariert das und prueft den Platz auf / danach erneut."
+    return 0
+  fi
+  if need_mb="$(apt_need_mb)"; then
+    src="berechnet mit apt"
+  else
+    need_mb="$MIN_FREE_ROOT_MB"
+    src="Schaetzwert - apt-Paketlisten nicht lesbar"
+  fi
+  total=$((need_mb + ROOT_MARGIN_MB))
+  info "Root-Partition (/): ${free_mb} MB frei; apt braucht ca. ${need_mb} MB + ${ROOT_MARGIN_MB} MB Reserve (${src})"
+  if [ "${free_mb:-0}" -ge "$total" ]; then
+    ok "Platz auf der Root-Partition (/) reicht"
+  else
+    bad "Zu wenig Platz auf der Root-Partition (/): ${free_mb} MB frei, benoetigt ca. ${total} MB (apt installiert nach /usr und /var, nicht nach ${HOME}). Platz schaffen z. B. mit: sudo apt-get clean; sudo apt-get autoremove; sudo journalctl --vacuum-size=50M  (Docker-Daten nur nach eigener Pruefung: docker system df)"
+  fi
+}
+
+# Nach einer abgebrochenen Installation (z. B. "No space left on device") bleiben Pakete halb
+# entpackt zurueck. Diese werden entfernt (apt installiert sie bei Bedarf sauber neu) und der
+# Rest fertig konfiguriert; zusaetzlich wird der apt-Zwischenspeicher geleert.
+repair_dpkg() {
+  dpkg_unfinished || return 0
+  say "Abgebrochene Paketinstallation reparieren"
+  local half
+  half="$(dpkg-query -W -f='${db:Status-Abbrev} ${Package}\n' 2>/dev/null | awk '$1 ~ /^.H/ {print $2}')"
+  sudo apt-get clean
+  if [ -n "$half" ]; then
+    info "Halb installierte Pakete werden entfernt: $(tr '\n' ' ' <<<"$half")"
+    # shellcheck disable=SC2086
+    sudo dpkg --purge --force-remove-reinstreq $half || true
+  fi
+  sudo dpkg --configure -a || true
+  if dpkg_unfinished; then
+    warn "dpkg ist noch nicht sauber - 'sudo apt-get -f install --no-install-recommends' kann den Rest beheben."
+  else
+    ok "dpkg-Zustand repariert"
+  fi
 }
 
 # ------------------------------------------------------------- Systempruefung
@@ -164,7 +248,8 @@ check_system() {
   mem_mb="$(awk '/^MemTotal:/ {print int($2/1024)}' /proc/meminfo)"
   free_mb="$(df -Pm "$HOME" | awk 'NR==2 {print $4}')"
   info "RAM: ${mem_mb} MB   frei im Home-Verzeichnis: ${free_mb} MB"
-  if [ "${free_mb:-0}" -ge "$MIN_FREE_MB" ]; then ok "Speicherplatz reicht (>= ${MIN_FREE_MB} MB frei)"; else bad "Zu wenig freier Speicher (${free_mb} MB, benoetigt ${MIN_FREE_MB} MB)."; fi
+  if [ "${free_mb:-0}" -ge "$MIN_FREE_MB" ]; then ok "Speicherplatz in ${HOME} reicht (>= ${MIN_FREE_MB} MB frei)"; else bad "Zu wenig freier Speicher in ${HOME} (${free_mb} MB, benoetigt ${MIN_FREE_MB} MB)."; fi
+  check_root_space
 
   if ! command -v curl >/dev/null 2>&1; then
     # curl wird erst in install_packages nachinstalliert - ohne curl laesst sich GitHub hier nicht testen.
@@ -289,12 +374,15 @@ preflight() {
 # ------------------------------------------------------------- Installation
 install_packages() {
   say "Systempakete (apt)"
+  repair_dpkg
   sudo apt-get -o DPkg::Lock::Timeout=300 update
-  sudo DEBIAN_FRONTEND=noninteractive apt-get -o DPkg::Lock::Timeout=300 install -y \
-    git curl wget unzip ca-certificates \
-    build-essential python3 python3-dev python3-virtualenv libffi-dev libncurses-dev \
-    dfu-util stm32flash gcc-arm-none-eabi binutils-arm-none-eabi libnewlib-arm-none-eabi \
-    nginx usbutils libinput-tools xinput evtest xserver-xorg-input-libinput
+  # Genauer Platzbedarf erst jetzt, nach "update" und einer eventuellen Reparatur.
+  PROBLEMS=0
+  check_root_space
+  if [ "$PROBLEMS" -gt 0 ] && [ "$FORCE" -ne 1 ]; then
+    die "Nicht genug Platz auf / - nichts wurde installiert. Platz schaffen oder mit --force fortfahren."
+  fi
+  sudo DEBIAN_FRONTEND=noninteractive apt-get -o DPkg::Lock::Timeout=300 install -y --no-install-recommends "${APT_PKGS[@]}"
 }
 
 install_klipper() {
@@ -694,6 +782,7 @@ do_install() {
   install_mainsail
   setup_touch
   start_services
+  sudo apt-get clean   # heruntergeladene .deb-Dateien wieder freigeben (liegen auf /)
   print_summary
 }
 
