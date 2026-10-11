@@ -21,6 +21,8 @@
 #  Optionen:  --port N   Port fuer Mainsail (Standard 80)
 #             -y         keine Rueckfrage vor der Installation
 #             --force    Fehler der Systempruefung ignorieren
+#             --slim-newlib  die ARM-C-Bibliothek immer schlank installieren (spart ~360 MB auf /;
+#                            sonst automatisch, wenn der Platz auf / knapp ist)
 # ============================================================================
 # shellcheck disable=SC1091,SC2001,SC2012
 set -Eeuo pipefail
@@ -43,8 +45,23 @@ MAINSAIL_CFG_DIR="${HOME}/mainsail-config"
 FW_DIR="${HOME}/m8p-firmware"
 LOG_FILE="${HOME}/klipper-install.log"
 MIN_FREE_MB=3000       # frei im Home-Verzeichnis (Quellcode, Python-Umgebungen, Firmware-Build)
-MIN_FREE_ROOT_MB=1700  # Rueckfall fuer die Root-Partition, wenn apt den Bedarf nicht berechnen kann
-ROOT_MARGIN_MB=500     # Reserve fuer die Pakete, die Moonraker selbst per apt nachinstalliert
+MIN_FREE_ROOT_MB=1700  # Rueckfall (entpackt) fuer die Root-Partition, wenn der apt-Bedarf nicht berechenbar ist
+ROOT_MARGIN_MB=150     # Reserve auf / fuer Moonrakers eigene apt-Pakete (~35 MB), Protokolle usw.
+
+# libnewlib-arm-none-eabi (C-Bibliothek fuer den ARM-Compiler) ist mit ~406 MB entpackt der groesste
+# Brocken, weil es die Bibliothek fuer rund 50 ARM-Varianten enthaelt. Klipper braucht davon nur vier
+# (alle ohne FPU): v6-m = Cortex-M0/M0+ (STM32F0/G0, RP2040, SAMD21), v7-m = M3 (STM32F1/F2, LPC176x),
+# v7e-m = M4/M7 (STM32F4/G4/H7, SAMD51), v8-m.main = M33 (RP2350). Ist der Platz auf / knapp, wird das
+# Paket deshalb schlank entpackt (~43 MB) - per dpkg-Filter, der auch spaetere Updates schlank haelt.
+NEWLIB_PKG=libnewlib-arm-none-eabi
+NEWLIB_DIR=/usr/lib/arm-none-eabi/newlib
+NEWLIB_FULL_MB=406     # Rueckfall: entpackte Groesse des vollstaendigen Pakets (Debian 13)
+NEWLIB_SLIM_MB=45      # entpackt mit nur den Varianten unten (gemessen: 43 MB)
+NEWLIB_SLIM_CONF=/etc/dpkg/dpkg.cfg.d/90-klipper-slim-newlib
+NEWLIB_KEEP=(thumb/v6-m/nofp thumb/v7-m/nofp thumb/v7e-m/nofp thumb/v8-m.main/nofp)
+FORCE_SLIM=0           # 1 = immer schlank installieren (--slim-newlib)
+USE_SLIM=0             # setzt check_root_space
+PLAN_INSTALL_MB=0; PLAN_DOWNLOAD_MB=0; PLAN_NEWLIB_MB=0   # setzt apt_plan
 
 # Ohne "Recommends" installieren: apt wuerde sonst libstdc++-arm-none-eabi-newlib (C++-Bibliothek
 # fuer den ARM-Compiler, ~2 GB entpackt) mitziehen. Klipper-Firmware ist reines C; die C-Bibliothek
@@ -89,7 +106,7 @@ on_err() {
 }
 trap 'on_err "$?" "$LINENO" "$BASH_COMMAND"' ERR
 
-usage() { sed -n '2,24p' "$0" | sed 's/^# \{0,1\}//'; }
+usage() { sed -n '2,26p' "$0" | sed 's/^# \{0,1\}//'; }
 
 # ------------------------------------------------------------------ Helfer
 # Kernelmodul geladen, ladbar oder fest eingebaut?
@@ -146,49 +163,102 @@ sudo_keepalive() {
 # ------------------------------------------------- Platz auf der Root-Partition
 # apt schreibt nach /usr und /var. Auf dem UNO Q liegt "/" auf einer anderen (kleineren)
 # Partition als /home/arduino - der freie Platz im Home-Verzeichnis sagt dazu nichts.
-to_mb() {  # "3,499 MB" | "615 kB" | "1.2 GB"  ->  ganze MB
-  awk -v s="$1" 'BEGIN {
-    split(s, a, " "); v = a[1]; gsub(",", "", v); u = a[2]
-    if (u == "kB") v /= 1024; else if (u == "GB") v *= 1024; else if (u == "B") v /= 1048576
-    printf "%d", v + 0.5 }'
-}
-
-# Download + entpackte Groesse der noch fehlenden Pakete laut "apt-get -s" (leer/Fehler: unbekannt)
-apt_need_mb() {
-  local sim dl inst mb=0
+# Bedarf der noch fehlenden Pakete. "apt-get -s" nennt auf Debian 13 keine Groessen, nur Zeilen
+# "Inst <paket> (<version> ...)"; Download- und entpackte Groesse kommen aus "apt-cache show".
+# Setzt PLAN_INSTALL_MB (entpackt), PLAN_DOWNLOAD_MB und PLAN_NEWLIB_MB (Anteil von
+# libnewlib-arm-none-eabi an PLAN_INSTALL_MB, 0 wenn es schon installiert ist), alles in MiB.
+# Rueckgabe 1: nicht berechenbar (z. B. apt-Paketlisten fehlen).
+apt_plan() {
+  local sim recs
+  local -a list
+  PLAN_INSTALL_MB=0; PLAN_DOWNLOAD_MB=0; PLAN_NEWLIB_MB=0
   sim="$(LC_ALL=C apt-get -s install --no-install-recommends "${APT_PKGS[@]}" 2>&1 || true)"
   if grep -q '^E:' <<<"$sim"; then return 1; fi
-  # "Need to get 176 MB of archives." oder, bei teilweise geladenen Paketen, "... 12.3 MB/615 MB of archives."
-  dl="$(sed -n 's/^Need to get \(.*\) of archives.*/\1/p' <<<"$sim" | head -n1)"
-  dl="${dl##*/}"
-  inst="$(sed -n 's/^After this operation, \(.*\) of additional disk space will be used.*/\1/p' <<<"$sim" | head -n1)"
-  if [ -n "$dl" ]; then mb=$((mb + $(to_mb "$dl"))); fi
-  if [ -n "$inst" ]; then mb=$((mb + $(to_mb "$inst"))); fi
-  printf '%d' "$mb"
+  # neu:      Inst paket (1.2-3 Debian:13.1/stable [arm64])
+  # Update:   Inst paket [1.2-2] (1.2-3 Debian-Security:13/stable-security [arm64])
+  mapfile -t list < <(sed -nE 's/^Inst ([^ ]+) (\[[^]]*\] )?\(([^ ]+) .*/\1=\3/p' <<<"$sim")
+  if [ "${#list[@]}" -eq 0 ]; then return 0; fi   # alles schon installiert
+  recs="$(LC_ALL=C apt-cache show "${list[@]}" 2>/dev/null || true)"
+  if [ -z "$recs" ]; then return 1; fi
+  # Pro Paket nur der erste Eintrag (dieselbe Version kann aus mehreren Quellen stammen).
+  read -r PLAN_INSTALL_MB PLAN_DOWNLOAD_MB PLAN_NEWLIB_MB < <(awk -v nl="$NEWLIB_PKG" '
+    /^Package: /                 { p = $2; seen = (p in S) }
+    /^Installed-Size: / && !seen { I += $2; if (p == nl) N = $2 }
+    /^Size: /           && !seen { D += $2; S[p] = 1 }
+    END { printf "%d %d %d\n", I / 1024 + 0.5, D / 1048576 + 0.5, N / 1024 + 0.5 }' <<<"$recs")
 }
 
-dpkg_unfinished() { [ -n "$(dpkg --audit 2>/dev/null)" ]; }
+# Gibt es Pakete mit unfertigem Zustand (halb installiert H, entpackt U, halb konfiguriert F,
+# Trigger offen W/t)? "dpkg --audit" taugt dafuer nicht: ohne root bricht es auf Debian 13 mit
+# "unable to check lock file" ab. "dpkg-query" liest die Datenbank auch als normaler Benutzer.
+dpkg_unfinished() {
+  dpkg-query -W -f='${db:Status-Abbrev}\n' 2>/dev/null | awk '/^.[HUFWt]/ { f = 1 } END { exit (f ? 0 : 1) }'
+}
 
+# Prueft den Platz auf "/" und entscheidet, ob libnewlib-arm-none-eabi schlank installiert werden
+# muss (USE_SLIM=1). Meldet bad(), wenn auch das nicht reicht.
 check_root_space() {
-  local free_mb need_mb total src
+  local free_mb full slim need src
+  USE_SLIM=0
   free_mb="$(df -Pm / | awk 'NR==2 {print $4}')"
   if dpkg_unfinished; then
     warn "dpkg meldet eine abgebrochene Paketinstallation - 'install' repariert das und prueft den Platz auf / danach erneut."
     return 0
   fi
-  if need_mb="$(apt_need_mb)"; then
+  if apt_plan; then
     src="berechnet mit apt"
   else
-    need_mb="$MIN_FREE_ROOT_MB"
+    PLAN_INSTALL_MB="$MIN_FREE_ROOT_MB"; PLAN_DOWNLOAD_MB=0; PLAN_NEWLIB_MB="$NEWLIB_FULL_MB"
     src="Schaetzwert - apt-Paketlisten nicht lesbar"
   fi
-  total=$((need_mb + ROOT_MARGIN_MB))
-  info "Root-Partition (/): ${free_mb} MB frei; apt braucht ca. ${need_mb} MB + ${ROOT_MARGIN_MB} MB Reserve (${src})"
-  if [ "${free_mb:-0}" -ge "$total" ]; then
+  full=$((PLAN_INSTALL_MB + PLAN_DOWNLOAD_MB + ROOT_MARGIN_MB))
+  slim=$((full - PLAN_NEWLIB_MB + NEWLIB_SLIM_MB))
+  info "Root-Partition (/): ${free_mb} MB frei; apt braucht ${PLAN_INSTALL_MB} MB entpackt + ${PLAN_DOWNLOAD_MB} MB Download + ${ROOT_MARGIN_MB} MB Reserve = ${full} MB (${src})"
+
+  if [ "${free_mb:-0}" -ge "$full" ] && { [ "$FORCE_SLIM" -eq 0 ] || [ "$PLAN_NEWLIB_MB" -eq 0 ]; }; then
     ok "Platz auf der Root-Partition (/) reicht"
-  else
-    bad "Zu wenig Platz auf der Root-Partition (/): ${free_mb} MB frei, benoetigt ca. ${total} MB (apt installiert nach /usr und /var, nicht nach ${HOME}). Platz schaffen z. B. mit: sudo apt-get clean; sudo apt-get autoremove; sudo journalctl --vacuum-size=50M  (Docker-Daten nur nach eigener Pruefung: docker system df)"
+    return 0
   fi
+  if [ "$PLAN_NEWLIB_MB" -gt 0 ] && { [ "$FORCE_SLIM" -eq 1 ] || [ "${free_mb:-0}" -ge "$slim" ]; }; then
+    USE_SLIM=1
+    if [ "$FORCE_SLIM" -eq 1 ]; then
+      ok "libnewlib-arm-none-eabi wird schlank installiert (--slim-newlib): nur die ARM-Varianten, die Klipper braucht (~${NEWLIB_SLIM_MB} statt ~${PLAN_NEWLIB_MB} MB)"
+    else
+      warn "Platz auf / ist knapp (${free_mb} MB frei, volle Installation braeuchte ${full} MB). libnewlib-arm-none-eabi wird deshalb schlank installiert: nur die ARM-Varianten, die Klipper braucht (~${NEWLIB_SLIM_MB} statt ~${PLAN_NEWLIB_MB} MB), Bedarf dann ${slim} MB. Rueckgaengig: sudo rm ${NEWLIB_SLIM_CONF}; sudo apt-get install --reinstall ${NEWLIB_PKG}"
+    fi
+    return 0
+  fi
+  need="$full"
+  if [ "$PLAN_NEWLIB_MB" -gt 0 ]; then need="$slim"; fi
+  bad "Zu wenig Platz auf der Root-Partition (/): ${free_mb} MB frei, benoetigt ca. ${need} MB (apt installiert nach /usr und /var, nicht nach ${HOME}). Platz schaffen z. B. mit: sudo apt-get clean; sudo apt-get autoremove; sudo journalctl --vacuum-size=50M  (Docker-Daten nur nach eigener Pruefung: docker system df)"
+}
+
+# dpkg-Filter: von libnewlib-arm-none-eabi nur die Varianten aus NEWLIB_KEEP entpacken. Die
+# Elternordner muessen einzeln wieder eingeschlossen werden, sonst legt dpkg sie nicht an.
+write_slim_filter() {
+  local k
+  info "Schlanke newlib: dpkg-Filter ${NEWLIB_SLIM_CONF}"
+  {
+    printf '%s\n' \
+      "# Angelegt von install-klipper-unoq.sh: ${NEWLIB_PKG} nur mit den ARM-Varianten entpacken, die Klipper" \
+      "# braucht (Cortex-M0/M0+/M3/M4/M7/M33, ohne FPU). Rueckgaengig machen: diese Datei loeschen und" \
+      "# 'sudo apt-get install --reinstall ${NEWLIB_PKG}' ausfuehren." \
+      "path-exclude=${NEWLIB_DIR}/*" \
+      "path-include=${NEWLIB_DIR}/thumb"
+    for k in "${NEWLIB_KEEP[@]}"; do
+      printf '%s\n' "path-include=${NEWLIB_DIR}/${k%/*}" "path-include=${NEWLIB_DIR}/${k}*"
+    done
+  } | sudo tee "$NEWLIB_SLIM_CONF" >/dev/null
+}
+
+# Gibt es fuer den H723 (Cortex-M7) die C-Bibliothek, die der Linker sucht (-lc_nano)?
+check_toolchain() {
+  local lib
+  lib="$(arm-none-eabi-gcc -mthumb -mcpu=cortex-m7 -print-file-name=libc_nano.a 2>/dev/null || true)"
+  case "$lib" in
+    /*) if [ -f "$lib" ]; then ok "ARM-Toolchain vollstaendig (libc_nano fuer Cortex-M7 vorhanden)"; return 0; fi ;;
+  esac
+  die "ARM-Toolchain unvollstaendig: libc_nano fuer Cortex-M7 fehlt (${lib:-nicht gefunden}). Der Firmware-Build wuerde mit 'cannot find -lc_nano' scheitern."
 }
 
 # Nach einer abgebrochenen Installation (z. B. "No space left on device") bleiben Pakete halb
@@ -397,7 +467,9 @@ install_packages() {
   if [ "$PROBLEMS" -gt 0 ] && [ "$FORCE" -ne 1 ]; then
     die "Nicht genug Platz auf / - nichts wurde installiert. Platz schaffen oder mit --force fortfahren."
   fi
+  if [ "$USE_SLIM" -eq 1 ]; then write_slim_filter; fi
   sudo DEBIAN_FRONTEND=noninteractive apt-get -o DPkg::Lock::Timeout=300 install -y --no-install-recommends "${APT_PKGS[@]}"
+  check_toolchain
 }
 
 install_klipper() {
@@ -780,6 +852,16 @@ print_summary() {
    4. Gruppenrechte (dialout) gelten nach einmaligem Ab- und Anmelden bzw.
       Neustart in der eigenen Shell; die Dienste sind davon nicht betroffen.
 EOF
+  if [ -e "$NEWLIB_SLIM_CONF" ]; then
+    cat <<EOF
+
+  Hinweis: ${NEWLIB_PKG} ist schlank installiert (nur ARM-Varianten ohne FPU, die Klipper
+  braucht: Cortex-M0/M0+/M3/M4/M7/M33). Reicht das fuer ein spaeteres Projekt nicht aus
+  (Fehler "cannot find -lc_nano" beim Firmware-Bau), vollstaendig nachinstallieren, wenn
+  auf / mindestens ~450 MB frei sind:
+    sudo rm ${NEWLIB_SLIM_CONF}; sudo apt-get install --reinstall ${NEWLIB_PKG}
+EOF
+  fi
 }
 
 do_install() {
@@ -872,6 +954,7 @@ while [ $# -gt 0 ]; do
     --port) shift; PORT="${1:-}" ;;
     -y|--yes) ASSUME_YES=1 ;;
     --force) FORCE=1 ;;
+    --slim-newlib) FORCE_SLIM=1 ;;
     -h|--help) usage; exit 0 ;;
     *) usage; die "Unbekannte Eingabe: $1" ;;
   esac
