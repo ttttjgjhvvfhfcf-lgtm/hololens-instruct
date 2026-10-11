@@ -60,6 +60,8 @@ M8P_CFG_NAME="generic-bigtreetech-manta-m8p-V2_0.cfg"
 M8P_CFG_URL="https://raw.githubusercontent.com/bigtreetech/Manta-M8P/master/V2.0/Firmware/${M8P_CFG_NAME}"
 MAINSAIL_ZIP_URL="https://github.com/mainsail-crew/mainsail/releases/latest/download/mainsail.zip"
 
+NGINX_SITES_DIR=/etc/nginx/sites-enabled
+
 HAVE_SYSTEMD=0
 [ -d /run/systemd/system ] && HAVE_SYSTEMD=1
 
@@ -105,6 +107,17 @@ port_in_use() {
   local listeners
   listeners="$(ss -ltnH 2>/dev/null | awk '{print $4}' || true)"
   grep -qE "[:.]$1\$" <<<"$listeners"
+}
+
+# Laeuft nginx und kennt er nur die Debian-Standardseite und/oder die Mainsail-Seite?
+nginx_ours_only() {
+  local f
+  pgrep -x nginx >/dev/null 2>&1 || return 1
+  for f in "$NGINX_SITES_DIR"/*; do
+    [ -e "$f" ] || [ -L "$f" ] || continue   # leeres/fehlendes Verzeichnis: Glob bleibt woertlich stehen
+    case "${f##*/}" in default|mainsail) ;; *) return 1 ;; esac
+  done
+  return 0
 }
 
 detect_serial() {
@@ -261,8 +274,10 @@ check_system() {
   fi
 
   if port_in_use "$PORT"; then
-    if pgrep -x nginx >/dev/null 2>&1 && [ -e /etc/nginx/sites-enabled/mainsail ]; then
-      ok "Port ${PORT} wird bereits von der Mainsail-Seite in nginx genutzt"
+    if nginx_ours_only; then
+      # Nach einer abgebrochenen oder wiederholten Installation laeuft nginx schon mit der
+      # Debian-Standardseite auf Port 80; die Mainsail-Seite loest sie spaeter ab.
+      ok "Port ${PORT} wird von nginx genutzt (nur Standard-/Mainsail-Seite) - das passt"
     else
       bad "Port ${PORT} ist von einem anderen Dienst belegt - mit '--port 8080' ausweichen."
     fi
