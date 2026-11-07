@@ -11,6 +11,7 @@
 @font-face { font-family: "Orbitron"; font-weight: 400 900; font-display: block; src: url("fonts/Orbitron-Variable.woff2") format("woff2"); }
 
 :root {
+  color-scheme: dark;
   --bg: #0a0d13;
   --panel: #121620;
   --panel-2: #181d2a;

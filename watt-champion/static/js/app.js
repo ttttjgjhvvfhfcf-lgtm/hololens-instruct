@@ -70,7 +70,7 @@
   // ---------------------------------------------------------------- API (Server oder Demo)
   const params = new URLSearchParams(window.location.search);
   const demoSpeed = Math.max(0.1, Math.min(50, parseFloat(params.get('speed')) || 1));
-  let api = (window.location.protocol === 'file:' || params.has('demo'))
+  let api = (window.location.protocol === 'file:' || params.has('demo') || window.WC_DEMO)
     ? new DemoApi({ speed: demoSpeed }) : new HttpApi();
   let everConnected = false;
 
