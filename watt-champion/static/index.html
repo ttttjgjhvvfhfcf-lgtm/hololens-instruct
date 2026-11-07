@@ -1,0 +1,125 @@
+<!doctype html>
+<html lang="de">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="dark">
+  <title>watt champion</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body data-view="setup" data-state="idle" data-mode="energy" data-count="2">
+  <main class="app">
+    <header class="top">
+      <div class="brand">
+        <h1 class="logo" id="logo"><span>watt</span><span>champion</span></h1>
+        <div class="goal"><span id="goal-label">Ziel:</span> <b id="goal">1.0 Wh</b></div>
+        <div class="chip" id="mode-chip" hidden></div>
+        <div class="chip chip-sim" id="simchip" hidden>Simulation</div>
+      </div>
+      <div class="tools">
+        <button class="icon-btn" id="sound" type="button" aria-label="Ton ein/aus" title="Ton ein/aus"></button>
+        <button class="btn btn-abort" id="abort" type="button" hidden>
+          <span class="btn-fill"></span><span class="btn-text">Abbrechen</span>
+        </button>
+        <img class="sponsor" id="sponsor" alt="" hidden>
+      </div>
+    </header>
+
+    <!-- ===================================================== Einstellungen -->
+    <section class="view view-setup" id="view-setup" aria-label="Einstellungen">
+      <div class="tiles" id="tiles">
+        <button class="tile" type="button" data-mode="energy">
+          <span class="tile-icon" data-icon="bolt"></span>
+          <span class="tile-text"><b>Energie-Rennen</b><small>Wer zuerst das Ziel erzeugt, gewinnt.</small></span>
+        </button>
+        <button class="tile" type="button" data-mode="time">
+          <span class="tile-icon" data-icon="clock"></span>
+          <span class="tile-text"><b>Zeit-Rennen</b><small>Wer in der Zeit die meiste Energie erzeugt, gewinnt.</small></span>
+        </button>
+      </div>
+
+      <div class="setup-grid">
+        <div class="panel players-panel">
+          <h2 class="panel-title">Spieler</h2>
+          <div class="seg" id="count-seg" role="group" aria-label="Spielerzahl">
+            <button type="button" data-count="1">Solo</button>
+            <button type="button" data-count="2">1 vs 1</button>
+          </div>
+          <div class="player-rows" id="player-rows"></div>
+        </div>
+
+        <div class="panel goal-panel">
+          <h2 class="panel-title" id="goal-title">Zielenergie</h2>
+          <div class="stepper">
+            <button class="step" type="button" data-dir="-1" aria-label="Weniger">−</button>
+            <div class="goal-value" id="goal-value">1.0 Wh</div>
+            <button class="step" type="button" data-dir="1" aria-label="Mehr">+</button>
+          </div>
+          <div class="chips" id="goal-chips"></div>
+          <div class="estimate" id="goal-estimate"></div>
+          <div class="hint" id="goal-hint"></div>
+        </div>
+      </div>
+
+      <div class="panel accent startbar">
+        <div class="record" id="setup-record"></div>
+        <button class="btn btn-start" id="start" type="button">Start</button>
+      </div>
+    </section>
+
+    <!-- ===================================================== Rennen -->
+    <section class="view view-race" id="view-race" aria-label="Rennen">
+      <div class="panel accent track-panel">
+        <h2 class="headline" id="headline" aria-live="polite">Bereit zum Start</h2>
+        <div class="lanes" id="lanes"></div>
+      </div>
+
+      <div class="cards" id="cards"></div>
+
+      <div class="bottom">
+        <div class="panel accent time-panel">
+          <div class="caption" id="time-caption">Rennzeit</div>
+          <div class="time" id="time">00:00</div>
+          <div class="note" id="note">Noch keine Messwerte</div>
+        </div>
+        <div class="panel chart-panel">
+          <div class="chart-head"><span class="caption">Leistung in W</span><span class="legend" id="legend"></span></div>
+          <canvas id="chart" aria-label="Leistungskurve"></canvas>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- Countdown / "LOS!" -->
+  <div class="overlay" id="overlay" hidden></div>
+
+  <!-- Ergebnis -->
+  <div class="modal" id="result" hidden>
+    <div class="modal-card" role="dialog" aria-labelledby="result-title">
+      <div class="trophy" data-icon="trophy"></div>
+      <h2 id="result-title">Anna gewinnt!</h2>
+      <p class="result-sub" id="result-sub"></p>
+      <div class="ribbon" id="result-ribbon" hidden></div>
+      <div class="stats" id="result-stats"></div>
+      <div class="compare-row" id="result-compare"></div>
+      <div class="modal-actions">
+        <button class="btn btn-primary" id="again" type="button">Nochmal</button>
+        <button class="btn btn-ghost" id="again-new" type="button">Neue Challenge</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="osk" id="osk" hidden></div>
+  <canvas class="confetti" id="confetti"></canvas>
+  <div class="toast" id="toast" hidden></div>
+  <div class="offline" id="offline" hidden>Keine Verbindung zum Messserver</div>
+
+  <script src="js/util.js"></script>
+  <script src="js/engine.js"></script>
+  <script src="js/api.js"></script>
+  <script src="js/chart.js"></script>
+  <script src="js/fx.js"></script>
+  <script src="js/osk.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>

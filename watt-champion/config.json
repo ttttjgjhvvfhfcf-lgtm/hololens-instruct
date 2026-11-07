@@ -1,0 +1,16 @@
+{
+  "title": "watt champion",
+  "host": "127.0.0.1",
+  "port": 8080,
+  "mode": "energy",
+  "target_wh": 1.0,
+  "time_goal_s": 60,
+  "solo": false,
+  "countdown_s": 3,
+  "tie_threshold_pct": 10,
+  "sensor": { "type": "sim" },
+  "players": [
+    { "id": "anna", "name": "Anna", "color": "red",  "sim_w": 32 },
+    { "id": "ben",  "name": "Ben",  "color": "cyan", "sim_w": 26 }
+  ]
+}
