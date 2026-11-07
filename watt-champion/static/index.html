@@ -1,0 +1,46 @@
+<!doctype html>
+<html lang="de">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="dark">
+  <title>watt champion</title>
+  <link rel="preload" href="fonts/Rajdhani-Bold.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body data-state="idle">
+  <main class="app">
+    <header class="top">
+      <div class="brand">
+        <h1 class="logo" id="logo"><span>watt</span><span>champion</span></h1>
+        <div class="goal">Ziel: <b id="goal">1.0 Wh</b></div>
+        <div class="sim-chip" id="simchip" hidden>Simulation</div>
+      </div>
+      <img class="sponsor" id="sponsor" alt="" hidden>
+    </header>
+
+    <section class="panel accent track-panel">
+      <h2 class="headline" id="headline" aria-live="polite">Bereit zum Start</h2>
+      <div class="lanes" id="lanes"></div>
+    </section>
+
+    <section class="cards" id="cards"></section>
+
+    <section class="bottom">
+      <div class="panel accent time-panel">
+        <div class="caption">Rennzeit</div>
+        <div class="time" id="time">00:00</div>
+        <div class="note" id="note">Noch keine Messwerte</div>
+      </div>
+      <div class="panel controls">
+        <button class="btn" id="action" type="button"><span class="btn-fill"></span><span class="btn-text">Start</span></button>
+        <div class="hint" id="hint"></div>
+      </div>
+    </section>
+  </main>
+
+  <div class="overlay" id="overlay" hidden></div>
+  <div class="offline" id="offline" hidden>Keine Verbindung zum Messserver</div>
+  <script src="app.js"></script>
+</body>
+</html>

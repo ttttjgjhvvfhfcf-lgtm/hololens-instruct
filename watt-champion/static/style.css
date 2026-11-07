@@ -1,0 +1,341 @@
+/* watt champion – Oberfläche für den Raspberry Pi
+ *
+ * Alles ist in rem gesetzt, und rem skaliert mit dem Bildschirm (siehe html unten).
+ * Dadurch sieht die Oberfläche auf 800×480, 1280×720 und 1920×1080 gleich aus.
+ * Bewusst ohne rechenintensive Effekte (keine animierten Blur-Filter), damit sie auf
+ * einem Pi 3/4 flüssig läuft.
+ */
+
+@font-face { font-family: "Rajdhani"; font-weight: 600; font-display: block; src: url("fonts/Rajdhani-SemiBold.woff2") format("woff2"); }
+@font-face { font-family: "Rajdhani"; font-weight: 700; font-display: block; src: url("fonts/Rajdhani-Bold.woff2") format("woff2"); }
+@font-face { font-family: "Orbitron"; font-weight: 400 900; font-display: block; src: url("fonts/Orbitron-Variable.woff2") format("woff2"); }
+
+:root {
+  --bg: #0a0d13;
+  --panel: #121620;
+  --line: rgba(255, 255, 255, 0.07);
+  --text: #eef1f7;
+  --muted: #7b8497;
+  --yellow: #ffc61a;
+  --road: #191d27;
+  --curb-red: #e8352d;
+  --curb-white: #f2f2f2;
+  --curb: 0.42rem;
+  --car-w: 4.7rem;
+  --n: 2;
+}
+
+[data-color="red"]     { --c: #ff4a3d; --c-rgb: 255, 74, 61; }
+[data-color="cyan"]    { --c: #2ee6d6; --c-rgb: 46, 230, 214; }
+[data-color="green"]   { --c: #62e66a; --c-rgb: 98, 230, 106; }
+[data-color="magenta"] { --c: #f45bd6; --c-rgb: 244, 91, 214; }
+[data-color="orange"]  { --c: #ff9a2e; --c-rgb: 255, 154, 46; }
+[data-color="blue"]    { --c: #5aa2ff; --c-rgb: 90, 162, 255; }
+
+* { box-sizing: border-box; }
+
+html {
+  /* 46 rem breit und 34 rem hoch entsprechen dem Entwurf; der kleinere Wert gewinnt. */
+  font-size: min(calc(100vw / 46), calc(100vh / 34));
+  background: var(--bg);
+}
+html.idle-cursor, html.idle-cursor * { cursor: none; }
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  background: radial-gradient(120% 90% at 50% 0%, #131826 0%, var(--bg) 60%);
+  color: var(--text);
+  font-family: "Rajdhani", "Piboto", "Roboto", "DejaVu Sans", sans-serif;
+  font-weight: 600;
+  overflow: hidden;
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.app {
+  height: 100vh;
+  display: grid;
+  grid-template-rows: auto minmax(0, 10.3fr) minmax(0, 12.4fr) auto;
+  gap: 0.6rem;
+  padding: 0.7rem;
+}
+
+.panel {
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 0.5rem;
+}
+.panel.accent { border-top: 0.2rem solid var(--yellow); }
+
+/* ------------------------------------------------------------------ Kopfzeile */
+.top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  min-height: 3.4rem;
+  padding: 0.35rem 0.9rem 0.35rem 0.7rem;
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-left: 0.3rem solid var(--yellow);
+  border-radius: 0.5rem;
+}
+.brand { display: flex; align-items: center; gap: 1rem; }
+
+.logo {
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  font-family: "Orbitron", "Rajdhani", sans-serif;
+  font-weight: 900;
+  line-height: 0.9;
+  letter-spacing: -0.02em;
+  text-transform: lowercase;
+  transform: skewX(-9deg);
+  background: linear-gradient(180deg, #e0b3ff 0%, #b04dff 50%, #ff3fa4 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  filter: drop-shadow(0 0 0.3rem rgba(190, 80, 255, 0.55));
+}
+.logo span:first-child { font-size: 1.5rem; }
+.logo span:last-child { font-size: 1.85rem; }
+
+.goal, .sim-chip {
+  transform: skewX(-12deg);
+  padding: 0.28rem 1rem;
+  font-weight: 700;
+  font-size: 1.05rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+.goal { background: var(--yellow); color: #14161c; }
+.goal b { font-weight: 700; }
+.sim-chip { border: 0.1rem solid var(--yellow); color: var(--yellow); font-size: 0.85rem; padding: 0.15rem 0.7rem; }
+
+.sponsor { height: 2.4rem; max-width: 14rem; object-fit: contain; border-radius: 1.2rem; background: #0a0c10; padding: 0.3rem 0.8rem; }
+.sponsor[hidden], .sim-chip[hidden], .overlay[hidden], .offline[hidden] { display: none; }
+
+/* ------------------------------------------------------------------ Strecke */
+.track-panel { display: flex; flex-direction: column; padding: 0.7rem 1.1rem 0.8rem; min-height: 0; }
+.headline {
+  margin: 0 0 0.55rem;
+  text-align: center;
+  font-size: 0.95rem;
+  font-weight: 700;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+}
+
+.lanes {
+  flex: 1;
+  min-height: 0;
+  display: grid;
+  grid-template-columns: 5.2rem minmax(0, 1fr) 3.2rem;
+}
+.lane-label { grid-column: 1; display: flex; align-items: center; gap: 0.5rem; font-size: 1rem; font-weight: 700; padding-right: 0.5rem; min-width: 0; }
+.lane-name { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.dot { flex: none; width: 0.55rem; height: 0.55rem; border-radius: 0.1rem; background: var(--c); }
+.lane-pct { grid-column: 3; display: flex; align-items: center; justify-content: flex-end; font-size: 1rem; font-weight: 700; }
+
+.curb {
+  grid-column: 2;
+  background: repeating-linear-gradient(90deg, var(--curb-red) 0 0.9rem, var(--curb-white) 0.9rem 1.8rem);
+}
+.road {
+  grid-column: 2;
+  position: relative;
+  min-height: 0;
+  background-color: var(--road);
+  /* gestrichelte Mittellinie */
+  background-image: repeating-linear-gradient(90deg, #4b5264 0 0.9rem, transparent 0.9rem 1.8rem);
+  background-size: 100% 0.1rem;
+  background-position: 0 50%;
+  background-repeat: no-repeat;
+}
+.road::before {            /* Startlinie */
+  content: "";
+  position: absolute;
+  left: 0.55rem; top: 0; bottom: 0;
+  width: 0.16rem;
+  background: repeating-linear-gradient(180deg, #fff 0 0.28rem, transparent 0.28rem 0.56rem);
+}
+.finish {
+  position: absolute;
+  right: 0; top: 0; bottom: 0;
+  width: 1.4rem;
+  background: repeating-conic-gradient(#f4f4f4 0 25%, #11141b 0 50%) 0 0 / 0.7rem 0.7rem;
+}
+
+/* Das Auto fährt per transform (läuft auf der GPU): --p ist der Fortschritt 0..1. */
+.rail {
+  position: absolute;
+  top: 50%;
+  left: 0.9rem;
+  width: calc(100% - 0.9rem - 1.6rem - var(--car-w));
+  height: 0;
+}
+.slider {
+  position: absolute;
+  left: 0; top: 0;
+  width: 100%; height: 0;
+  transform: translateX(calc((var(--p, 0) - 1) * 100%));
+  transition: transform 0.45s linear;
+}
+.car {
+  position: absolute;
+  left: 100%; top: 0;
+  width: var(--car-w);
+  transform: translateY(-50%);
+  filter: drop-shadow(0 0 0.25rem rgba(var(--c-rgb), 0.45));
+}
+.car svg { display: block; width: 100%; height: auto; overflow: visible; }
+.car-body { fill: var(--c); stroke: rgba(255, 255, 255, 0.9); stroke-width: 1.1; stroke-linejoin: round; }
+.car-glass { fill: rgba(9, 14, 26, 0.88); stroke: rgba(255, 255, 255, 0.55); stroke-width: 0.7; }
+.car-line { stroke: rgba(0, 0, 0, 0.25); stroke-width: 0.8; fill: none; }
+.wheel { transform-origin: 0 0; }
+body[data-state="running"] .wheel { animation: spin 0.5s linear infinite; }
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* ------------------------------------------------------------------ Spielerkarten */
+.cards {
+  display: grid;
+  grid-template-columns: repeat(var(--n), minmax(0, 1fr));
+  gap: 0.7rem;
+  min-height: 0;
+}
+.card {
+  position: relative;
+  overflow: hidden;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: 0.75rem 1rem 0.85rem;
+  border: 0.13rem solid var(--c);
+  border-radius: 0.95rem;
+  background: linear-gradient(155deg, rgba(var(--c-rgb), 0.13) 0%, rgba(var(--c-rgb), 0.04) 55%, var(--panel) 100%);
+  box-shadow: 0 0 1.1rem rgba(var(--c-rgb), 0.28), inset 0 0 1.5rem rgba(var(--c-rgb), 0.07);
+}
+.card > * { position: relative; }
+.card .rank {                 /* großes Platzierungs-Wasserzeichen */
+  position: absolute;
+  right: 0.7rem; bottom: -1.6rem;
+  font-size: 9rem;
+  font-weight: 700;
+  line-height: 1;
+  color: rgba(var(--c-rgb), 0.12);
+  pointer-events: none;
+}
+
+.card-head { display: flex; align-items: center; justify-content: space-between; gap: 0.5rem; }
+.card-name { margin: 0; font-size: 1.35rem; font-weight: 700; letter-spacing: 0.04em; text-transform: uppercase; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.badge {
+  flex: none;
+  transform: skewX(-12deg);
+  padding: 0.12rem 0.8rem;
+  border: 0.08rem solid rgba(var(--c-rgb), 0.9);
+  background: rgba(var(--c-rgb), 0.55);
+  font-size: 0.85rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: #fff;
+  text-shadow: 0 0 0.2rem rgba(0, 0, 0, 0.4);
+}
+.badge:empty { display: none; }
+.card[data-status="winner"] .badge { background: var(--yellow); border-color: var(--yellow); color: #14161c; text-shadow: none; }
+.card[data-status="loser"] .badge { background: rgba(255, 255, 255, 0.08); border-color: rgba(255, 255, 255, 0.25); }
+.card[data-status="winner"] { box-shadow: 0 0 1.6rem rgba(var(--c-rgb), 0.6), inset 0 0 1.8rem rgba(var(--c-rgb), 0.12); }
+
+.power { font-size: 3.4rem; font-weight: 700; line-height: 0.95; color: var(--c); text-shadow: 0 0 1rem rgba(var(--c-rgb), 0.45); }
+.power .unit { font-size: 3.4rem; }
+.cap { font-size: 0.68rem; font-weight: 600; letter-spacing: 0.17em; text-transform: uppercase; color: var(--muted); line-height: 1.2; }
+.cap-energy { margin-top: -0.2rem; }
+.cap-pct { letter-spacing: 0.08em; text-transform: none; font-size: 0.75rem; }
+.energy { font-size: 1.7rem; font-weight: 700; line-height: 1; }
+.energy .unit { font-size: 1.7rem; }
+
+.bar {
+  position: relative;
+  height: 0.8rem;
+  margin: 0.35rem 0 0.3rem;
+  background: rgba(255, 255, 255, 0.07);
+  /* 25 Segmente */
+  -webkit-mask-image: repeating-linear-gradient(90deg, #000 0 calc(4% - 0.14rem), transparent calc(4% - 0.14rem) 4%);
+  mask-image: repeating-linear-gradient(90deg, #000 0 calc(4% - 0.14rem), transparent calc(4% - 0.14rem) 4%);
+}
+.bar-fill {
+  position: absolute;
+  left: 0; top: 0; bottom: 0;
+  width: calc(var(--p, 0) * 100%);
+  background: var(--c);
+  transition: width 0.4s linear;
+}
+
+/* ------------------------------------------------------------------ Unterer Bereich */
+.bottom { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0.7rem; }
+
+.time-panel { padding: 0.6rem 0.9rem 0.55rem; text-align: center; display: flex; flex-direction: column; justify-content: center; }
+.caption { font-size: 0.72rem; font-weight: 600; letter-spacing: 0.22em; text-transform: uppercase; color: var(--muted); }
+.time { font-size: 3rem; font-weight: 700; line-height: 1; color: var(--yellow); text-shadow: 0 0 1rem rgba(255, 198, 26, 0.3); white-space: nowrap; }
+/* Rajdhani hat proportionale Ziffern – feste Zellen verhindern, dass die Zeit wackelt. */
+.time .dg, .time .sep { display: inline-block; text-align: center; }
+.time .dg { width: 0.6em; }
+.time .sep { width: 0.32em; }
+.note { font-size: 0.78rem; letter-spacing: 0.06em; color: var(--muted); }
+.note.warn { color: #ff8a80; }
+.note.record { color: var(--yellow); font-weight: 700; animation: blink 1s ease-in-out infinite; }
+@keyframes blink { 50% { opacity: 0.45; } }
+
+.controls { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 0.3rem; padding: 0.6rem; }
+.btn {
+  position: relative;
+  overflow: hidden;
+  width: 100%;
+  min-height: 3rem;
+  flex: 1;
+  max-height: 4rem;
+  border: 0.15rem solid var(--yellow);
+  border-radius: 0.6rem;
+  background: var(--yellow);
+  color: #14161c;
+  font: inherit;
+  font-size: 1.5rem;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  touch-action: manipulation;
+}
+.btn:active { transform: scale(0.985); }
+.btn[data-mode="abort"], .btn[data-mode="reset"] { background: rgba(255, 198, 26, 0.08); color: var(--yellow); }
+.btn-text { position: relative; }
+.btn-fill { position: absolute; inset: 0 auto 0 0; width: 0; background: rgba(255, 198, 26, 0.35); }
+.btn.holding .btn-fill { width: 100%; transition: width 1s linear; }
+.hint { min-height: 0.8rem; font-size: 0.68rem; letter-spacing: 0.16em; text-transform: uppercase; color: var(--muted); }
+
+/* ------------------------------------------------------------------ Overlays */
+.overlay { position: fixed; inset: 0; display: grid; place-items: center; background: rgba(6, 8, 12, 0.72); z-index: 10; }
+.count { font-family: "Orbitron", "Rajdhani", sans-serif; font-size: 13rem; font-weight: 900; line-height: 1; color: var(--yellow); text-shadow: 0 0 3rem rgba(255, 198, 26, 0.55); animation: pop 1s ease-out both; }
+.count.go { color: #62e66a; text-shadow: 0 0 3rem rgba(98, 230, 106, 0.55); animation-duration: 0.9s; }
+@keyframes pop { 0% { transform: scale(1.5); opacity: 0; } 25% { transform: scale(1); opacity: 1; } 100% { transform: scale(0.9); opacity: 0.85; } }
+
+.offline { position: fixed; top: 0; left: 0; right: 0; padding: 0.4rem; text-align: center; background: #b3261e; color: #fff; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; z-index: 20; }
+
+@media (orientation: portrait) {
+  html { font-size: min(calc(100vw / 30), calc(100vh / 50)); }
+  .app { grid-template-rows: auto minmax(0, 11fr) minmax(0, 24fr) auto; }
+  .cards { grid-template-columns: 1fr; grid-template-rows: repeat(var(--n), minmax(0, 1fr)); }
+  .lanes { grid-template-columns: 4rem minmax(0, 1fr) 2.8rem; }
+  .logo span:first-child { font-size: 1.3rem; }
+  .logo span:last-child { font-size: 1.6rem; }
+  .top { flex-wrap: wrap; }
+  .brand { gap: 0.7rem; flex-wrap: wrap; }
+  .count { font-size: 11rem; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .slider, .bar-fill { transition: none; }
+  .wheel, .note.record, .count { animation: none; }
+}
