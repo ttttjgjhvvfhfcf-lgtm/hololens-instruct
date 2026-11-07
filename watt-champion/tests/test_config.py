@@ -21,6 +21,11 @@ class ConfigTests(unittest.TestCase):
         self.assertEqual([p["id"] for p in cfg["players"]], ["anna", "ben"])
         self.assertEqual(cfg["host"], "127.0.0.1")  # nicht im Netz erreichbar, solange nicht gewollt
 
+    def test_mode_defaults(self):
+        cfg = load_config(None)
+        self.assertEqual((cfg["mode"], cfg["target_wh"], cfg["time_goal_s"], cfg["solo"]),
+                         ("energy", 1.0, 60, False))
+
     def test_shipped_configs_are_valid(self):
         root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
         for name in ("config.json", "config.ina219.example.json", "config.push.example.json"):
@@ -52,6 +57,13 @@ class ConfigTests(unittest.TestCase):
             "ziel null": {"target_wh": 0},
             "port": {"port": 99999},
             "ein spieler": {"players": [{"id": "a"}]},
+            "drei spieler": {"players": [{"id": "a"}, {"id": "b"}, {"id": "c"}]},
+            "modus": {"mode": "sprint"},
+            "solo kein bool": {"solo": "ja"},
+            "ziel zu klein": {"target_wh": 0.05},
+            "ziel zu groß": {"target_wh": 1001},
+            "zeitlimit zu kurz": {"time_goal_s": 4},
+            "zeitlimit zu lang": {"time_goal_s": 3601},
             "doppelte id": {"players": [{"id": "a"}, {"id": "a"}]},
             "id ungültig": {"players": [{"id": "A b"}, {"id": "b"}]},
             "farbe": {"players": [{"id": "a", "color": "pink"}, {"id": "b"}]},

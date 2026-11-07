@@ -18,7 +18,11 @@ class App:
         self.results = ResultsStore(cfg["results_file"])
         self.race = Race(
             cfg["players"],
-            target_wh=cfg["target_wh"],
+            mode=cfg["mode"],
+            goal=cfg["target_wh"],
+            time_goal_s=cfg["time_goal_s"],
+            solo=cfg["solo"],
+            time_reference_w=cfg["time_reference_w"],
             countdown_s=cfg["countdown_s"],
             tie_threshold=cfg["tie_threshold_pct"] / 100.0,
             results=self.results,

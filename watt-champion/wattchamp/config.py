@@ -9,11 +9,17 @@ from copy import deepcopy
 COLORS = ("red", "cyan", "green", "magenta", "orange", "blue")
 SENSOR_TYPES = ("sim", "ina219", "push")
 
+MODES = ("energy", "time")
+
 DEFAULTS = {
     "title": "watt champion",
     "host": "127.0.0.1",
     "port": 8080,
-    "target_wh": 1.0,
+    "mode": "energy",          # Startvorgabe: "energy" (Zielenergie) oder "time" (Zeitlimit)
+    "target_wh": 1.0,          # Zielenergie für das Energie-Rennen (0,1 bis 1000 Wh)
+    "time_goal_s": 60,         # Zeitlimit für das Zeit-Rennen (5 bis 3600 s)
+    "solo": False,             # Startvorgabe: Solo statt 1 vs 1
+    "time_reference_w": 30,    # Richtwert für die Strecke im Zeit-Rennen, solange es keinen Rekord gibt
     "countdown_s": 3,
     "tie_threshold_pct": 10,
     "sample_hz": 10,
@@ -73,7 +79,13 @@ def _address(value) -> int:
 
 def validate(cfg: dict, base_dir: str) -> dict:
     _number(cfg, "port", 1, 65535)
-    _number(cfg, "target_wh", 0.001, 10000)
+    _number(cfg, "target_wh", 0.1, 1000)
+    _number(cfg, "time_goal_s", 5, 3600)
+    _number(cfg, "time_reference_w", 1, 100000)
+    if cfg["mode"] not in MODES:
+        raise ConfigError(f"'mode' muss eine von {', '.join(MODES)} sein")
+    if not isinstance(cfg["solo"], bool):
+        raise ConfigError("'solo' muss true oder false sein")
     _number(cfg, "countdown_s", 0, 60)
     _number(cfg, "tie_threshold_pct", 0, 100)
     _number(cfg, "sample_hz", 1, 100)
@@ -81,8 +93,8 @@ def validate(cfg: dict, base_dir: str) -> dict:
         raise ConfigError("'title' darf nicht leer sein")
 
     players = cfg["players"]
-    if not isinstance(players, list) or not 2 <= len(players) <= 4:
-        raise ConfigError("'players' braucht 2 bis 4 Einträge")
+    if not isinstance(players, list) or len(players) != 2:
+        raise ConfigError("'players' braucht genau 2 Einträge (Platz 1 und Platz 2)")
     seen = set()
     for idx, player in enumerate(players):
         if not isinstance(player, dict):

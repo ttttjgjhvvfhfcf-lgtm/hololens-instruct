@@ -13,4 +13,4 @@ fi
 until curl -fs -o /dev/null "$URL"; do sleep 1; done
 
 exec "$BROWSER" --kiosk --noerrdialogs --disable-infobars --disable-session-crashed-bubble \
-  --disable-pinch --overscroll-history-navigation=0 "$URL"
+  --disable-pinch --overscroll-history-navigation=0 --autoplay-policy=no-user-gesture-required "$URL"

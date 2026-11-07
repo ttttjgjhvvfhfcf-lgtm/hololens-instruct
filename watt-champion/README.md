@@ -1,32 +1,53 @@
 # watt champion – Rennoberfläche für den Raspberry Pi
 
-Zwei Spieler erzeugen Strom (Handkurbel, Fahrrad-Generator …), und wer **zuerst die Zielenergie
-(Standard: 1,0 Wh)** erreicht, gewinnt. Die Oberfläche zeigt live Leistung (W), Gesamtenergie (mWh),
-Fortschritt, Rennstrecke mit Autos, Rennzeit und den Rekord.
+Spieler erzeugen Strom (Handkurbel, Fahrrad-Generator …) und treten gegeneinander oder gegen den
+Rekord an. Die Oberfläche zeigt live Leistung (W), Gesamtenergie (mWh), Fortschritt, eine
+Rennstrecke mit Autos, die Leistungskurve, Rennzeit und Rekord.
 
-| Rennen läuft | Ziel erreicht |
-| --- | --- |
-| ![Rennen läuft](docs/screenshot-rennen.png) | ![Ziel erreicht](docs/screenshot-ziel.png) |
+| Einstellung | Rennen läuft | Ziel erreicht |
+| --- | --- | --- |
+| ![Einstellung](docs/screenshot-einstellungen.png) | ![Rennen läuft](docs/screenshot-rennen.png) | ![Ziel erreicht](docs/screenshot-ziel.png) |
 
-Die Oberfläche ist eine Webseite, die im Vollbild-Browser des Pi läuft (Kiosk-Modus). Ein kleiner
-Python-Server liest die Sensoren, rechnet Leistung zu Energie auf und liefert die Seite aus.
-**Es werden keine Python-Pakete benötigt** (nur die Standardbibliothek, Python ≥ 3.9); nur für
-INA219-Sensoren zusätzlich `smbus2`. Alle Schriften liegen lokal – der Pi braucht kein Internet.
+## Spielmodi
 
-## Schnellstart (ohne Sensoren, Simulation)
+| | Energie-Rennen | Zeit-Rennen |
+| --- | --- | --- |
+| **Ziel** | 0,1 bis 1000 Wh | 5 bis 3600 s Zeitlimit |
+| **Gewinner** | wer zuerst das Ziel erzeugt | wer nach Ablauf der Zeit die meiste Energie hat |
+| **Rekord** | schnellste Zeit | meiste Energie |
+| **1 vs 1** | zwei Autos, „Führt!“, „Gleichauf!“, … | dazu bei Gleichstand „Unentschieden“ |
+| **Solo** | gegen die Uhr, der bisherige Rekord fährt als grauer **Geist** mit | wie 1 vs 1, die Strecke zeigt den Fortschritt zum Rekord |
+
+Rekorde gelten je Modus **und** Ziel (eine andere Zielenergie ist eine andere Wertung). Im
+Zeit-Rennen läuft die Strecke gegen den Rekord, solange es noch keinen gibt, gegen einen Richtwert
+(`time_reference_w`); wer ihn übertrifft, fährt über 100 %.
+
+Weitere Funktionen: Countdown (3-2-1-LOS!), Ergebnis-Dialog mit Sieger, Spitzen- und
+Durchschnittsleistung, Vergleichswerte (Handy-Akku, LED-Lampe, Laptop), Konfetti, Töne (abschaltbar),
+Namen per **Bildschirmtastatur** und „Abbrechen“ nur durch Gedrückthalten.
+
+## Schnellstart
+
+**Ohne Server, nur Chrome (Demo):** `static/index.html` im Browser öffnen, Doppelklick genügt. Die
+Oberfläche rechnet dann mit einer eingebauten Simulation (oben steht „Demo“). Mit `?speed=4` an der
+Adresse laufen die simulierten Spieler schneller (`index.html?speed=4`), das ist praktisch zum
+Ausprobieren. Auch ein statisches Hosting ohne Server fällt automatisch in diesen Modus.
+
+**Mit Server** (Rennlogik, Rekorde und Sensoren laufen dann auf dem Pi; nur die Python-Standardbibliothek,
+Python ≥ 3.9):
 
 ```bash
 cd watt-champion
 python3 server.py
 ```
 
-Dann `http://127.0.0.1:8080/` im Browser öffnen. Standardmäßig läuft eine **Simulation** (in der
-Kopfzeile steht dann „Simulation“), damit sich alles ohne Hardware ausprobieren lässt.
+Dann `http://127.0.0.1:8080/` öffnen. Standardmäßig läuft eine **Simulation** (Reiter „Simulation“).
+Alle Schriften liegen lokal, der Pi braucht kein Internet.
 
-**Bedienung:** *Start* startet nach einem 3-Sekunden-Countdown. Während des Rennens muss
-*Abbrechen* eine Sekunde **gehalten** werden (damit niemand das Rennen versehentlich beendet).
-Nach dem Ziel startet *Neues Rennen* zurück in den Bereitschaftszustand.
-Tastatur: `Leertaste`/`Enter` Start bzw. Neues Rennen, `R` sofort zurücksetzen, `F` Vollbild.
+**Bedienung:** Modus, Spielerzahl, Namen (Name antippen) und Ziel wählen (`+`/`−` oder Schnellwahl,
+gedrückt halten wiederholt), dann *Start*. Beim Ergebnis: *Nochmal* oder *Neue Challenge*.
+Tastatur: `Leertaste`/`Enter` Start bzw. Nochmal, `Esc` im Ergebnis zur Einstellung, `R` zurücksetzen,
+`M` Ton, `F` Vollbild.
 
 ## Konfiguration (`config.json`)
 
@@ -34,17 +55,22 @@ Tastatur: `Leertaste`/`Enter` Start bzw. Neues Rennen, `R` sofort zurücksetzen,
 | --- | --- | --- |
 | `title` | Logo-Text (erstes Wort oben, Rest darunter) | `watt champion` |
 | `host`, `port` | Adresse des Servers. `127.0.0.1` = nur der Pi selbst; `0.0.0.0` = im Netzwerk erreichbar | `127.0.0.1`, `8080` |
-| `target_wh` | Zielenergie in Wh | `1.0` |
+| `mode`, `solo` | Vorauswahl nach dem Start: `energy`/`time`, Solo ja/nein | `energy`, `false` |
+| `target_wh` | Vorgabe Zielenergie in Wh (0,1 bis 1000) | `1.0` |
+| `time_goal_s` | Vorgabe Zeitlimit in Sekunden (5 bis 3600) | `60` |
+| `time_reference_w` | Richtwert in W für die Strecke im Zeit-Rennen ohne Rekord | `30` |
 | `countdown_s` | Countdown vor dem Start in Sekunden (`0` = sofort) | `3` |
-| `tie_threshold_pct` | Liegen die Spieler weniger als so viele Prozent des Ziels auseinander, steht „Gleichauf!“ | `10` |
+| `tie_threshold_pct` | Liegen die Spieler weniger als so viele Prozent der Bezugsenergie auseinander, steht „Gleichauf!“ | `10` |
 | `sample_hz` | Messungen pro Sekunde | `10` |
 | `results_file` | Rekordliste (JSON), relativ zur Konfigurationsdatei; `null` = nicht speichern | `data/results.json` |
 | `sponsor_logo` | Bild oben rechts, z. B. `"img/sponsoren.png"` (Datei in `static/img/` ablegen) | – |
 | `sensor` | Messwertquelle, siehe unten | `{"type": "sim"}` |
-| `players` | 2 bis 4 Spieler: `id`, `name`, `color` (`red`, `cyan`, `green`, `magenta`, `orange`, `blue`) | Anna (rot), Ben (cyan) |
+| `players` | genau 2 Plätze: `id`, `name`, `color` (`red`, `cyan`, `green`, `magenta`, `orange`, `blue`) | Anna (rot), Ben (cyan) |
 
-Rekorde gelten je Zielenergie; wer `target_wh` ändert, startet eine neue Rekordliste.
-Fehlerhafte Konfigurationen werden beim Start mit einer verständlichen Meldung abgelehnt.
+Modus, Ziel, Spielerzahl und Namen lassen sich zusätzlich in der Oberfläche ändern; sie gelten bis zum
+Neustart des Servers. Fehlerhafte Konfigurationen werden beim Start mit einer verständlichen Meldung
+abgelehnt. Bei einem Wechsel des Ziels beginnt eine eigene Rekordliste. Rekorddateien der ersten
+Version (nur Energie-Rennen) werden weiter gelesen.
 
 ## Sensoren
 
@@ -103,7 +129,8 @@ sudo systemctl daemon-reload && sudo systemctl enable --now watt-champion
 ```
 
 **Vollbild-Kiosk:** [`deploy/kiosk.sh`](deploy/kiosk.sh) startet Chromium im Kiosk-Modus, sobald der
-Server antwortet. Wie man es beim Anmelden automatisch startet, hängt von der Raspberry-Pi-OS-Version ab:
+Server antwortet (mit der Option, dass Töne ohne vorherige Berührung abgespielt werden dürfen). Wie man es
+beim Anmelden automatisch startet, hängt von der Raspberry-Pi-OS-Version ab:
 
 * Wayland (labwc): Zeile `/home/pi/hololens-instruct/watt-champion/deploy/kiosk.sh &` in
   `~/.config/labwc/autostart`
@@ -111,37 +138,48 @@ Server antwortet. Wie man es beim Anmelden automatisch startet, hängt von der R
   `~/.config/lxsession/LXDE-pi/autostart`
 
 Damit der Bildschirm nicht ausgeht: `sudo raspi-config` → *Display Options* → *Screen Blanking* aus.
-Die Oberfläche skaliert mit der Bildschirmgröße (getestet im Browser mit 480×365 bis 1920×1080,
-Quer- und Hochformat; z. B. 800×480 beim offiziellen 7"-Touch-Display).
+Die Oberfläche skaliert mit der Bildschirmgröße (im Browser geprüft von 390×844 bis 1920×1080, quer
+und hochkant; z. B. 800×480 beim offiziellen 7"-Touch-Display). Ein Namensfeld öffnet die eingebaute
+Bildschirmtastatur, eine Tastatur am Pi ist nicht nötig.
 
 ## HTTP-API
 
 | Aufruf | Zweck |
 | --- | --- |
-| `GET /api/state` | kompletter Zustand (Status, Zeit, Spieler, Rekord) |
+| `GET /api/state` | kompletter Zustand (Status, Zeit, aktive Spieler, alle Plätze, Rekord, Geist) |
+| `POST /api/setup` | `{"mode": "energy"\|"time", "goal": 1.0, "count": 1\|2, "names": {"anna": "Zoë"}}`, alle Felder optional; `400` bei ungültigen Werten, `409` während eines Rennens |
 | `POST /api/start` | Rennen starten (`409`, wenn schon eines läuft) |
-| `POST /api/reset` | Rennen abbrechen bzw. Ergebnis wegräumen |
+| `POST /api/reset` | Rennen abbrechen bzw. Ergebnis wegräumen (zurück zur Einstellung) |
+| `GET /api/history?from=N&race=ID` | Leistungskurve (ein Punkt je Sekunde), nur neue Punkte ab `N` |
 | `POST /api/measurement` | nur mit Sensor `push`: `{"<id>": watt, …}` |
 
 ## Aufbau und Tests
 
 ```
-server.py            Start (Argumente: --config, --host, --port)
-wattchamp/race.py    Rennlogik: Leistung → Energie, Sieger, Rekord, Status je Spieler
-wattchamp/sensors.py Messquellen sim / ina219 / push
-wattchamp/results.py Rekordliste (JSON, atomar geschrieben)
-wattchamp/web.py     HTTP-Server und API
-static/              Oberfläche (index.html, style.css, app.js, Schriften)
-deploy/              systemd-Dienst und Kiosk-Skript
+server.py             Start (Argumente: --config, --host, --port)
+wattchamp/race.py     Rennlogik: Modi, Energie, Sieger, Rekord, Geist, Kurve, Status je Spieler
+wattchamp/sensors.py  Messquellen sim / ina219 / push
+wattchamp/results.py  Rekordliste (JSON, atomar geschrieben)
+wattchamp/web.py      HTTP-Server und API
+static/               Oberfläche: index.html, style.css, Schriften
+static/js/            engine.js (Demo-Rennlogik), api.js (Server oder Demo), app.js (Ansichten),
+                      util.js, chart.js, fx.js (Ton, Konfetti), osk.js (Bildschirmtastatur)
+deploy/               systemd-Dienst und Kiosk-Skript
 ```
 
 ```bash
-python3 -m unittest discover -s tests -t .
+python3 -m unittest discover -s tests -t .     # Python-Tests (Server, Logik, Konfiguration, API)
+node --test tests/js/*.test.js                 # Tests der Oberflächen-Hilfsfunktionen (Node ≥ 18)
 ```
 
-Die Tests decken Rennlogik (inkl. exakter Zielzeit zwischen zwei Messungen), Rekorde, Konfiguration,
-HTTP-API und den INA219-Treiber gegen einen **simulierten** I²C-Bus ab. Der INA219-Treiber und der
-Kiosk-Start wurden noch nicht an echter Pi-Hardware ausprobiert; bitte beim ersten Aufbau
+`engine.js` ist eine Portierung der Rennlogik für den Demo-Modus. Ein **Paritätstest**
+(`tests/test_engine_parity.py`, braucht Node) lässt dieselben Szenarien durch Python und JavaScript laufen und
+vergleicht jeden Wert, damit Demo und Server sich nicht auseinanderentwickeln. Wird `race.py`
+geändert, muss `engine.js` angepasst werden – der Test sagt, wo.
+
+Die Tests decken Rennlogik (inkl. exakter Zielzeit zwischen zwei Messungen), Modi, Rekorde,
+Konfiguration, HTTP-API und den INA219-Treiber gegen einen **simulierten** I²C-Bus ab. Der INA219-Treiber
+und der Kiosk-Start wurden noch nicht an echter Pi-Hardware ausprobiert; bitte beim ersten Aufbau
 (Beispielwerte mit einem Netzteil/Multimeter gegenprüfen) kurz verifizieren.
 
 ## Lizenzen

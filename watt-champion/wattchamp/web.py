@@ -6,6 +6,9 @@ import json
 import logging
 import os
 from http.server import SimpleHTTPRequestHandler, ThreadingHTTPServer
+from urllib.parse import parse_qs, urlsplit
+
+from .race import BusyError
 
 log = logging.getLogger(__name__)
 STATIC_DIR = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "static")
@@ -65,9 +68,19 @@ class Handler(SimpleHTTPRequestHandler):
 
     # ------------------------------------------------------------------ Routen
     def do_GET(self) -> None:  # noqa: N802
-        path = self.path.split("?")[0]
+        url = urlsplit(self.path)
+        path = url.path
         if path == "/api/state":
             self._json(self.app.state())
+        elif path == "/api/history":
+            query = parse_qs(url.query)
+            try:
+                since = int(query.get("from", ["0"])[0])
+                race_id = int(query["race"][0]) if "race" in query else None
+            except ValueError:
+                self._json({"error": "from und race müssen ganze Zahlen sein"}, 400)
+                return
+            self._json(self.app.race.history(since, race_id))
         elif path.startswith("/api/"):
             self._json({"error": "Unbekannter Endpunkt"}, 404)
         else:
@@ -80,6 +93,22 @@ class Handler(SimpleHTTPRequestHandler):
                 self._json(self.app.state())
             else:
                 self._json({"error": "Es läuft bereits ein Rennen"}, 409)
+        elif path == "/api/setup":
+            data = self._read_json()
+            if data is None:
+                return
+            unknown = set(data) - {"mode", "goal", "count", "names"}
+            if unknown:
+                self._json({"error": f"Unbekannte Felder: {', '.join(sorted(unknown))}"}, 400)
+                return
+            try:
+                self.app.race.configure(**data)
+            except BusyError as exc:
+                self._json({"error": str(exc)}, 409)
+            except ValueError as exc:
+                self._json({"error": str(exc)}, 400)
+            else:
+                self._json(self.app.state())
         elif path == "/api/reset":
             self.app.race.reset()
             self._json(self.app.state())
