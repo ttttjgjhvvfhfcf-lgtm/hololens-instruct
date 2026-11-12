@@ -18,7 +18,7 @@ for (const fach of faecher) {
     await page.waitForTimeout(1200);
     const secs = await page.evaluate(() => {
       const SKIP = '#exam-modal,#exam-overlay,[id*="modal"],[class*="overlay"],nav,header,script,style,.katex-html,button,input,#hub-back,.toc-sidebar,#toasts';
-      const HEADS = 'h2,h3,h4,.sum-title,.aufgabe-title,.card-title,.textbook-head';
+      const HEADS = 'h2,h3,h4,.sum-title,.aufgabe-title,.card-title,.textbook-head,.section-title,.card-head';
       const rootEl = document.querySelector('main') || document.body;
       const clean = s => s.replace(/\s+/g, ' ').trim();
       const out = [];
@@ -35,7 +35,7 @@ for (const fach of faecher) {
         if (n.nodeType === 1) {
           if (n.matches(HEADS)) {
             if (cur.h || cur.t) out.push(cur);
-            const top = n.matches('.sum-title,.aufgabe-title,.card-title'); const h = clean(n.textContent);
+            const top = n.matches('.sum-title,.aufgabe-title,.card-title,.section-title'); const h = clean(n.textContent);
             if (top) parent = h;
             cur = { h, t: '', k: top ? '' : parent };
             skipUntil = n;

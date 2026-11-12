@@ -25,7 +25,7 @@
       '.hub-target{outline:3px solid #f59e0b;outline-offset:4px;border-radius:6px}' +
       '@media print{#hub-back{display:none}}';
     document.head.appendChild(css);
-    var nav = document.querySelector('nav, .formula-nav');
+    var nav = document.querySelector('.formula-nav, .toolbar, nav:not(.toc-sidebar)');
     if (nav) nav.insertBefore(a, nav.firstChild);
     else { a.className = 'hub-float'; document.body.appendChild(a); }
   }
@@ -47,7 +47,7 @@
   }
 
   var SKIP = '#exam-modal,#exam-overlay,[id*="modal"],[class*="overlay"],nav,header,script,style,.katex';
-  var HEADS = 'h2,h3,h4,.sum-title,.aufgabe-title,.card-title,.textbook-head';
+  var HEADS = 'h2,h3,h4,.sum-title,.aufgabe-title,.card-title,.textbook-head,.section-title,.card-head';
 
   function highlight(root, words) {
     var first = null;
@@ -90,7 +90,7 @@
     };
     if (j.at) {
       var par = j.k ? find(root, j.k) : null;
-      var box = par && par.closest('.sum-wrap, .aufgabe, .card');
+      var box = par && par.closest('.sum-wrap, .aufgabe, .section, .card');
       target = (box && find(box, j.at)) || find(root, j.at);
     }
     // Eingeklappte Abschnitte öffnen
@@ -99,7 +99,7 @@
       while (c) { c.classList.remove('collapsed'); c = c.parentElement && c.parentElement.closest('.collapsed'); }
     }
     var words = (j.q || '').split(/\s+/).filter(function (w) { return w.length > 1; });
-    var scope = target ? (target.closest('.sum-wrap, .aufgabe, .card') || root) : root;
+    var scope = target ? (target.closest('.sum-wrap, .aufgabe, .section, .card') || root) : root;
     var first = words.length ? highlight(scope, words) : null;
     var el = target || first;
     if (!el) return;
