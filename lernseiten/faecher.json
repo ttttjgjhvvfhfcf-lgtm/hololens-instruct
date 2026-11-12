@@ -12,6 +12,12 @@
         "titel": "Mathematik 2Md",
         "art": "Lernseite",
         "info": "Lernzusammenfassungen, Übungsaufgaben, Lernmodus und Probeschularbeit"
+      },
+      {
+        "datei": "faecher/mathematik/probeschularbeit.html",
+        "titel": "Probeschularbeit Mathematik 2Md",
+        "art": "Probearbeit",
+        "info": "10 Aufgaben mit aufklappbaren Lösungen, Kurzformeln und typischen Fehlern"
       }
     ]
   },
@@ -34,6 +40,18 @@
         "titel": "Test 2a — Lösungen",
         "art": "Testlösung",
         "info": "Musterlösung zum Test vom 19.06.2026, 8 Aufgaben"
+      },
+      {
+        "datei": "faecher/aee/formeluebersicht.html",
+        "titel": "AEE2 — Formelübersicht",
+        "art": "Formeln",
+        "info": "Alle Formeln der Wechselstromtechnik in 8 Abschnitten"
+      },
+      {
+        "datei": "faecher/aee/merksaetze.html",
+        "titel": "AEE2 — Merksätze & Eselsbrücken",
+        "art": "Merkhilfe",
+        "info": "13 Kompaktkarten zum Auswendiglernen"
       }
     ]
   },
@@ -55,12 +73,18 @@
   },
   {
     "id": "met",
-    "name": "MET · Elektrotechnik",
+    "name": "MET · Mechatronik",
     "kurz": "MET",
     "farbe": "#b45309",
     "farbeDunkel": "#fbbf24",
-    "info": "Schutzmaßnahmen, Sicherungen, Schutzleiter",
+    "info": "Leitungen, Sicherungen, Schutzmaßnahmen",
     "seiten": [
+      {
+        "datei": "faecher/met/lernuebersicht.html",
+        "titel": "MET — Lernübersicht",
+        "art": "Übersicht",
+        "info": "Leitungen, Sicherungen und Schutzmaßnahmen, Unterrichtseinheiten 7–21"
+      },
       {
         "datei": "faecher/met/met-test2-schutzmassnahmen.html",
         "titel": "MET — Test 2: Schutzmaßnahmen",

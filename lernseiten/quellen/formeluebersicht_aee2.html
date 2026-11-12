@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AEE2 – Formelübersicht</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/3.2.2/es5/tex-mml-chtml.min.js"></script>
+<style>
+:root{
+  --blue-50:#E6F1FB;--blue-100:#B5D4F4;--blue-200:#85B7EB;--blue-600:#185FA5;--blue-800:#0C447C;--blue-900:#042C53;
+  --teal-50:#E1F5EE;--teal-100:#9FE1CB;--teal-600:#0F6E56;--teal-800:#085041;
+  --amber-50:#FAEEDA;--amber-100:#FAC775;--amber-600:#854F0B;--amber-800:#633806;
+  --purple-50:#EEEDFE;--purple-100:#CECBF6;--purple-600:#534AB7;--purple-800:#3C3489;
+  --coral-50:#FAECE7;--coral-100:#F5C4B3;--coral-600:#993C1D;--coral-800:#712B13;
+  --green-50:#EAF3DE;--green-100:#C0DD97;--green-600:#3B6D11;--green-800:#27500A;
+  --gray-50:#F1EFE8;--gray-100:#D3D1C7;--gray-200:#B4B2A9;--gray-600:#5F5E5A;--gray-800:#444441;
+  --text:#1a1a18;--text2:#5a5a56;--bg:#fff;--surface:#f7f6f2;--border:rgba(0,0,0,0.1);
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:Georgia,'Times New Roman',serif;background:var(--bg);color:var(--text);line-height:1.6;font-size:15px;}
+.doc-header{background:var(--blue-900);color:#fff;padding:2rem 2.5rem 1.5rem;border-bottom:4px solid var(--amber-100);}
+.doc-header h1{font-size:24px;font-weight:700;margin-bottom:5px;}
+.doc-header p{font-size:13px;color:var(--blue-100);font-style:italic;}
+.toc{background:var(--blue-50);border-bottom:0.5px solid var(--blue-100);padding:0.9rem 2.5rem;}
+.toc-title{font-size:11px;text-transform:uppercase;letter-spacing:0.1em;color:var(--blue-600);font-family:Arial,sans-serif;margin-bottom:8px;}
+.toc-links{display:flex;flex-wrap:wrap;gap:7px;}
+.toc-links a{font-size:13px;font-family:Arial,sans-serif;color:var(--blue-800);text-decoration:none;background:#fff;border:0.5px solid var(--blue-200);border-radius:4px;padding:3px 10px;}
+.toc-links a:hover{background:var(--blue-100);}
+.content{max-width:920px;margin:0 auto;padding:1.6rem 1.6rem 4rem;}
+.section{margin-bottom:2rem;border:0.5px solid var(--border);border-radius:10px;overflow:hidden;}
+.section-header{display:flex;align-items:center;gap:12px;padding:13px 20px;font-family:Arial,sans-serif;}
+.section-header h2{font-size:16px;font-weight:600;}
+.section-num{font-size:11px;font-weight:700;font-family:Arial,sans-serif;width:24px;height:24px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.sh-blue{background:var(--blue-600);color:#fff;}.hdr-blue{background:var(--blue-50);border-bottom:0.5px solid var(--blue-100);color:var(--blue-800);}
+.sh-teal{background:var(--teal-600);color:#fff;}.hdr-teal{background:var(--teal-50);border-bottom:0.5px solid var(--teal-100);color:var(--teal-800);}
+.sh-purple{background:var(--purple-600);color:#fff;}.hdr-purple{background:var(--purple-50);border-bottom:0.5px solid var(--purple-100);color:var(--purple-800);}
+.sh-amber{background:var(--amber-600);color:#fff;}.hdr-amber{background:var(--amber-50);border-bottom:0.5px solid var(--amber-100);color:var(--amber-800);}
+.sh-coral{background:var(--coral-600);color:#fff;}.hdr-coral{background:var(--coral-50);border-bottom:0.5px solid var(--coral-100);color:var(--coral-800);}
+.sh-green{background:var(--green-600);color:#fff;}.hdr-green{background:var(--green-50);border-bottom:0.5px solid #C0DD97;color:var(--green-800);}
+.section-body{padding:18px 22px;background:var(--bg);}
+.formula-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:10px;margin:8px 0;}
+.fcard{background:var(--surface);border:0.5px solid var(--border);border-radius:8px;padding:11px 15px;}
+.flabel{font-family:Arial,sans-serif;font-size:12px;color:var(--text2);margin-bottom:5px;}
+.feq{font-size:16px;text-align:center;padding:3px 0;}
+.fnote{font-family:Arial,sans-serif;font-size:12px;color:var(--text2);margin-top:5px;font-style:italic;}
+table{width:100%;border-collapse:collapse;font-family:Arial,sans-serif;font-size:13.5px;margin:8px 0;}
+thead tr{background:var(--gray-50);border-bottom:1px solid var(--gray-100);}
+th{text-align:left;padding:8px 12px;font-weight:600;color:var(--text2);font-size:12px;text-transform:uppercase;letter-spacing:0.04em;}
+td{padding:7px 12px;border-bottom:0.5px solid var(--border);vertical-align:middle;}
+tr:last-child td{border-bottom:none;}
+td.math{font-size:15px;}
+.info-box{border-radius:8px;padding:11px 15px;margin:10px 0;font-family:Arial,sans-serif;font-size:13.5px;line-height:1.6;}
+.info-box.amber{background:var(--amber-50);border-left:3px solid var(--amber-600);color:var(--amber-800);}
+.info-box.teal{background:var(--teal-50);border-left:3px solid var(--teal-600);color:var(--teal-800);}
+.info-box.blue{background:var(--blue-50);border-left:3px solid var(--blue-600);color:var(--blue-800);}
+.info-box.purple{background:var(--purple-50);border-left:3px solid var(--purple-600);color:var(--purple-800);}
+.info-box.coral{background:var(--coral-50);border-left:3px solid var(--coral-600);color:var(--coral-800);}
+h3{font-family:Arial,sans-serif;font-size:13px;font-weight:600;color:var(--text2);text-transform:uppercase;letter-spacing:0.05em;margin:1.2rem 0 0.6rem;padding-bottom:4px;border-bottom:0.5px solid var(--border);}
+h3:first-child{margin-top:0;}
+@media(max-width:600px){.content{padding:1rem 0.9rem 3rem;}.doc-header{padding:1.4rem 1.2rem;}.toc{padding:0.8rem 1.2rem;}.formula-grid{grid-template-columns:1fr;}}
+</style>
+</head>
+<body>
+
+<div class="doc-header">
+  <h1>AEE2 – Formelübersicht</h1>
+  <p>Wechselstromtechnik · alle Formeln aus den Unterlagen</p>
+</div>
+
+<div class="toc">
+  <div class="toc-title">Inhalt</div>
+  <div class="toc-links">
+    <a href="#s1">1 · Kenngrößen</a>
+    <a href="#s2">2 · Ohmscher Widerstand R</a>
+    <a href="#s3">3 · Induktivität L</a>
+    <a href="#s4">4 · Kapazität C</a>
+    <a href="#s5">5 · Impedanz &amp; Dreiecke</a>
+    <a href="#s6">6 · Leistung</a>
+    <a href="#s7">7 · Pythagoras &amp; Trigonometrie</a>
+    <a href="#s8">8 · Gleichstrom-Grundlagen</a>
+  </div>
+</div>
+
+<div class="content">
+
+<!-- 1 KENNGRÖSSEN -->
+<div class="section" id="s1">
+  <div class="section-header hdr-amber"><span class="section-num sh-amber">1</span><h2>Kenngrößen der Wechselspannung</h2></div>
+  <div class="section-body">
+    <table>
+      <thead><tr><th>Kenngröße</th><th>Zeichen</th><th>Einheit</th><th>Formel</th></tr></thead>
+      <tbody>
+        <tr><td>Scheitelwert (Spitzenwert)</td><td class="math">\(\hat{u},\ \hat{i}\)</td><td>V, A</td><td class="math">\(\hat{u} = \sqrt{2}\cdot U_{\text{eff}}\)</td></tr>
+        <tr><td>Effektivwert</td><td class="math">\(U_{\text{eff}}\)</td><td>V, A</td><td class="math">\(U_{\text{eff}} = \dfrac{\hat{u}}{\sqrt{2}}\)</td></tr>
+        <tr><td>Periodendauer</td><td class="math">\(T\)</td><td>s</td><td class="math">\(T = \dfrac{1}{f}\)</td></tr>
+        <tr><td>Frequenz</td><td class="math">\(f\)</td><td>Hz</td><td class="math">\(f = \dfrac{1}{T}\)</td></tr>
+        <tr><td>Kreisfrequenz (Winkelgeschw.)</td><td class="math">\(\omega\)</td><td>rad/s</td><td class="math">\(\omega = 2\pi\cdot f\)</td></tr>
+        <tr><td>Winkel im Bogenmaß</td><td class="math">\(\varphi\)</td><td>rad</td><td class="math">\(\varphi = \omega\cdot t\)</td></tr>
+        <tr><td>Wellenlänge</td><td class="math">\(\lambda\)</td><td>m</td><td class="math">\(\lambda = \dfrac{c}{f}\)</td></tr>
+        <tr><td>Lichtgeschwindigkeit</td><td class="math">\(c\)</td><td>km/s</td><td class="math">\(c_0 = 3\cdot 10^{8}\ \text{m/s}\)</td></tr>
+      </tbody>
+    </table>
+    <h3>Momentanwert / Augenblickswert</h3>
+    <div class="formula-grid">
+      <div class="fcard"><div class="flabel">Spannung (RAD-Modus)</div><div class="feq">\( u(t) = \hat{u}\cdot\sin(\omega t) \)</div></div>
+      <div class="fcard"><div class="flabel">Strom (RAD-Modus)</div><div class="feq">\( i(t) = \hat{i}\cdot\sin(\omega t) \)</div></div>
+      <div class="fcard"><div class="flabel">Taschenrechner-Trick (DEG-Modus)</div><div class="feq">\( u = \hat{u}\cdot\sin(360°\cdot f\cdot t) \)</div></div>
+    </div>
+    <div class="info-box amber">Bogenmaß: \(360° = 2\pi\ \text{rad}\), \(180° = \pi\ \text{rad}\), \(90° = \dfrac{\pi}{2}\). Netz: \(U_{\text{eff}} = 230\,\text{V} \Rightarrow \hat{u}\approx 325\,\text{V}\), \(f = 50\,\text{Hz}\), \(T = 20\,\text{ms}\).</div>
+  </div>
+</div>
+
+<!-- 2 R -->
+<div class="section" id="s2">
+  <div class="section-header hdr-blue"><span class="section-num sh-blue">2</span><h2>Ohmscher Widerstand R</h2></div>
+  <div class="section-body">
+    <div class="info-box blue">Phasenverschiebung \(\varphi = 0°\) — Strom und Spannung in Phase. Energie wird vollständig in Wärme umgesetzt (Wirkleistung).</div>
+    <div class="formula-grid">
+      <div class="fcard"><div class="flabel">Ohmsches Gesetz</div><div class="feq">\( U = R\cdot I \)</div></div>
+      <div class="fcard"><div class="flabel">Wirkleistung</div><div class="feq">\( P = U\cdot I = \dfrac{U^2}{R} = I^2\cdot R \)</div></div>
+      <div class="fcard"><div class="flabel">Mittlere Leistung = Gleichstromleistung</div><div class="feq">\( P_{\text{AC,mittel}} = P_{\text{DC}} \)</div></div>
+      <div class="fcard"><div class="flabel">Äquivalente Gleichspannung</div><div class="feq">\( U_{\text{DC}} = \sqrt{P_{\text{mittel}}\cdot R} \)</div></div>
+    </div>
+  </div>
+</div>
+
+<!-- 3 L -->
+<div class="section" id="s3">
+  <div class="section-header hdr-purple"><span class="section-num sh-purple">3</span><h2>Induktivität L (Spule)</h2></div>
+  <div class="section-body">
+    <div class="info-box purple"><strong>Merksatz:</strong> „Bei der Induktivität kommt der Strom zu spät." Der Strom eilt der Spannung um 90° <strong>nach</strong> → \(\varphi = 90°\), \(\cos\varphi = 0\).</div>
+    <div class="formula-grid">
+      <div class="fcard"><div class="flabel">Induktiver Blindwiderstand</div><div class="feq">\( X_L = \omega\cdot L = 2\pi\cdot f\cdot L \)</div><div class="fnote">Einheit: Ω · steigt mit f</div></div>
+      <div class="fcard"><div class="flabel">Ohmsches Gesetz an der Spule</div><div class="feq">\( U_L = X_L\cdot I_L \)</div></div>
+      <div class="fcard"><div class="flabel">Wirkleistung (ideale Spule)</div><div class="feq">\( P = 0 \)</div><div class="fnote">nur Blindleistung Q [var]</div></div>
+    </div>
+    <h3>Schaltung von Induktivitäten</h3>
+    <div class="formula-grid">
+      <div class="fcard"><div class="flabel">Reihenschaltung</div><div class="feq">\( L_g = L_1 + L_2 \)</div></div>
+      <div class="fcard"><div class="flabel">Parallelschaltung</div><div class="feq">\( L_g = \dfrac{1}{\frac{1}{L_1}+\frac{1}{L_2}} \)</div></div>
+    </div>
+  </div>
+</div>
+
+<!-- 4 C -->
+<div class="section" id="s4">
+  <div class="section-header hdr-teal"><span class="section-num sh-teal">4</span><h2>Kapazität C (Kondensator)</h2></div>
+  <div class="section-body">
+    <div class="info-box teal"><strong>Merksatz:</strong> „Beim Kondensator eilt der Strom vor." Der Strom eilt der Spannung um 90° <strong>vor</strong> → \(\varphi = 90°\), \(\cos\varphi = 0\).</div>
+    <div class="formula-grid">
+      <div class="fcard"><div class="flabel">Kapazitiver Blindwiderstand</div><div class="feq">\( X_C = \dfrac{1}{\omega\cdot C} = \dfrac{1}{2\pi\cdot f\cdot C} \)</div><div class="fnote">Einheit: Ω · sinkt mit f</div></div>
+      <div class="fcard"><div class="flabel">Ohmsches Gesetz am Kondensator</div><div class="feq">\( U_C = X_C\cdot I_C \)</div></div>
+      <div class="fcard"><div class="flabel">Wirkleistung (idealer Kondensator)</div><div class="feq">\( P = 0 \)</div><div class="fnote">nur Blindleistung Q [var]</div></div>
+    </div>
+    <h3>Schaltung von Kapazitäten</h3>
+    <div class="formula-grid">
+      <div class="fcard"><div class="flabel">Parallelschaltung</div><div class="feq">\( C_g = C_1 + C_2 \)</div></div>
+      <div class="fcard"><div class="flabel">Reihenschaltung</div><div class="feq">\( C_g = \dfrac{1}{\frac{1}{C_1}+\frac{1}{C_2}} \)</div></div>
+    </div>
+  </div>
+</div>
+
+<!-- 5 IMPEDANZ -->
+<div class="section" id="s5">
+  <div class="section-header hdr-coral"><span class="section-num sh-coral">5</span><h2>Impedanz Z &amp; Dreiecke</h2></div>
+  <div class="section-body">
+    <div class="formula-grid">
+      <div class="fcard"><div class="flabel">Blindwiderstand gesamt</div><div class="feq">\( X = X_L - X_C \)</div></div>
+      <div class="fcard"><div class="flabel">Impedanz (Scheinwiderstand)</div><div class="feq">\( Z = \sqrt{R^2 + X^2} \)</div><div class="fnote">Einheit: Ω · nach Pythagoras</div></div>
+      <div class="fcard"><div class="flabel">Phasenwinkel</div><div class="feq">\( \varphi = \arctan\!\dfrac{X}{R} \)</div></div>
+      <div class="fcard"><div class="flabel">Ohmsches Gesetz</div><div class="feq">\( U = Z\cdot I \)</div></div>
+    </div>
+    <div class="info-box coral">Impedanz- und Leistungsdreieck sind gleich aufgebaut: <strong>R ↔ P</strong> (Ankathete), <strong>X ↔ Q</strong> (Gegenkathete), <strong>Z ↔ S</strong> (Hypotenuse).</div>
+  </div>
+</div>
+
+<!-- 6 LEISTUNG -->
+<div class="section" id="s6">
+  <div class="section-header hdr-green"><span class="section-num sh-green">6</span><h2>Leistung im Wechselstromkreis</h2></div>
+  <div class="section-body">
+    <div class="formula-grid">
+      <div class="fcard"><div class="flabel">Wirkleistung</div><div class="feq">\( P = U\cdot I\cdot\cos\varphi \)</div><div class="fnote">Einheit: W (Watt)</div></div>
+      <div class="fcard"><div class="flabel">Blindleistung</div><div class="feq">\( Q = U\cdot I\cdot\sin\varphi \)</div><div class="fnote">Einheit: var</div></div>
+      <div class="fcard"><div class="flabel">Scheinleistung</div><div class="feq">\( S = U\cdot I = \sqrt{P^2 + Q^2} \)</div><div class="fnote">Einheit: VA</div></div>
+      <div class="fcard"><div class="flabel">Leistungsfaktor</div><div class="feq">\( \cos\varphi = \dfrac{P}{S} = \dfrac{R}{Z} \)</div></div>
+    </div>
+  </div>
+</div>
+
+<!-- 7 PYTHAGORAS -->
+<div class="section" id="s7">
+  <div class="section-header hdr-blue"><span class="section-num sh-blue">7</span><h2>Pythagoras &amp; Trigonometrie</h2></div>
+  <div class="section-body">
+    <div class="formula-grid">
+      <div class="fcard"><div class="flabel">Satz des Pythagoras</div><div class="feq">\( a^2 + b^2 = c^2 \)</div></div>
+      <div class="fcard"><div class="flabel">Winkelsumme im Dreieck</div><div class="feq">\( \beta = 90° - \alpha \)</div></div>
+    </div>
+    <div class="formula-grid">
+      <div class="fcard"><div class="flabel">Sinus</div><div class="feq">\( \sin\alpha = \dfrac{GK}{HYP} \)</div></div>
+      <div class="fcard"><div class="flabel">Cosinus</div><div class="feq">\( \cos\alpha = \dfrac{AK}{HYP} \)</div></div>
+      <div class="fcard"><div class="flabel">Tangens</div><div class="feq">\( \tan\alpha = \dfrac{GK}{AK} \)</div></div>
+    </div>
+  </div>
+</div>
+
+<!-- 8 GLEICHSTROM -->
+<div class="section" id="s8">
+  <div class="section-header hdr-amber"><span class="section-num sh-amber">8</span><h2>Gleichstrom-Grundlagen (Wiederholung)</h2></div>
+  <div class="section-body">
+    <table>
+      <thead><tr><th>Größe</th><th>Zeichen</th><th>Einheit</th><th>Beschreibung</th></tr></thead>
+      <tbody>
+        <tr><td>Spannung</td><td class="math">\(U\)</td><td>Volt (V)</td><td>Potentialunterschied</td></tr>
+        <tr><td>Strom</td><td class="math">\(I\)</td><td>Ampere (A)</td><td>Menge fließender Elektronen</td></tr>
+        <tr><td>Widerstand</td><td class="math">\(R\)</td><td>Ohm (Ω)</td><td>Hinderung des Stromflusses</td></tr>
+        <tr><td>Leistung</td><td class="math">\(P\)</td><td>Watt (W)</td><td>\(P = U\cdot I\)</td></tr>
+        <tr><td>Arbeit</td><td class="math">\(W\)</td><td>Joule (J)</td><td>\(W = P\cdot t\)</td></tr>
+      </tbody>
+    </table>
+    <div class="formula-grid">
+      <div class="fcard"><div class="flabel">Ohmsches Gesetz</div><div class="feq">\( U = R\cdot I \quad\Rightarrow\quad R = \dfrac{U}{I} \)</div></div>
+    </div>
+    <h3>Schaltungen</h3>
+    <div class="formula-grid">
+      <div class="fcard"><div class="flabel">Serienschaltung = Spannungsteiler</div><div class="feq">\( R_g = R_1 + R_2 + R_3 \)</div><div class="fnote">Strom überall gleich, Spannung teilt sich auf</div></div>
+      <div class="fcard"><div class="flabel">Parallelschaltung = Stromteiler</div><div class="feq">\( R_g = \dfrac{1}{\frac{1}{R_1}+\frac{1}{R_2}} \)</div><div class="fnote">Spannung überall gleich, Strom teilt sich auf</div></div>
+    </div>
+  </div>
+</div>
+
+</div>
+</body>
+</html>

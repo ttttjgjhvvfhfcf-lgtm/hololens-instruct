@@ -17,7 +17,7 @@ for (const fach of faecher) {
     await page.goto(pathToFileURL(path.join(root, seite.datei)).href, { waitUntil: 'load' });
     await page.waitForTimeout(1200);
     const secs = await page.evaluate(() => {
-      const SKIP = '#exam-modal,#exam-overlay,[id*="modal"],[class*="overlay"],nav,header,script,style,.katex-html,button,input,#hub-back,.toc-sidebar,#toasts';
+      const SKIP = '#exam-modal,#exam-overlay,[id*="modal"],[class*="overlay"],nav,header,script,style,.katex-html,mjx-container,button,input,#hub-back,.toc-sidebar,#toasts';
       const HEADS = 'h2,h3,h4,.sum-title,.aufgabe-title,.card-title,.textbook-head,.section-title,.card-head';
       const rootEl = document.querySelector('main') || document.body;
       const clean = s => s.replace(/\s+/g, ' ').trim();

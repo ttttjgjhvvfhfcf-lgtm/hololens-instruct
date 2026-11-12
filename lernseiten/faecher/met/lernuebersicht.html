@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MET — Lernübersicht</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap">
+
+<style>
+:root { --primary:#b45309; --primary-light:#d97706; --bg:#fffbeb; --soft:#fffbeb; --soft2:#fef3c7; --border:#fde9b8; --h1:#92400e; --h2:#d97706;
+  --card:#ffffff; --text:#0f172a; --muted:#64748b; --ok:#047857; --ok-bg:#ecfdf5;
+  --warn-bg:#fffbeb; --warn-bd:#d97706; --warn-tx:#92400e; --dot:rgba(148,163,184,0.22);
+  --shadow-sm:0 2px 8px rgba(15,23,42,0.07),0 1px 3px rgba(15,23,42,0.04); --radius:16px; --radius-sm:10px; }
+body.dark { --primary:#fbbf24; --primary-light:#fcd34d; --bg:#140d02; --soft:#1c1304; --soft2:#150e03; --border:#3d2a0a; --h1:#1c1002; --h2:#92400e;
+  --card:#0f1626; --text:#e2e8f0; --muted:#94a3b8; --ok:#34d399; --ok-bg:#052e22;
+  --warn-bg:#1a0f00; --warn-bd:#d97706; --warn-tx:#fbbf24; --dot:rgba(51,65,85,0.6);
+  --shadow-sm:0 2px 8px rgba(0,0,0,0.35); color-scheme:dark; }
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Inter',-apple-system,BlinkMacSystemFont,system-ui,sans-serif;background:var(--bg);
+  background-image:radial-gradient(circle,var(--dot) 0.85px,transparent 0.85px);background-size:22px 22px;
+  color:var(--text);min-height:100vh;font-size:15px;line-height:1.57}
+#top-progress-bar{position:fixed;top:0;left:0;height:3px;width:0%;background:var(--primary-light);z-index:9999;pointer-events:none}
+header{background:linear-gradient(135deg,var(--h1) 0%,var(--h2) 100%);color:#fff;padding:1.25rem 2.5rem 1.1rem;position:relative;overflow:hidden}
+.h-deco{position:absolute;right:2.5rem;top:50%;transform:translateY(-50%);font-size:3.5rem;opacity:.08;font-style:italic;user-select:none;white-space:nowrap}
+.h-content{position:relative}
+.h-badge{display:inline-flex;background:rgba(255,255,255,.11);border:1px solid rgba(255,255,255,.18);padding:.3rem .95rem;border-radius:999px;font-size:.75rem;font-weight:600;margin-bottom:.85rem}
+header h1{font-size:2.3rem;font-weight:800;letter-spacing:-.75px;line-height:1.15;margin-bottom:.35rem}
+.h-motto{font-size:.92rem;font-style:italic;color:rgba(255,255,255,.78);max-width:46rem}
+nav{background:var(--card);border-bottom:1px solid var(--border);padding:.55rem 1.75rem;display:flex;flex-wrap:wrap;align-items:center;gap:.6rem;position:sticky;top:0;z-index:50;box-shadow:0 1px 14px rgba(15,23,42,.07)}
+.nav-label{font-size:.72rem;font-weight:600;text-transform:uppercase;letter-spacing:.06em;color:var(--muted)}
+.nav-jump{display:flex;flex-wrap:wrap;gap:.3rem}
+.nav-jump a{font:600 .75rem 'JetBrains Mono',monospace;color:var(--primary);text-decoration:none;padding:.2rem .5rem;border-radius:7px;border:1px solid var(--border);background:var(--soft)}
+.nav-jump a:hover{background:var(--soft2)}
+.btn{display:inline-flex;align-items:center;padding:.33rem .7rem;border-radius:9px;font:500 .78rem Inter,sans-serif;cursor:pointer;background:var(--soft);color:var(--text);border:1px solid var(--border)}
+.btn:hover{background:var(--soft2)}
+.btn-dm{margin-left:auto;font-size:1.05rem;line-height:1}
+.nav-right{margin-left:auto;display:flex;gap:.5rem}.nav-right .btn-dm{margin-left:0}
+main{max-width:900px;margin:0 auto;padding:1.75rem 1.25rem 4rem}
+.sum-wrap{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);margin-bottom:1.5rem;box-shadow:var(--shadow-sm);scroll-margin-top:70px;overflow:hidden}
+.sum-header{display:flex;align-items:center;gap:.75rem;flex-wrap:wrap;padding:.9rem 1.5rem;background:linear-gradient(135deg,var(--soft),var(--soft2));border-bottom:1px solid var(--border)}
+.sum-num{font:600 .72rem 'JetBrains Mono',monospace;background:var(--primary);color:var(--card);padding:.2rem .6rem;border-radius:999px;white-space:nowrap}
+.sum-title{font-weight:700;font-size:1.05rem;flex:1;min-width:10rem}
+.sum-note{font-size:.72rem;font-weight:600;color:var(--primary);border:1px solid var(--border);background:var(--card);padding:.2rem .65rem;border-radius:999px;white-space:nowrap}
+.sum-body{padding:1.25rem 1.5rem 1.4rem}
+.md-out p{margin-bottom:.7rem}.md-out p:last-child{margin-bottom:0}
+.md-out ul{margin:.3rem 0 .8rem 1.3rem}.md-out li{margin-bottom:.3rem}
+.md-out strong{color:var(--primary)}
+.md-out h3{font-size:.95rem;font-weight:700;color:var(--primary);margin:1.2rem 0 .5rem;padding-bottom:.3rem;border-bottom:1px solid var(--border);scroll-margin-top:70px}
+.md-out h3:first-child{margin-top:0}
+.tbl-wrap{overflow-x:auto;margin:.5rem 0 1rem}
+table{border-collapse:collapse;width:100%;font-size:.9rem}
+th{text-align:left;background:var(--soft);color:var(--primary);padding:.5rem .8rem;border-bottom:2px solid var(--border);white-space:nowrap}
+td{padding:.5rem .8rem;border-top:1px solid var(--border);vertical-align:top}
+td.math{font-size:1rem}
+.formula-box,.formula-mini{background:var(--soft);border-left:4px solid var(--primary-light);border-radius:0 var(--radius-sm) var(--radius-sm) 0;padding:.6rem 1rem;margin:.5rem 0 .8rem;overflow-x:auto}
+.formula-box{font:500 .88rem/1.9 'JetBrains Mono',monospace}
+.notice-box,.info-box{background:var(--warn-bg);border-left:4px solid var(--warn-bd);border-radius:0 var(--radius-sm) var(--radius-sm) 0;padding:.7rem 1rem;margin:.6rem 0 1rem;font-size:.9rem}
+.notice-box strong,.info-box strong{color:var(--warn-tx)}
+/* Formelkarten */
+.formula-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:.7rem;margin:.5rem 0 1rem}
+.fcard{background:var(--soft);border:1px solid var(--border);border-radius:var(--radius-sm);padding:.7rem .9rem;min-width:0;overflow-x:auto}
+.flabel{font-size:.74rem;font-weight:600;text-transform:uppercase;letter-spacing:.04em;color:var(--muted);margin-bottom:.3rem}
+.feq{font-size:1.02rem;text-align:center;padding:.2rem 0}
+.fnote{font-size:.76rem;color:var(--muted);margin-top:.3rem;font-style:italic}
+/* Merksatz-Karten */
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(270px,1fr));gap:1rem}
+.card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);box-shadow:var(--shadow-sm);overflow:hidden;min-width:0;scroll-margin-top:70px}
+.card-head{padding:.7rem 1.1rem;font-weight:700;font-size:.95rem;display:flex;align-items:center;gap:.5rem;background:linear-gradient(135deg,var(--soft),var(--soft2));border-bottom:1px solid var(--border)}
+.card-head>span{display:flex;align-items:center;gap:.5rem;flex:1}
+.card-body{padding:.9rem 1.1rem}
+.quote{font-size:1rem;font-weight:700;font-style:italic;color:var(--primary);margin-bottom:.35rem;line-height:1.4}
+.explain{font-size:.86rem;color:var(--muted);margin-bottom:.6rem}.explain:last-child{margin-bottom:0}
+.explain strong{color:var(--text)}
+.divider{height:1px;background:var(--border);margin:.7rem 0}
+.big-letters{font:700 1.3rem 'JetBrains Mono',monospace;letter-spacing:.06em;color:var(--primary);margin:.1rem 0 .5rem}
+.tag{margin-left:auto;font-size:.68rem;font-weight:700;padding:.12rem .55rem;border-radius:999px;background:var(--warn-bg);color:var(--warn-tx);border:1px solid var(--warn-bd)}
+/* Aufgaben mit aufklappbarer Lösung */
+.meta-row{display:flex;flex-wrap:wrap;gap:.6rem;margin-bottom:1rem}
+.meta-row div{background:var(--card);border:1px solid var(--border);border-radius:var(--radius-sm);padding:.5rem .9rem;font-size:.85rem;box-shadow:var(--shadow-sm)}
+.meta-row b{display:block;font-size:.68rem;text-transform:uppercase;letter-spacing:.06em;color:var(--muted)}
+details.loesung{margin-top:.9rem;border:1px solid var(--border);border-radius:var(--radius-sm);overflow:hidden}
+details.loesung summary{cursor:pointer;padding:.55rem .9rem;font-weight:600;font-size:.86rem;color:var(--primary);background:var(--soft);list-style-position:inside}
+details.loesung[open] summary{border-bottom:1px solid var(--border)}
+details.loesung .tbl-wrap{margin:0}
+details.loesung td:first-child{font-weight:600;color:var(--muted);white-space:nowrap;width:1%}
+details.loesung tr.erg td{background:var(--ok-bg)}details.loesung tr.erg td:last-child{font-weight:700;color:var(--ok)}
+details.loesung tr:first-child td{border-top:0}
+:focus-visible{outline:3px solid var(--warn-bd);outline-offset:2px}
+@media(max-width:600px){header{padding:1.1rem 1.1rem 1rem}header h1{font-size:1.65rem}.h-deco{display:none}nav{padding:.5rem 1rem}.sum-body,.sum-header{padding-left:1rem;padding-right:1rem}}
+@media print{nav,#top-progress-bar{display:none}.sum-wrap,.card{break-inside:avoid;box-shadow:none}details.loesung>*{display:block}}
+</style>
+</head>
+<body>
+<div id="top-progress-bar"></div>
+<header>
+    <div class="h-deco">PE · IP · LS</div>
+    <div class="h-content">
+        <div class="h-badge">🔌 Unterrichtseinheiten 7–21</div>
+        <h1>MET — Lernübersicht</h1>
+        <p class="h-motto">Leitungen · Sicherungen · Schutzschalter · Fehlerarten · Schutzmaßnahmen · IP-Schutzarten · Schutzklassen</p>
+    </div>
+</header>
+<nav>
+    <span class="nav-label">Abschnitt</span><div class="nav-jump"><a href="#s1">1</a><a href="#s2">2</a><a href="#s3">3</a><a href="#s4">4</a><a href="#s5">5</a><a href="#s6">6</a><a href="#s7">7</a><a href="#s8">8</a><a href="#s9">9</a><a href="#s10">10</a><a href="#merker">Merker</a></div>
+    <div class="nav-right"><button class="btn btn-dm" id="dm-toggle" title="Dunkles Design">🌙</button></div>
+</nav>
+<main>
+<div class="sum-wrap" id="s1"><div class="sum-header"><span class="sum-num">1</span><span class="sum-title">Elektrische Leitungen – Grundlagen</span><span class="sum-note">UE 7–8</span></div><div class="sum-body md-out"><p><strong>Zwei Hauptgruppen:</strong></p>
+<ul><li><strong>Bewegliche Leitungen</strong> → für ortsveränderliche Verbraucher (müssen <em>immer</em> darüber angeschlossen werden)</li><li><strong>Leitungen für feste Verlegung</strong> → fast ausschließlich mit PVC-Isolierung; Nennspannung darf nie überschritten werden</li></ul>
+<p><strong>Genormte Querschnitte (mm²):</strong><br>0,5 / 0,75 / 1,5 / 2,5 / 4 / 6 / 10 / 16 / 25 / 35 / 50 / 70 / 95 / 120</p>
+<h3>Bewegliche Leitungen (Anschluss ortsveränderlicher Verbraucher)</h3>
+<div class="tbl-wrap"><table><tr><th>Typ</th><th>Kurzzeichen</th><th>Spannung</th><th>Adern</th><th>Verwendung</th></tr><tr><td>Zwillingsleitung</td><td>H03VH-Y</td><td>300/300 V</td><td>2</td><td>kleine Handapparate (z. B. Rasierer)</td></tr><tr><td>Leichte Kunststoffschlauchltg.</td><td>H03VV-F</td><td>300/300 V</td><td>2–3</td><td>geringe Beanspruchung, <em>nicht</em> für Kochgeräte</td></tr><tr><td>Mittlere Kunststoffschlauchltg.</td><td>H05VV-F</td><td>300/500 V</td><td>2–5</td><td>Waschmaschinen, Kühlschränke, Wärmegeräte</td></tr><tr><td>Gummischlauchleitung</td><td>H05RR-F</td><td>300/500 V</td><td>2–5</td><td>höhere Beanspruchung (Staubsauger, Lötkolben)</td></tr></table></div>
+<h3>Leitungen für feste Verlegung</h3>
+<div class="tbl-wrap"><table><tr><th>Typ</th><th>Kurzzeichen</th><th>Spannung</th><th>Verwendung</th></tr><tr><td>Kunststoffaderleitung</td><td>H07V-U/-R/-K</td><td>450/750 V</td><td>in Rohren, trockene Räume, Verteilung</td></tr><tr><td>Stegleitung</td><td>NYIF</td><td>230/400 V</td><td>nur trocken, in/unter Putz; nicht auf Holz/Metall, nicht im Bad</td></tr><tr><td>Mantelleitung</td><td>NYM</td><td>300/500 V</td><td>unter Putz, trocken/feucht/nass; <strong>nicht</strong> im Erdreich</td></tr></table></div>
+<h3>Bemessung beweglicher Leitungen</h3>
+<ul><li><strong>Kriterium 1:</strong> mechanische Beanspruchung</li><li><strong>Kriterium 2:</strong> Nennstrom des Verbrauchsgerätes</li><li><strong>Mindestquerschnitte (Festigkeit):</strong> Schlauchleitungen 0,75 mm² · leichte Schlauchltg. (≤3 A, ≤2 m) 0,5 mm² · vieladrige Steuerltg. (≥7 Adern) 0,1 mm²</li><li><strong>Nicht zu knapp bemessen!</strong> Bei zulässigem Dauerstrom: Oberfläche 60 °C (Gummi) / 70 °C (PVC)</li><li><strong>Kabeltrommel:</strong> wegen schlechter Kühlung <strong>abwickeln</strong>, nie mit vollem Strom belasten</li></ul>
+<p><strong>Höchstzulässige Dauerströme (Auswahl):</strong></p>
+<div class="tbl-wrap"><table><tr><th>Querschnitt</th><th>0,75</th><th>1</th><th>1,5</th><th>2,5</th><th>4</th><th>6 mm²</th></tr><tr><td>Haus-/Handgeräte (2 Adern)</td><td>6 A</td><td>10 A</td><td>16 A</td><td>20 A</td><td>25 A</td><td>–</td></tr><tr><td>Auf Flächen liegend</td><td>12 A</td><td>15 A</td><td>18 A</td><td>26 A</td><td>34 A</td><td>44 A</td></tr></table></div>
+<h3>Anschlussregeln (Stecker &amp; Verlängerung)</h3>
+<ul><li>Adern mit <strong>Aderendhülsen / Kabelschuhen</strong> sichern</li><li><strong>Schutzleiter (grün/gelb) immer länger</strong> lassen → reißt bei Zugbelastung zuletzt</li><li>Leitung <strong>zug-/schubentlastet und vor Knickung geschützt</strong></li><li>Verlängerungen: <strong>nie zwei Stecker</strong>, immer mit Schutzleiter</li><li>Drehstrom bis 32 A → <strong>fünfpolige CEE-Steckvorrichtung</strong>, Phasenfolge nie umkehren</li><li>Verboten: Zwischenstecker, Bananenstecker an Lampenfassungen, Mehrfachsteckdosen mit starr angebautem Stecker</li></ul></div></div>
+<div class="sum-wrap" id="s2"><div class="sum-header"><span class="sum-num">2</span><span class="sum-title">Bezeichnungen &amp; Normen – Typkurzzeichen nach HD 361</span><span class="sum-note">UE 9</span></div><div class="sum-body md-out"><p>Aufbau am Beispiel <strong>H05RR-F 3G2,5</strong>:</p>
+<div class="tbl-wrap"><table><tr><th>Stelle</th><th>Bedeutung</th><th>Beispiele</th></tr><tr><td>1. Kennzeichnung</td><td><strong>H</strong> = harmonisiert · <strong>A</strong> = nationaler Typ</td><td></td></tr><tr><td>2. Spannung U₀/U</td><td>01=100/100 · 03=300/300 · 05=300/500 · 07=450/750 V</td><td></td></tr><tr><td>3. Isolierwerkstoff</td><td><strong>V</strong>=PVC · <strong>R</strong>=EP-Gummi · <strong>S</strong>=Silikon · <strong>B</strong>=EP-Kautschuk · <strong>Z</strong>=Polyolefin</td><td></td></tr><tr><td>4. Mantelwerkstoff</td><td><strong>V</strong>=PVC · <strong>R</strong>=EP-Gummi · <strong>N</strong>=Polychloropren · <strong>T</strong>=Textil · <strong>J</strong>=Glasfaser · <strong>Q</strong>=Polyurethan</td><td></td></tr><tr><td>(Besonderheit)</td><td><strong>H</strong>=flach aufteilbar · <strong>H2</strong>=flach nicht aufteilbar</td><td></td></tr><tr><td>5. Leiterform</td><td><strong>-U</strong>=eindrähtig · <strong>-R</strong>=mehrdrähtig · <strong>-F</strong>=feindrähtig flexibel · <strong>-K</strong>=feindrähtig fest · <strong>-D/-E</strong>=Schweißltg. · <strong>-Y</strong>=Lahnlitze</td><td></td></tr><tr><td>6. Schutzleiter</td><td><strong>G</strong>=mit SL · <strong>X</strong>=ohne SL</td><td></td></tr><tr><td>7. Aderzahl + Querschnitt</td><td>z. B. 3 × 2,5 mm²</td><td></td></tr></table></div>
+<p><strong>Merksätze:</strong></p>
+<ul><li>U₀ = Spannung Leiter gegen Erde · U = Spannung zwischen den Adern (Systemspannung bei Drehstrom)</li><li><em>A05VV-U3×1,5</em> = nationaler Typ, 300/500 V, PVC, eindrähtig, 3 Adern, ohne SL, 1,5 mm²</li><li>Unterschied <em>U4G</em> vs. <em>R4X</em>: eindrähtig mit SL ↔ mehrdrähtig ohne SL</li></ul></div></div>
+<div class="sum-wrap" id="s3"><div class="sum-header"><span class="sum-num">3</span><span class="sum-title">Leitungsverlegung, Rohre, Steckdosen, Schalter</span><span class="sum-note">UE 11–12</span></div><div class="sum-body md-out"><h3>Verlegearten</h3>
+<p>in/unter Putz · in Rohren/Installationskanälen · Mantelleitungen/Kabel direkt</p>
+<h3>Installationszonen im Wohnbereich</h3>
+<ul><li>Leitungen <strong>immer senkrecht/waagrecht</strong> verlegen</li><li><strong>waagrecht:</strong> 15–45 cm unter Decke bzw. über Fußboden</li><li><strong>senkrecht:</strong> 10–30 cm neben Fenstern, Türen, Wandecken</li><li><strong>Vorzugsmaße:</strong> Schalter 105 cm · Steckdosen 30 cm (Küche/Arbeitsfläche 115 cm) über Fertigfußboden</li></ul>
+<h3>Leitungsverbindungen</h3>
+<ul><li>Nur auf isolierender Unterlage (Schraubklemmen, Pressverbinder, Löten, Schweißen)</li><li>In Rohren/Kanälen <strong>nur in Dosen/Kästen</strong>; lösbare Verbindungen müssen zugänglich bleiben</li></ul>
+<h3>Rohre</h3>
+<ul><li>Schützen Leitungen gegen mechanische Beschädigung</li><li><strong>Aderleitungen müssen immer in Schutzrohren</strong> liegen</li></ul>
+<h3>Aderkennzeichnung (Farben)</h3>
+<div class="tbl-wrap"><table><tr><th>Farbe</th><th>Verwendung</th></tr><tr><td><strong>Grün/Gelb</strong></td><td>ausschließlich Schutzleiter (PE/PEN); PEN-Enden zusätzlich dauerhaft <strong>blau</strong> markieren</td></tr><tr><td><strong>Blau (hellblau)</strong></td><td>Neutralleiter</td></tr><tr><td><strong>Braun / Schwarz / Grau</strong></td><td>Außenleiter L1 / L2 / L3</td></tr></table></div>
+<h3>Steckvorrichtungen – Beschriftung</h3>
+<ul><li><strong>10/250</strong> → Gleich-/Wechselstrom bis 250 V / 10 A</li><li><strong>16/250~</strong> → nur Wechselstrom bis 16 A / 250 V</li><li><strong>10/16 A 250 V</strong> → 10 A Gleichstrom <em>oder</em> 16 A Wechselstrom</li><li>CEE-Drehstromsteckdose von vorne: Phasenfolge im <strong>Uhrzeigersinn</strong></li></ul>
+<h3>Schalterarten</h3>
+<div class="tbl-wrap"><table><tr><th>Schalter</th><th>Eigenschaft</th></tr><tr><td><strong>Leerschalter (Trenner)</strong></td><td>führt Bemessungsstrom dauernd, schaltet nur Bruchteil</td></tr><tr><td><strong>Lastschalter</strong></td><td>führt <strong>und</strong> schaltet Bemessungsstrom</td></tr><tr><td><strong>Leistungsschalter</strong></td><td>führt + schaltet Vielfaches aus (z. B. LS-Schalter)</td></tr></table></div>
+<ul><li>Einpolige Schalter <strong>nur im nicht geerdeten Leiter</strong></li><li>Lichtbogen entsteht beim Öffnen; bei induktiven Lasten &amp; Gleichstrom besonders stark → spezielle Schalter</li><li>Beschriftung <strong>32(16)/~250</strong>: Klammer = Bemessungsstrom für Motorlast (16 A), 32 A für Widerstandslast</li></ul></div></div>
+<div class="sum-wrap" id="s4"><div class="sum-header"><span class="sum-num">4</span><span class="sum-title">Schmelzsicherungen</span><span class="sum-note">UE 13</span></div><div class="sum-body md-out"><p>Schützen Leitungen/Betriebsmittel vor <strong>Überlast</strong> (zu hohe Stromaufnahme) und <strong>Kurzschluss</strong> (Isolationsfehler).<br><strong>Niemals flicken oder überbrücken!</strong></p>
+<h3>Bauarten</h3>
+<ul><li><strong>Stöpselsicherungen:</strong> DIAZED (älteres D-System) · NEOZED (neueres, platzsparendes D0-System)</li><li><strong>Unverwechselbarkeit</strong> durch Passeinsatz/Passschraube → verhindert Einsatz höherer Werte</li><li>Schmelzeinsatz: Porzellan-Hohlkörper mit <strong>Quarzsand</strong> (Funkenlöschung), <strong>Kennmelder</strong> zeigt Auslösen</li><li><strong>NH-Sicherung</strong> (Niederspannungs-Hochleistung): 2 A bis &gt;1250 A; nur durch Fachkräfte mit <strong>Aufsteckgriff, Helm, Gesichtsschutz</strong> wechseln (ÖVE/ÖNORM E 8689)</li><li><strong>G-Sicherung</strong> (Geräteschutz): 0,032–20 A, 250 V, z. B. 5×20 mm, für Elektronik/Netzteile</li></ul>
+<h3>Abschaltcharakteristik (G-Sicherungen)</h3>
+<p><strong>FF</strong> superflink · <strong>F</strong> flink · <strong>M</strong> mittelträge · <strong>T</strong> träge · <strong>TT</strong> superträge<br>→ Beispiel <strong>T 0,1/250</strong> = träge, 0,1 A, 250 V</p>
+<h3>Betriebsklassen (NH/gG)</h3>
+<ul><li><strong>gG</strong> allgemeine Verwendung (früher gL) · <strong>gM</strong> Motoren · <strong>gR</strong> Halbleiter · <strong>gTr</strong> Transformator · <strong>aM/aR</strong> Teilbereichsschutz</li></ul></div></div>
+<div class="sum-wrap" id="s5"><div class="sum-header"><span class="sum-num">5</span><span class="sum-title">Schutzschalter</span><span class="sum-note">UE 15–18</span></div><div class="sum-body md-out"><p>Trennen Verbraucher selbständig vom Netz bei Überlast, Kurzschluss oder gefährlicher Berührungsspannung.<br><strong>Freiauslösung:</strong> Abschaltung lässt sich durch Festhalten des Knebels nicht verhindern.</p>
+<h3>Auslösesysteme</h3>
+<ul><li><strong>Thermischer Auslöser</strong> → Überlast; <strong>Bimetall</strong> (zwei Metalle mit unterschiedl. Ausdehnung) biegt sich, verzögert</li><li><strong>Elektromagnetischer Auslöser</strong> → Kurzschluss; Spule + <strong>Schlaganker</strong> entklinkt sofort</li></ul>
+<h3>Auslösegrenzen</h3>
+<div class="tbl-wrap"><table><tr><th>Strom</th><th>Wert</th><th>Wirkung</th></tr><tr><td>Nichtauslösestrom</td><td>I_N × 1,13</td><td>löst <strong>nie</strong> aus</td></tr><tr><td>therm. Auslösestrom</td><td>I_N × 1,45</td><td>≤ 1 h</td></tr><tr><td>elektromag. Auslösestrom</td><td>I_N × 5 (Typ B)</td><td>≤ 0,1 s</td></tr></table></div>
+<h3>Leitungsschutzschalter (LSS) – Typen</h3>
+<div class="tbl-wrap"><table><tr><th>Typ</th><th>Auslösung</th><th>Anwendung</th></tr><tr><td><strong>B</strong></td><td><strong>3–5fach</strong></td><td>allgemein, Beleuchtung, Haushalt</td></tr><tr><td><strong>C</strong></td><td><strong>5–10fach</strong></td><td>Motoren, Handwerkzeug, hohe Anlaufströme</td></tr><tr><td><strong>D</strong></td><td><strong>10–20fach</strong></td><td>Trafos, Sondergeräte, hohe Stromspitzen</td></tr></table></div>
+<p><em>Merke: C13 → Motor · B16 → allgemein</em></p>
+<p><strong>Auslösekennlinie lesen:</strong> n-facher Bemessungsstrom = I_p / I_N<br>→ ta1 = frühestmögliches, ta2 = sicheres Auslösen<br>(Beispiel B16 A bei I_p = 32 A → n = 2 → ta1 ≈ 20 s, ta2 ≈ 3 min)</p>
+<h3>Motorschutzschalter</h3>
+<ul><li>Motoren ziehen bei Überlast / Ausfall eines Außenleiters mehr Strom → können zerstört werden</li><li>Schalten <strong>allpolig</strong>, Schutz gegen Nichtanlauf, Überlast, Spannungsausfall, Phasenausfall</li><li>Bemessungsstrom <strong>einstellbar</strong> (z. B. 3,1/1,8 A)</li><li>Schutz mit <strong>Kaltleiter (PTC)</strong> im Motor: Widerstand steigt steil bei Ansprechtemperatur</li><li>⚠️ Schützt <strong>nur das Betriebsmittel</strong> → zusätzlicher <strong>Leitungs-/Kurzschlussschutz</strong> (Sicherung/LS-Schalter) erforderlich</li></ul></div></div>
+<div class="sum-wrap" id="s6"><div class="sum-header"><span class="sum-num">6</span><span class="sum-title">Fehlerarten in elektrischen Anlagen</span><span class="sum-note">UE 19</span></div><div class="sum-body md-out"><div class="tbl-wrap"><table><tr><th>Fehler</th><th>Definition</th></tr><tr><td><strong>Körperschluss</strong></td><td>leitende Verbindung zwischen Gehäuse und aktiven Teilen</td></tr><tr><td><strong>Kurzschluss</strong></td><td>Verbindung zwischen spannungsführenden Teilen, <strong>kein</strong> Nutzwiderstand</td></tr><tr><td><strong>Leiterschluss</strong></td><td>Verbindung zwischen Leitern <strong>mit</strong> Nutzwiderstand im Fehlerkreis</td></tr><tr><td><strong>Erdschluss</strong></td><td>Verbindung aktiver Leiter / N mit Erde oder geerdeten Teilen</td></tr></table></div>
+<ul><li><strong>Direktes Berühren:</strong> Kontakt mit aktiven Teilen direkt</li><li><strong>Indirektes Berühren:</strong> Kontakt über Körperschluss (Gehäuse)</li><li><strong>Fehlerspannung U_F = I_F × R_A</strong> → bei Isolationsfehler zwischen leitfähigem Teil und Bezugserde</li><li><strong>Berührungsspannung U_T</strong> → liegt am Körper, wenn er durchflossen wird (gilt auch für Nutztiere)</li><li>Stromwirkung auf Körper: Bereiche <strong>AC-1 bis AC-4</strong> (Einwirkdauer × Stromstärke)</li></ul></div></div>
+<div class="sum-wrap" id="s7"><div class="sum-header"><span class="sum-num">7</span><span class="sum-title">Schutzleiter</span><span class="sum-note">UE 19</span></div><div class="sum-body md-out"><ul><li>Leiter zur Sicherheit gegen elektrischen Schlag, mit Erde verbunden → <strong>Schutzerdungsleiter / PE-Leiter</strong></li><li>Verhindert bei Körperschluss eine gefährliche Fehlerspannung</li><li><strong>Abkürzung PE · Farbe grün/gelb · Erdungssymbol</strong></li><li>⚠️ Darf <strong>niemals abgesichert, geschaltet oder unterbrochen</strong> werden – Verwechseln = Lebensgefahr!</li></ul>
+<p><strong>Mindestquerschnitt Schutzerdungsleiter:</strong></p>
+<div class="tbl-wrap"><table><tr><th>Außenleiter</th><th>PE mindestens</th></tr><tr><td>bis 16 mm²</td><td>= wie Außenleiter</td></tr><tr><td>25 &amp; 35 mm²</td><td>16 mm²</td></tr><tr><td>über 35 mm²</td><td>halber Außenleiterquerschnitt</td></tr></table></div></div></div>
+<div class="sum-wrap" id="s8"><div class="sum-header"><span class="sum-num">8</span><span class="sum-title">Schutzmaßnahmen gegen elektrischen Schlag</span><span class="sum-note">UE 21</span></div><div class="sum-body md-out"><p>Jede Schutzmaßnahme = <strong>a) Basisschutz UND b) Fehlerschutz</strong> <em>oder</em> <strong>verstärkte Schutzvorkehrung</strong></p>
+<p><strong>Übersicht:</strong> Kleinspannung (SELV/PELV) · Automatische Abschaltung · Schutztrennung · Schutzisolierung</p>
+<h3>Basisschutz (gegen direktes Berühren)</h3>
+<p>a) Basisisolierung · b) Abdeckungen/Umhüllungen · c) Hindernisse · d) Anordnung außerhalb Handbereich</p>
+<h3>Schutzisolierung (Schutzklasse II)</h3>
+<ul><li>Basisisolierung <strong>+</strong> verstärkte Isolierung, <strong>kein Schutzleiter</strong></li><li>Arten: Vollisolierung (isolierstoffgekapselter Motor), Zwischenisolierung</li><li>Symbol: <strong>doppeltes Quadrat</strong> · Stecker: Euro-/Flachstecker</li></ul>
+<h3>Standortisolierung</h3>
+<ul><li>Fußboden + Handbereich isoliert → Person nicht gefährdet</li><li><strong>Nur zulässig bei ortsfesten Betriebsmitteln</strong></li></ul></div></div>
+<div class="sum-wrap" id="s9"><div class="sum-header"><span class="sum-num">9</span><span class="sum-title">Schutzarten IP</span><span class="sum-note">UE 20</span></div><div class="sum-body md-out"><p><strong>IP</strong> = International Protection, gefolgt von 2 Ziffern.</p>
+<h3>1. Ziffer – Fremdkörper-/Berührungsschutz</h3>
+<div class="tbl-wrap"><table><tr><th>Ziffer</th><th>Schutz</th></tr><tr><td>0</td><td>kein</td></tr><tr><td>1</td><td>≥ 50 mm (Handrücken)</td></tr><tr><td>2</td><td>≥ 12,5 mm (Finger)</td></tr><tr><td>3</td><td>≥ 2,5 mm (Werkzeug)</td></tr><tr><td>4</td><td>≥ 1 mm (Draht)</td></tr><tr><td>5</td><td>staubgeschützt</td></tr><tr><td>6</td><td>staubdicht, voller Berührungsschutz</td></tr></table></div>
+<h3>2. Ziffer – Wasserschutz</h3>
+<div class="tbl-wrap"><table><tr><th>Ziffer</th><th>Schutz</th></tr><tr><td>0</td><td>kein</td></tr><tr><td>1</td><td>senkrecht tropfend</td></tr><tr><td>2</td><td>tropfend (15° gekippt)</td></tr><tr><td>3</td><td>Sprühwasser (60°)</td></tr><tr><td>4</td><td>Spritzwasser allseitig</td></tr><tr><td>5</td><td>Strahlwasser (Düse)</td></tr><tr><td>6</td><td>starkes Strahlwasser / schwere See</td></tr><tr><td>7</td><td>Eintauchen (Druck/Zeit)</td></tr><tr><td>8</td><td>dauerndes Untertauchen</td></tr></table></div>
+<ul><li>Fehlende Angabe → <strong>X</strong> (z. B. IP X3, IP 3X)</li><li>Beispiele: <strong>IP40</strong> (Steckdose innen) · <strong>IP65</strong> (wasserdichte Außenleuchte)</li></ul></div></div>
+<div class="sum-wrap" id="s10"><div class="sum-header"><span class="sum-num">10</span><span class="sum-title">Schutzklassen</span><span class="sum-note">UE 20</span></div><div class="sum-body md-out"><div class="tbl-wrap"><table><tr><th>Klasse</th><th>Symbol</th><th>Merkmal</th><th>Beispiele</th></tr><tr><td><strong>SK I</strong></td><td>Erdungszeichen</td><td>Schutzleiteranschluss</td><td>Waschmaschine, E-Herd, Geschirrspüler, Bügeleisen</td></tr><tr><td><strong>SK II</strong></td><td>doppeltes Quadrat</td><td>Schutzisoliert, <strong>kein</strong> SL</td><td>Rasierer, Handwerkzeug, Radio/TV, Handlampen</td></tr><tr><td><strong>SK III</strong></td><td>drei Rauten</td><td>Kleinspannung (SELV/PELV), <strong>kein</strong> SL</td><td>Kinderspielzeug, med. Geräte, Fassleuchten</td></tr></table></div></div></div>
+<div class="sum-wrap" id="merker"><div class="sum-header"><span class="sum-title">Schnell-Merker fürs Prüfungsgedächtnis</span><span class="sum-note">Kurz und knapp</span></div><div class="sum-body md-out"><ul><li>Schutzleiter = <strong>grün/gelb</strong>, niemals unterbrechen</li><li>LS-Typen: <strong>B 3–5× · C 5–10× · D 10–20×</strong></li><li>Auslösung: 1,13× nie · 1,45× ≤1 h · 5× ≤0,1 s</li><li>NH-Sicherung nur mit Aufsteckgriff + Schutzausrüstung</li><li>Motorschutzschalter schützt <strong>Motor</strong>, nicht die Leitung</li><li>IP: 1. Ziffer = fest (Fremdkörper), 2. Ziffer = flüssig (Wasser)</li></ul></div></div>
+
+</main>
+<script>
+window.addEventListener('scroll',function(){var sh=document.documentElement.scrollHeight-window.innerHeight;
+  document.getElementById('top-progress-bar').style.width=(sh>0?window.scrollY/sh*100:0)+'%';});
+(function(){var btn=document.getElementById('dm-toggle');
+  function apply(d){document.body.classList.toggle('dark',d);btn.textContent=d?'☀️':'🌙';try{localStorage.setItem('lern-seite-theme',d?'dark':'light')}catch(e){}}
+  var s=null;try{s=localStorage.getItem('lern-seite-theme')}catch(e){}
+  apply(s==='dark'||(!s&&window.matchMedia('(prefers-color-scheme: dark)').matches));
+  btn.addEventListener('click',function(){apply(!document.body.classList.contains('dark'))});
+  var all=document.getElementById('sol-toggle');
+  if(all)all.addEventListener('click',function(){var ds=[].slice.call(document.querySelectorAll('details.loesung'));
+    var open=ds.some(function(d){return !d.open});ds.forEach(function(d){d.open=open});all.textContent=open?'Alle Lösungen schließen':'Alle Lösungen zeigen';});
+})();
+</script>
+<script src="../../shared/hub.js"></script>
+</body>
+</html>

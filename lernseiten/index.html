@@ -214,7 +214,7 @@ var store = { get: function (k, d) { try { return JSON.parse(localStorage.getIte
 var fach = {}, seite = {};
 D.faecher.forEach(function (f) { fach[f.id] = f; f.seiten.forEach(function (s) { seite[s.datei] = { s: s, f: f }; }); });
 var fc = function (f) { return 'style="--fc-l:' + f.farbe + ';--fc-d:' + f.farbeDunkel + '"'; };
-D.sektionen.forEach(function (x) { x.H = fold(x.h); x.K = fold(x.k || ''); x.T = fold(x.t); });
+D.sektionen.forEach(function (x) { x.H = fold(x.h); x.K = fold((x.k || '') + ' ' + seite[x.d].s.titel + ' ' + seite[x.d].f.name); x.T = fold(x.t); });
 
 function link(x, q) {
     var j = { q: q || '', at: x.h, k: x.k || '' };

@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AEE2 – Merksätze & Eselsbrücken</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/3.2.2/es5/tex-mml-chtml.min.js"></script>
+<style>
+:root{
+  --blue-50:#E6F1FB;--blue-100:#B5D4F4;--blue-600:#185FA5;--blue-800:#0C447C;--blue-900:#042C53;
+  --teal-50:#E1F5EE;--teal-100:#9FE1CB;--teal-600:#0F6E56;--teal-800:#085041;
+  --amber-50:#FAEEDA;--amber-100:#FAC775;--amber-600:#854F0B;--amber-800:#633806;
+  --purple-50:#EEEDFE;--purple-100:#CECBF6;--purple-600:#534AB7;--purple-800:#3C3489;
+  --coral-50:#FAECE7;--coral-100:#F5C4B3;--coral-600:#993C1D;--coral-800:#712B13;
+  --green-50:#EAF3DE;--green-100:#C0DD97;--green-600:#3B6D11;--green-800:#27500A;
+  --gray-50:#F1EFE8;--gray-100:#D3D1C7;--gray-600:#5F5E5A;--gray-800:#444441;
+  --text:#1a1a18;--text2:#5a5a56;--bg:#fff;--border:rgba(0,0,0,0.1);
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:Arial,Helvetica,sans-serif;background:#f5f4f0;color:var(--text);line-height:1.55;font-size:14px;}
+.doc-header{background:var(--blue-900);color:#fff;padding:1.8rem 2rem 1.3rem;border-bottom:4px solid var(--amber-100);}
+.doc-header h1{font-size:22px;font-weight:700;margin-bottom:4px;}
+.doc-header p{font-size:13px;color:var(--blue-100);}
+.grid{max-width:920px;margin:0 auto;padding:1.4rem 1.2rem 4rem;display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:14px;}
+.card{background:#fff;border:0.5px solid var(--border);border-radius:10px;overflow:hidden;}
+.card-head{padding:10px 16px;font-size:14px;font-weight:700;display:flex;align-items:center;gap:8px;}
+.ch-purple{background:var(--purple-50);color:var(--purple-800);border-bottom:0.5px solid var(--purple-100);}
+.ch-teal{background:var(--teal-50);color:var(--teal-800);border-bottom:0.5px solid var(--teal-100);}
+.ch-amber{background:var(--amber-50);color:var(--amber-800);border-bottom:0.5px solid var(--amber-100);}
+.ch-blue{background:var(--blue-50);color:var(--blue-800);border-bottom:0.5px solid var(--blue-100);}
+.ch-coral{background:var(--coral-50);color:var(--coral-800);border-bottom:0.5px solid var(--coral-100);}
+.ch-green{background:var(--green-50);color:var(--green-800);border-bottom:0.5px solid var(--green-100);}
+.card-body{padding:14px 16px;}
+.quote{font-size:15px;font-weight:700;font-style:italic;margin-bottom:6px;line-height:1.4;}
+.q-purple{color:var(--purple-600);}.q-teal{color:var(--teal-600);}.q-amber{color:var(--amber-600);}
+.q-blue{color:var(--blue-600);}.q-coral{color:var(--coral-600);}.q-green{color:var(--green-600);}
+.explain{font-size:13px;color:var(--text2);margin-bottom:10px;}
+.explain:last-child{margin-bottom:0;}
+.explain strong{color:var(--text);}
+.divider{height:0.5px;background:var(--border);margin:10px 0;}
+.big-letters{font-size:20px;font-weight:700;letter-spacing:0.06em;margin:4px 0 8px;}
+.bl-purple{color:var(--purple-600);}.bl-teal{color:var(--teal-600);}
+.formula-mini{background:var(--gray-50);border-radius:5px;padding:5px 10px;font-size:14px;text-align:center;margin:6px 0;}
+.tag{display:inline-block;font-size:11px;font-weight:700;padding:2px 8px;border-radius:10px;margin-left:auto;}
+.t-test{background:var(--coral-100);color:var(--coral-800);}
+@media(max-width:600px){.grid{grid-template-columns:1fr;padding:1rem 0.8rem 3rem;}.doc-header{padding:1.3rem 1.1rem;}}
+</style>
+</head>
+<body>
+
+<div class="doc-header">
+  <h1>AEE2 – Merksätze &amp; Eselsbrücken</h1>
+  <p>Kompaktkarte zum Auswendiglernen · Wechselstromtechnik</p>
+</div>
+
+<div class="grid">
+
+  <div class="card">
+    <div class="card-head ch-purple"><span>⚡ Phasenverschiebung L &amp; C</span></div>
+    <div class="card-body">
+      <div class="big-letters bl-purple">ELI &nbsp;·&nbsp; ICE</div>
+      <div class="explain"><strong>E–L–I:</strong> Bei der Spule (L) kommt die Spannung E vor dem Strom I → Spannung eilt vor.</div>
+      <div class="explain"><strong>I–C–E:</strong> Beim Kondensator (C) kommt der Strom I vor der Spannung E → Strom eilt vor.</div>
+      <div class="divider"></div>
+      <div class="quote q-purple">„Bei der Induktivität kommt der Strom zu spät."</div>
+      <div class="explain">Spule: erst Spannung, dann baut sich der Strom auf (Magnetfeld). \(\varphi = 90°\)</div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-head ch-teal"><span>📈 X_L und X_C</span></div>
+    <div class="card-body">
+      <div class="quote q-teal">„Die Spule Sperrt bei Speed."</div>
+      <div class="explain">\(X_L = \omega L\) — beides „S": je höher die Frequenz, desto größer X_L (Spule bremst mehr).</div>
+      <div class="divider"></div>
+      <div class="quote q-teal">„Der Kondensator lässt bei hoher Frequenz durch."</div>
+      <div class="explain">\(X_C = \frac{1}{\omega C}\) — sinkt mit steigender Frequenz, genau gegenläufig.</div>
+      <div class="explain"><strong>Bild:</strong> Spule = Tiefpass, Kondensator = Hochpass.</div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-head ch-amber"><span>🔢 Effektiv ↔ Scheitel</span></div>
+    <div class="card-body">
+      <div class="quote q-amber">„Effektiv ist immer kleiner."</div>
+      <div class="explain">Vom Scheitel runter zum Effektiv: <strong>teilen</strong> durch \(\sqrt{2}\).<br>Vom Effektiv rauf zum Scheitel: <strong>mal</strong> \(\sqrt{2}\).</div>
+      <div class="formula-mini">\( 230\,\text{V} \xrightarrow{\;\times\sqrt2\;} 325\,\text{V} \)</div>
+      <div class="explain">Diese Merkzahl behalten — dann weißt du immer die Richtung.</div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-head ch-green"><span>💡 Leistung P · Q · S</span></div>
+    <div class="card-body">
+      <div class="quote q-green">„P wie Power – die echte Leistung."</div>
+      <div class="explain">Wirkleistung, nutzbar, Einheit Watt (W).</div>
+      <div class="divider"></div>
+      <div class="quote q-green">„Q pendelt nur."</div>
+      <div class="explain">Blindleistung pendelt hin und her, bringt nichts. Einheit <strong>var</strong>.</div>
+      <div class="divider"></div>
+      <div class="quote q-green">„S wie Schein."</div>
+      <div class="explain">Scheinbare Gesamtleistung, Einheit VA. PQS-Dreieck = RXZ-Dreieck!</div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-head ch-blue"><span>🔥 Wann ist P = 0?</span></div>
+    <div class="card-body">
+      <div class="quote q-blue">„Nur der Ohmsche macht Arbeit."</div>
+      <div class="explain">Reine Spule und reiner Kondensator: \(P = 0\) (weil \(\cos 90° = 0\)). Nur R erzeugt echte Wärme/Leistung.</div>
+      <div class="formula-mini">\( P = U\cdot I\cdot\cos\varphi \)</div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-head ch-coral"><span>🧲 Induktion &amp; Trafo <span class="tag t-test">Test!</span></span></div>
+    <div class="card-body">
+      <div class="quote q-coral">„Kein Wechsel, keine Induktion."</div>
+      <div class="explain">Ein Trafo braucht eine <strong>Änderung</strong> des Flusses. Gleichspannung → keine Spannung auf der Sekundärseite.</div>
+      <div class="divider"></div>
+      <div class="quote q-coral">„Schneller = mehr Spannung."</div>
+      <div class="explain">Je schneller die Bewegung im Magnetfeld, desto höher die induzierte Spannung. (Deine F-Aufgabe im Test!)</div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-head ch-amber"><span>🔌 Gleichstrom-Schaltungen</span></div>
+    <div class="card-body">
+      <div class="quote q-amber">„Serie teilt Spannung, parallel teilt Strom."</div>
+      <div class="explain">Serienschaltung = Spannungsteiler · Parallelschaltung = Stromteiler.</div>
+      <div class="divider"></div>
+      <div class="quote q-amber">„Reihe rauf, parallel runter."</div>
+      <div class="explain">Mehr R in Reihe → Gesamtwiderstand rauf (Strom runter).<br>Mehr R parallel → Gesamtwiderstand runter (Strom rauf).</div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-head ch-blue"><span>△ Das URI-Dreieck</span></div>
+    <div class="card-body">
+      <div class="explain">Dreieck mit <strong>U</strong> oben, <strong>R</strong> und <strong>I</strong> unten. Deck den gesuchten Wert ab → Formel erscheint:</div>
+      <div class="formula-mini">U → \(R\cdot I\) &nbsp;·&nbsp; R → \(\frac{U}{I}\) &nbsp;·&nbsp; I → \(\frac{U}{R}\)</div>
+      <div class="explain">Funktioniert auch im Wechselstrom mit Z statt R: \(U = Z\cdot I\).</div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-head ch-teal"><span>🔄 Kreisfrequenz &amp; Frequenz</span></div>
+    <div class="card-body">
+      <div class="quote q-teal">„Omega dreht im Kreis – 2π pro Umdrehung."</div>
+      <div class="explain">\(\omega = 2\pi\cdot f\) — die Winkelgeschwindigkeit des Zeigers. Eine volle Umdrehung = \(2\pi\).</div>
+      <div class="divider"></div>
+      <div class="quote q-teal">„Frequenz und Periode sind Kehrwerte."</div>
+      <div class="explain">\(f = \frac{1}{T}\) und \(T = \frac{1}{f}\). Bei 50 Hz → T = 20 ms.</div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-head ch-coral"><span>△ Impedanz Z</span></div>
+    <div class="card-body">
+      <div class="quote q-coral">„Impedanz ist die Hypotenuse."</div>
+      <div class="explain">R und X kann man nicht einfach addieren (90° versetzt) → Pythagoras:</div>
+      <div class="formula-mini">\( Z = \sqrt{R^2 + X^2} \)</div>
+      <div class="explain">R = Ankathete, X = Gegenkathete, Z = Hypotenuse. Genau wie das Leistungsdreieck (P, Q, S).</div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-head ch-purple"><span>📐 Phasenwinkel φ</span></div>
+    <div class="card-body">
+      <div class="quote q-purple">„Winkel über Gegen durch An."</div>
+      <div class="explain">\(\tan\varphi = \frac{X}{R}\) → also \(\varphi = \arctan\!\frac{X}{R}\) (am TI-34: TRIG → tan⁻¹, DEG-Modus).</div>
+      <div class="formula-mini">\( \tan 45° = 1,\quad \tan 60° \approx 1,73 \)</div>
+      <div class="explain">Zur Kontrolle: \(X/R = 1\) → \(\varphi = 45°\).</div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-head ch-blue"><span>〰️ Wellenlänge λ</span></div>
+    <div class="card-body">
+      <div class="quote q-blue">„Lange Welle = kleine Frequenz."</div>
+      <div class="explain">\(\lambda = \frac{c}{f}\) — je höher die Frequenz, desto kürzer die Welle.</div>
+      <div class="formula-mini">\( c_0 = 3\cdot 10^{8}\ \text{m/s} \)</div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-head ch-green"><span>💡 PQS-Dreieck (Formeln)</span></div>
+    <div class="card-body">
+      <div class="explain">Die drei Leistungen bilden das gleiche Dreieck wie R-X-Z:</div>
+      <div class="formula-mini">\( P = U I\cos\varphi \quad Q = U I\sin\varphi \)</div>
+      <div class="formula-mini">\( S = U I = \sqrt{P^2 + Q^2} \)</div>
+      <div class="formula-mini">\( \cos\varphi = \frac{P}{S} = \frac{R}{Z} \)</div>
+    </div>
+  </div>
+
+</div>
+</body>
+</html>

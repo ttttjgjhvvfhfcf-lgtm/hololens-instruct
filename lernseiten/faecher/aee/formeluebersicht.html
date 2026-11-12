@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AEE2 — Formelübersicht</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/3.2.2/es5/tex-mml-chtml.min.js"></script>
+<style>
+:root { --primary:#1d4ed8; --primary-light:#2563eb; --bg:#eff6ff; --soft:#eff6ff; --soft2:#dbeafe; --border:#dbeafe; --h1:#1e40af; --h2:#2563eb;
+  --card:#ffffff; --text:#0f172a; --muted:#64748b; --ok:#047857; --ok-bg:#ecfdf5;
+  --warn-bg:#fffbeb; --warn-bd:#d97706; --warn-tx:#92400e; --dot:rgba(148,163,184,0.22);
+  --shadow-sm:0 2px 8px rgba(15,23,42,0.07),0 1px 3px rgba(15,23,42,0.04); --radius:16px; --radius-sm:10px; }
+body.dark { --primary:#60a5fa; --primary-light:#93c5fd; --bg:#050d1a; --soft:#091524; --soft2:#060f1e; --border:#1a2d4a; --h1:#030a1a; --h2:#1e40af;
+  --card:#0f1626; --text:#e2e8f0; --muted:#94a3b8; --ok:#34d399; --ok-bg:#052e22;
+  --warn-bg:#1a0f00; --warn-bd:#d97706; --warn-tx:#fbbf24; --dot:rgba(51,65,85,0.6);
+  --shadow-sm:0 2px 8px rgba(0,0,0,0.35); color-scheme:dark; }
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Inter',-apple-system,BlinkMacSystemFont,system-ui,sans-serif;background:var(--bg);
+  background-image:radial-gradient(circle,var(--dot) 0.85px,transparent 0.85px);background-size:22px 22px;
+  color:var(--text);min-height:100vh;font-size:15px;line-height:1.57}
+#top-progress-bar{position:fixed;top:0;left:0;height:3px;width:0%;background:var(--primary-light);z-index:9999;pointer-events:none}
+header{background:linear-gradient(135deg,var(--h1) 0%,var(--h2) 100%);color:#fff;padding:1.25rem 2.5rem 1.1rem;position:relative;overflow:hidden}
+.h-deco{position:absolute;right:2.5rem;top:50%;transform:translateY(-50%);font-size:3.5rem;opacity:.08;font-style:italic;user-select:none;white-space:nowrap}
+.h-content{position:relative}
+.h-badge{display:inline-flex;background:rgba(255,255,255,.11);border:1px solid rgba(255,255,255,.18);padding:.3rem .95rem;border-radius:999px;font-size:.75rem;font-weight:600;margin-bottom:.85rem}
+header h1{font-size:2.3rem;font-weight:800;letter-spacing:-.75px;line-height:1.15;margin-bottom:.35rem}
+.h-motto{font-size:.92rem;font-style:italic;color:rgba(255,255,255,.78);max-width:46rem}
+nav{background:var(--card);border-bottom:1px solid var(--border);padding:.55rem 1.75rem;display:flex;flex-wrap:wrap;align-items:center;gap:.6rem;position:sticky;top:0;z-index:50;box-shadow:0 1px 14px rgba(15,23,42,.07)}
+.nav-label{font-size:.72rem;font-weight:600;text-transform:uppercase;letter-spacing:.06em;color:var(--muted)}
+.nav-jump{display:flex;flex-wrap:wrap;gap:.3rem}
+.nav-jump a{font:600 .75rem 'JetBrains Mono',monospace;color:var(--primary);text-decoration:none;padding:.2rem .5rem;border-radius:7px;border:1px solid var(--border);background:var(--soft)}
+.nav-jump a:hover{background:var(--soft2)}
+.btn{display:inline-flex;align-items:center;padding:.33rem .7rem;border-radius:9px;font:500 .78rem Inter,sans-serif;cursor:pointer;background:var(--soft);color:var(--text);border:1px solid var(--border)}
+.btn:hover{background:var(--soft2)}
+.btn-dm{margin-left:auto;font-size:1.05rem;line-height:1}
+.nav-right{margin-left:auto;display:flex;gap:.5rem}.nav-right .btn-dm{margin-left:0}
+main{max-width:900px;margin:0 auto;padding:1.75rem 1.25rem 4rem}
+.sum-wrap{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);margin-bottom:1.5rem;box-shadow:var(--shadow-sm);scroll-margin-top:70px;overflow:hidden}
+.sum-header{display:flex;align-items:center;gap:.75rem;flex-wrap:wrap;padding:.9rem 1.5rem;background:linear-gradient(135deg,var(--soft),var(--soft2));border-bottom:1px solid var(--border)}
+.sum-num{font:600 .72rem 'JetBrains Mono',monospace;background:var(--primary);color:var(--card);padding:.2rem .6rem;border-radius:999px;white-space:nowrap}
+.sum-title{font-weight:700;font-size:1.05rem;flex:1;min-width:10rem}
+.sum-note{font-size:.72rem;font-weight:600;color:var(--primary);border:1px solid var(--border);background:var(--card);padding:.2rem .65rem;border-radius:999px;white-space:nowrap}
+.sum-body{padding:1.25rem 1.5rem 1.4rem}
+.md-out p{margin-bottom:.7rem}.md-out p:last-child{margin-bottom:0}
+.md-out ul{margin:.3rem 0 .8rem 1.3rem}.md-out li{margin-bottom:.3rem}
+.md-out strong{color:var(--primary)}
+.md-out h3{font-size:.95rem;font-weight:700;color:var(--primary);margin:1.2rem 0 .5rem;padding-bottom:.3rem;border-bottom:1px solid var(--border);scroll-margin-top:70px}
+.md-out h3:first-child{margin-top:0}
+.tbl-wrap{overflow-x:auto;margin:.5rem 0 1rem}
+table{border-collapse:collapse;width:100%;font-size:.9rem}
+th{text-align:left;background:var(--soft);color:var(--primary);padding:.5rem .8rem;border-bottom:2px solid var(--border);white-space:nowrap}
+td{padding:.5rem .8rem;border-top:1px solid var(--border);vertical-align:top}
+td.math{font-size:1rem}
+.formula-box,.formula-mini{background:var(--soft);border-left:4px solid var(--primary-light);border-radius:0 var(--radius-sm) var(--radius-sm) 0;padding:.6rem 1rem;margin:.5rem 0 .8rem;overflow-x:auto}
+.formula-box{font:500 .88rem/1.9 'JetBrains Mono',monospace}
+.notice-box,.info-box{background:var(--warn-bg);border-left:4px solid var(--warn-bd);border-radius:0 var(--radius-sm) var(--radius-sm) 0;padding:.7rem 1rem;margin:.6rem 0 1rem;font-size:.9rem}
+.notice-box strong,.info-box strong{color:var(--warn-tx)}
+/* Formelkarten */
+.formula-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:.7rem;margin:.5rem 0 1rem}
+.fcard{background:var(--soft);border:1px solid var(--border);border-radius:var(--radius-sm);padding:.7rem .9rem;min-width:0;overflow-x:auto}
+.flabel{font-size:.74rem;font-weight:600;text-transform:uppercase;letter-spacing:.04em;color:var(--muted);margin-bottom:.3rem}
+.feq{font-size:1.02rem;text-align:center;padding:.2rem 0}
+.fnote{font-size:.76rem;color:var(--muted);margin-top:.3rem;font-style:italic}
+/* Merksatz-Karten */
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(270px,1fr));gap:1rem}
+.card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);box-shadow:var(--shadow-sm);overflow:hidden;min-width:0;scroll-margin-top:70px}
+.card-head{padding:.7rem 1.1rem;font-weight:700;font-size:.95rem;display:flex;align-items:center;gap:.5rem;background:linear-gradient(135deg,var(--soft),var(--soft2));border-bottom:1px solid var(--border)}
+.card-head>span{display:flex;align-items:center;gap:.5rem;flex:1}
+.card-body{padding:.9rem 1.1rem}
+.quote{font-size:1rem;font-weight:700;font-style:italic;color:var(--primary);margin-bottom:.35rem;line-height:1.4}
+.explain{font-size:.86rem;color:var(--muted);margin-bottom:.6rem}.explain:last-child{margin-bottom:0}
+.explain strong{color:var(--text)}
+.divider{height:1px;background:var(--border);margin:.7rem 0}
+.big-letters{font:700 1.3rem 'JetBrains Mono',monospace;letter-spacing:.06em;color:var(--primary);margin:.1rem 0 .5rem}
+.tag{margin-left:auto;font-size:.68rem;font-weight:700;padding:.12rem .55rem;border-radius:999px;background:var(--warn-bg);color:var(--warn-tx);border:1px solid var(--warn-bd)}
+/* Aufgaben mit aufklappbarer Lösung */
+.meta-row{display:flex;flex-wrap:wrap;gap:.6rem;margin-bottom:1rem}
+.meta-row div{background:var(--card);border:1px solid var(--border);border-radius:var(--radius-sm);padding:.5rem .9rem;font-size:.85rem;box-shadow:var(--shadow-sm)}
+.meta-row b{display:block;font-size:.68rem;text-transform:uppercase;letter-spacing:.06em;color:var(--muted)}
+details.loesung{margin-top:.9rem;border:1px solid var(--border);border-radius:var(--radius-sm);overflow:hidden}
+details.loesung summary{cursor:pointer;padding:.55rem .9rem;font-weight:600;font-size:.86rem;color:var(--primary);background:var(--soft);list-style-position:inside}
+details.loesung[open] summary{border-bottom:1px solid var(--border)}
+details.loesung .tbl-wrap{margin:0}
+details.loesung td:first-child{font-weight:600;color:var(--muted);white-space:nowrap;width:1%}
+details.loesung tr.erg td{background:var(--ok-bg)}details.loesung tr.erg td:last-child{font-weight:700;color:var(--ok)}
+details.loesung tr:first-child td{border-top:0}
+:focus-visible{outline:3px solid var(--warn-bd);outline-offset:2px}
+@media(max-width:600px){header{padding:1.1rem 1.1rem 1rem}header h1{font-size:1.65rem}.h-deco{display:none}nav{padding:.5rem 1rem}.sum-body,.sum-header{padding-left:1rem;padding-right:1rem}}
+@media print{nav,#top-progress-bar{display:none}.sum-wrap,.card{break-inside:avoid;box-shadow:none}details.loesung>*{display:block}}
+</style>
+</head>
+<body>
+<div id="top-progress-bar"></div>
+<header>
+    <div class="h-deco">Z = √(R² + X²)</div>
+    <div class="h-content">
+        <div class="h-badge">⚡ Wechselstromtechnik</div>
+        <h1>AEE2 — Formelübersicht</h1>
+        <p class="h-motto">Alle Formeln aus den Unterlagen: Kenngrößen, R, L, C, Impedanz, Leistung, Trigonometrie, Gleichstrom</p>
+    </div>
+</header>
+<nav>
+    <span class="nav-label">Abschnitt</span><div class="nav-jump"><a href="#s1">1</a><a href="#s2">2</a><a href="#s3">3</a><a href="#s4">4</a><a href="#s5">5</a><a href="#s6">6</a><a href="#s7">7</a><a href="#s8">8</a></div>
+    <div class="nav-right"><button class="btn btn-dm" id="dm-toggle" title="Dunkles Design">🌙</button></div>
+</nav>
+<main>
+
+
+<!-- 1 KENNGRÖSSEN -->
+<div class="sum-wrap" id="s1"><div class="sum-header"><span class="sum-num">1</span><span class="sum-title">Kenngrößen der Wechselspannung</span></div><div class="sum-body md-out">
+    <div class="tbl-wrap"><table>
+      <thead><tr><th>Kenngröße</th><th>Zeichen</th><th>Einheit</th><th>Formel</th></tr></thead>
+      <tbody>
+        <tr><td>Scheitelwert (Spitzenwert)</td><td class="math">\(\hat{u},\ \hat{i}\)</td><td>V, A</td><td class="math">\(\hat{u} = \sqrt{2}\cdot U_{\text{eff}}\)</td></tr>
+        <tr><td>Effektivwert</td><td class="math">\(U_{\text{eff}}\)</td><td>V, A</td><td class="math">\(U_{\text{eff}} = \dfrac{\hat{u}}{\sqrt{2}}\)</td></tr>
+        <tr><td>Periodendauer</td><td class="math">\(T\)</td><td>s</td><td class="math">\(T = \dfrac{1}{f}\)</td></tr>
+        <tr><td>Frequenz</td><td class="math">\(f\)</td><td>Hz</td><td class="math">\(f = \dfrac{1}{T}\)</td></tr>
+        <tr><td>Kreisfrequenz (Winkelgeschw.)</td><td class="math">\(\omega\)</td><td>rad/s</td><td class="math">\(\omega = 2\pi\cdot f\)</td></tr>
+        <tr><td>Winkel im Bogenmaß</td><td class="math">\(\varphi\)</td><td>rad</td><td class="math">\(\varphi = \omega\cdot t\)</td></tr>
+        <tr><td>Wellenlänge</td><td class="math">\(\lambda\)</td><td>m</td><td class="math">\(\lambda = \dfrac{c}{f}\)</td></tr>
+        <tr><td>Lichtgeschwindigkeit</td><td class="math">\(c\)</td><td>km/s</td><td class="math">\(c_0 = 3\cdot 10^{8}\ \text{m/s}\)</td></tr>
+      </tbody>
+    </table></div>
+    <h3>Momentanwert / Augenblickswert</h3>
+    <div class="formula-grid">
+      <div class="fcard"><div class="flabel">Spannung (RAD-Modus)</div><div class="feq">\( u(t) = \hat{u}\cdot\sin(\omega t) \)</div></div>
+      <div class="fcard"><div class="flabel">Strom (RAD-Modus)</div><div class="feq">\( i(t) = \hat{i}\cdot\sin(\omega t) \)</div></div>
+      <div class="fcard"><div class="flabel">Taschenrechner-Trick (DEG-Modus)</div><div class="feq">\( u = \hat{u}\cdot\sin(360°\cdot f\cdot t) \)</div></div>
+    </div>
+    <div class="info-box">Bogenmaß: \(360° = 2\pi\ \text{rad}\), \(180° = \pi\ \text{rad}\), \(90° = \dfrac{\pi}{2}\). Netz: \(U_{\text{eff}} = 230\,\text{V} \Rightarrow \hat{u}\approx 325\,\text{V}\), \(f = 50\,\text{Hz}\), \(T = 20\,\text{ms}\).</div>
+  </div>
+</div>
+
+<!-- 2 R -->
+<div class="sum-wrap" id="s2"><div class="sum-header"><span class="sum-num">2</span><span class="sum-title">Ohmscher Widerstand R</span></div><div class="sum-body md-out">
+    <div class="info-box">Phasenverschiebung \(\varphi = 0°\) — Strom und Spannung in Phase. Energie wird vollständig in Wärme umgesetzt (Wirkleistung).</div>
+    <div class="formula-grid">
+      <div class="fcard"><div class="flabel">Ohmsches Gesetz</div><div class="feq">\( U = R\cdot I \)</div></div>
+      <div class="fcard"><div class="flabel">Wirkleistung</div><div class="feq">\( P = U\cdot I = \dfrac{U^2}{R} = I^2\cdot R \)</div></div>
+      <div class="fcard"><div class="flabel">Mittlere Leistung = Gleichstromleistung</div><div class="feq">\( P_{\text{AC,mittel}} = P_{\text{DC}} \)</div></div>
+      <div class="fcard"><div class="flabel">Äquivalente Gleichspannung</div><div class="feq">\( U_{\text{DC}} = \sqrt{P_{\text{mittel}}\cdot R} \)</div></div>
+    </div>
+  </div>
+</div>
+
+<!-- 3 L -->
+<div class="sum-wrap" id="s3"><div class="sum-header"><span class="sum-num">3</span><span class="sum-title">Induktivität L (Spule)</span></div><div class="sum-body md-out">
+    <div class="info-box"><strong>Merksatz:</strong> „Bei der Induktivität kommt der Strom zu spät." Der Strom eilt der Spannung um 90° <strong>nach</strong> → \(\varphi = 90°\), \(\cos\varphi = 0\).</div>
+    <div class="formula-grid">
+      <div class="fcard"><div class="flabel">Induktiver Blindwiderstand</div><div class="feq">\( X_L = \omega\cdot L = 2\pi\cdot f\cdot L \)</div><div class="fnote">Einheit: Ω · steigt mit f</div></div>
+      <div class="fcard"><div class="flabel">Ohmsches Gesetz an der Spule</div><div class="feq">\( U_L = X_L\cdot I_L \)</div></div>
+      <div class="fcard"><div class="flabel">Wirkleistung (ideale Spule)</div><div class="feq">\( P = 0 \)</div><div class="fnote">nur Blindleistung Q [var]</div></div>
+    </div>
+    <h3>Schaltung von Induktivitäten</h3>
+    <div class="formula-grid">
+      <div class="fcard"><div class="flabel">Reihenschaltung</div><div class="feq">\( L_g = L_1 + L_2 \)</div></div>
+      <div class="fcard"><div class="flabel">Parallelschaltung</div><div class="feq">\( L_g = \dfrac{1}{\frac{1}{L_1}+\frac{1}{L_2}} \)</div></div>
+    </div>
+  </div>
+</div>
+
+<!-- 4 C -->
+<div class="sum-wrap" id="s4"><div class="sum-header"><span class="sum-num">4</span><span class="sum-title">Kapazität C (Kondensator)</span></div><div class="sum-body md-out">
+    <div class="info-box"><strong>Merksatz:</strong> „Beim Kondensator eilt der Strom vor." Der Strom eilt der Spannung um 90° <strong>vor</strong> → \(\varphi = 90°\), \(\cos\varphi = 0\).</div>
+    <div class="formula-grid">
+      <div class="fcard"><div class="flabel">Kapazitiver Blindwiderstand</div><div class="feq">\( X_C = \dfrac{1}{\omega\cdot C} = \dfrac{1}{2\pi\cdot f\cdot C} \)</div><div class="fnote">Einheit: Ω · sinkt mit f</div></div>
+      <div class="fcard"><div class="flabel">Ohmsches Gesetz am Kondensator</div><div class="feq">\( U_C = X_C\cdot I_C \)</div></div>
+      <div class="fcard"><div class="flabel">Wirkleistung (idealer Kondensator)</div><div class="feq">\( P = 0 \)</div><div class="fnote">nur Blindleistung Q [var]</div></div>
+    </div>
+    <h3>Schaltung von Kapazitäten</h3>
+    <div class="formula-grid">
+      <div class="fcard"><div class="flabel">Parallelschaltung</div><div class="feq">\( C_g = C_1 + C_2 \)</div></div>
+      <div class="fcard"><div class="flabel">Reihenschaltung</div><div class="feq">\( C_g = \dfrac{1}{\frac{1}{C_1}+\frac{1}{C_2}} \)</div></div>
+    </div>
+  </div>
+</div>
+
+<!-- 5 IMPEDANZ -->
+<div class="sum-wrap" id="s5"><div class="sum-header"><span class="sum-num">5</span><span class="sum-title">Impedanz Z &amp; Dreiecke</span></div><div class="sum-body md-out">
+    <div class="formula-grid">
+      <div class="fcard"><div class="flabel">Blindwiderstand gesamt</div><div class="feq">\( X = X_L - X_C \)</div></div>
+      <div class="fcard"><div class="flabel">Impedanz (Scheinwiderstand)</div><div class="feq">\( Z = \sqrt{R^2 + X^2} \)</div><div class="fnote">Einheit: Ω · nach Pythagoras</div></div>
+      <div class="fcard"><div class="flabel">Phasenwinkel</div><div class="feq">\( \varphi = \arctan\!\dfrac{X}{R} \)</div></div>
+      <div class="fcard"><div class="flabel">Ohmsches Gesetz</div><div class="feq">\( U = Z\cdot I \)</div></div>
+    </div>
+    <div class="info-box">Impedanz- und Leistungsdreieck sind gleich aufgebaut: <strong>R ↔ P</strong> (Ankathete), <strong>X ↔ Q</strong> (Gegenkathete), <strong>Z ↔ S</strong> (Hypotenuse).</div>
+  </div>
+</div>
+
+<!-- 6 LEISTUNG -->
+<div class="sum-wrap" id="s6"><div class="sum-header"><span class="sum-num">6</span><span class="sum-title">Leistung im Wechselstromkreis</span></div><div class="sum-body md-out">
+    <div class="formula-grid">
+      <div class="fcard"><div class="flabel">Wirkleistung</div><div class="feq">\( P = U\cdot I\cdot\cos\varphi \)</div><div class="fnote">Einheit: W (Watt)</div></div>
+      <div class="fcard"><div class="flabel">Blindleistung</div><div class="feq">\( Q = U\cdot I\cdot\sin\varphi \)</div><div class="fnote">Einheit: var</div></div>
+      <div class="fcard"><div class="flabel">Scheinleistung</div><div class="feq">\( S = U\cdot I = \sqrt{P^2 + Q^2} \)</div><div class="fnote">Einheit: VA</div></div>
+      <div class="fcard"><div class="flabel">Leistungsfaktor</div><div class="feq">\( \cos\varphi = \dfrac{P}{S} = \dfrac{R}{Z} \)</div></div>
+    </div>
+  </div>
+</div>
+
+<!-- 7 PYTHAGORAS -->
+<div class="sum-wrap" id="s7"><div class="sum-header"><span class="sum-num">7</span><span class="sum-title">Pythagoras &amp; Trigonometrie</span></div><div class="sum-body md-out">
+    <div class="formula-grid">
+      <div class="fcard"><div class="flabel">Satz des Pythagoras</div><div class="feq">\( a^2 + b^2 = c^2 \)</div></div>
+      <div class="fcard"><div class="flabel">Winkelsumme im Dreieck</div><div class="feq">\( \beta = 90° - \alpha \)</div></div>
+    </div>
+    <div class="formula-grid">
+      <div class="fcard"><div class="flabel">Sinus</div><div class="feq">\( \sin\alpha = \dfrac{GK}{HYP} \)</div></div>
+      <div class="fcard"><div class="flabel">Cosinus</div><div class="feq">\( \cos\alpha = \dfrac{AK}{HYP} \)</div></div>
+      <div class="fcard"><div class="flabel">Tangens</div><div class="feq">\( \tan\alpha = \dfrac{GK}{AK} \)</div></div>
+    </div>
+  </div>
+</div>
+
+<!-- 8 GLEICHSTROM -->
+<div class="sum-wrap" id="s8"><div class="sum-header"><span class="sum-num">8</span><span class="sum-title">Gleichstrom-Grundlagen (Wiederholung)</span></div><div class="sum-body md-out">
+    <div class="tbl-wrap"><table>
+      <thead><tr><th>Größe</th><th>Zeichen</th><th>Einheit</th><th>Beschreibung</th></tr></thead>
+      <tbody>
+        <tr><td>Spannung</td><td class="math">\(U\)</td><td>Volt (V)</td><td>Potentialunterschied</td></tr>
+        <tr><td>Strom</td><td class="math">\(I\)</td><td>Ampere (A)</td><td>Menge fließender Elektronen</td></tr>
+        <tr><td>Widerstand</td><td class="math">\(R\)</td><td>Ohm (Ω)</td><td>Hinderung des Stromflusses</td></tr>
+        <tr><td>Leistung</td><td class="math">\(P\)</td><td>Watt (W)</td><td>\(P = U\cdot I\)</td></tr>
+        <tr><td>Arbeit</td><td class="math">\(W\)</td><td>Joule (J)</td><td>\(W = P\cdot t\)</td></tr>
+      </tbody>
+    </table></div>
+    <div class="formula-grid">
+      <div class="fcard"><div class="flabel">Ohmsches Gesetz</div><div class="feq">\( U = R\cdot I \quad\Rightarrow\quad R = \dfrac{U}{I} \)</div></div>
+    </div>
+    <h3>Schaltungen</h3>
+    <div class="formula-grid">
+      <div class="fcard"><div class="flabel">Serienschaltung = Spannungsteiler</div><div class="feq">\( R_g = R_1 + R_2 + R_3 \)</div><div class="fnote">Strom überall gleich, Spannung teilt sich auf</div></div>
+      <div class="fcard"><div class="flabel">Parallelschaltung = Stromteiler</div><div class="feq">\( R_g = \dfrac{1}{\frac{1}{R_1}+\frac{1}{R_2}} \)</div><div class="fnote">Spannung überall gleich, Strom teilt sich auf</div></div>
+    </div>
+  </div>
+</div>
+
+
+</main>
+<script>
+window.addEventListener('scroll',function(){var sh=document.documentElement.scrollHeight-window.innerHeight;
+  document.getElementById('top-progress-bar').style.width=(sh>0?window.scrollY/sh*100:0)+'%';});
+(function(){var btn=document.getElementById('dm-toggle');
+  function apply(d){document.body.classList.toggle('dark',d);btn.textContent=d?'☀️':'🌙';try{localStorage.setItem('lern-seite-theme',d?'dark':'light')}catch(e){}}
+  var s=null;try{s=localStorage.getItem('lern-seite-theme')}catch(e){}
+  apply(s==='dark'||(!s&&window.matchMedia('(prefers-color-scheme: dark)').matches));
+  btn.addEventListener('click',function(){apply(!document.body.classList.contains('dark'))});
+  var all=document.getElementById('sol-toggle');
+  if(all)all.addEventListener('click',function(){var ds=[].slice.call(document.querySelectorAll('details.loesung'));
+    var open=ds.some(function(d){return !d.open});ds.forEach(function(d){d.open=open});all.textContent=open?'Alle Lösungen schließen':'Alle Lösungen zeigen';});
+})();
+</script>
+<script src="../../shared/hub.js"></script>
+</body>
+</html>

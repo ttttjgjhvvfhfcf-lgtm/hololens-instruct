@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AEE2 — Merksätze &amp; Eselsbrücken</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/3.2.2/es5/tex-mml-chtml.min.js"></script>
+<style>
+:root { --primary:#1d4ed8; --primary-light:#2563eb; --bg:#eff6ff; --soft:#eff6ff; --soft2:#dbeafe; --border:#dbeafe; --h1:#1e40af; --h2:#2563eb;
+  --card:#ffffff; --text:#0f172a; --muted:#64748b; --ok:#047857; --ok-bg:#ecfdf5;
+  --warn-bg:#fffbeb; --warn-bd:#d97706; --warn-tx:#92400e; --dot:rgba(148,163,184,0.22);
+  --shadow-sm:0 2px 8px rgba(15,23,42,0.07),0 1px 3px rgba(15,23,42,0.04); --radius:16px; --radius-sm:10px; }
+body.dark { --primary:#60a5fa; --primary-light:#93c5fd; --bg:#050d1a; --soft:#091524; --soft2:#060f1e; --border:#1a2d4a; --h1:#030a1a; --h2:#1e40af;
+  --card:#0f1626; --text:#e2e8f0; --muted:#94a3b8; --ok:#34d399; --ok-bg:#052e22;
+  --warn-bg:#1a0f00; --warn-bd:#d97706; --warn-tx:#fbbf24; --dot:rgba(51,65,85,0.6);
+  --shadow-sm:0 2px 8px rgba(0,0,0,0.35); color-scheme:dark; }
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Inter',-apple-system,BlinkMacSystemFont,system-ui,sans-serif;background:var(--bg);
+  background-image:radial-gradient(circle,var(--dot) 0.85px,transparent 0.85px);background-size:22px 22px;
+  color:var(--text);min-height:100vh;font-size:15px;line-height:1.57}
+#top-progress-bar{position:fixed;top:0;left:0;height:3px;width:0%;background:var(--primary-light);z-index:9999;pointer-events:none}
+header{background:linear-gradient(135deg,var(--h1) 0%,var(--h2) 100%);color:#fff;padding:1.25rem 2.5rem 1.1rem;position:relative;overflow:hidden}
+.h-deco{position:absolute;right:2.5rem;top:50%;transform:translateY(-50%);font-size:3.5rem;opacity:.08;font-style:italic;user-select:none;white-space:nowrap}
+.h-content{position:relative}
+.h-badge{display:inline-flex;background:rgba(255,255,255,.11);border:1px solid rgba(255,255,255,.18);padding:.3rem .95rem;border-radius:999px;font-size:.75rem;font-weight:600;margin-bottom:.85rem}
+header h1{font-size:2.3rem;font-weight:800;letter-spacing:-.75px;line-height:1.15;margin-bottom:.35rem}
+.h-motto{font-size:.92rem;font-style:italic;color:rgba(255,255,255,.78);max-width:46rem}
+nav{background:var(--card);border-bottom:1px solid var(--border);padding:.55rem 1.75rem;display:flex;flex-wrap:wrap;align-items:center;gap:.6rem;position:sticky;top:0;z-index:50;box-shadow:0 1px 14px rgba(15,23,42,.07)}
+.nav-label{font-size:.72rem;font-weight:600;text-transform:uppercase;letter-spacing:.06em;color:var(--muted)}
+.nav-jump{display:flex;flex-wrap:wrap;gap:.3rem}
+.nav-jump a{font:600 .75rem 'JetBrains Mono',monospace;color:var(--primary);text-decoration:none;padding:.2rem .5rem;border-radius:7px;border:1px solid var(--border);background:var(--soft)}
+.nav-jump a:hover{background:var(--soft2)}
+.btn{display:inline-flex;align-items:center;padding:.33rem .7rem;border-radius:9px;font:500 .78rem Inter,sans-serif;cursor:pointer;background:var(--soft);color:var(--text);border:1px solid var(--border)}
+.btn:hover{background:var(--soft2)}
+.btn-dm{margin-left:auto;font-size:1.05rem;line-height:1}
+.nav-right{margin-left:auto;display:flex;gap:.5rem}.nav-right .btn-dm{margin-left:0}
+main{max-width:900px;margin:0 auto;padding:1.75rem 1.25rem 4rem}
+.sum-wrap{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);margin-bottom:1.5rem;box-shadow:var(--shadow-sm);scroll-margin-top:70px;overflow:hidden}
+.sum-header{display:flex;align-items:center;gap:.75rem;flex-wrap:wrap;padding:.9rem 1.5rem;background:linear-gradient(135deg,var(--soft),var(--soft2));border-bottom:1px solid var(--border)}
+.sum-num{font:600 .72rem 'JetBrains Mono',monospace;background:var(--primary);color:var(--card);padding:.2rem .6rem;border-radius:999px;white-space:nowrap}
+.sum-title{font-weight:700;font-size:1.05rem;flex:1;min-width:10rem}
+.sum-note{font-size:.72rem;font-weight:600;color:var(--primary);border:1px solid var(--border);background:var(--card);padding:.2rem .65rem;border-radius:999px;white-space:nowrap}
+.sum-body{padding:1.25rem 1.5rem 1.4rem}
+.md-out p{margin-bottom:.7rem}.md-out p:last-child{margin-bottom:0}
+.md-out ul{margin:.3rem 0 .8rem 1.3rem}.md-out li{margin-bottom:.3rem}
+.md-out strong{color:var(--primary)}
+.md-out h3{font-size:.95rem;font-weight:700;color:var(--primary);margin:1.2rem 0 .5rem;padding-bottom:.3rem;border-bottom:1px solid var(--border);scroll-margin-top:70px}
+.md-out h3:first-child{margin-top:0}
+.tbl-wrap{overflow-x:auto;margin:.5rem 0 1rem}
+table{border-collapse:collapse;width:100%;font-size:.9rem}
+th{text-align:left;background:var(--soft);color:var(--primary);padding:.5rem .8rem;border-bottom:2px solid var(--border);white-space:nowrap}
+td{padding:.5rem .8rem;border-top:1px solid var(--border);vertical-align:top}
+td.math{font-size:1rem}
+.formula-box,.formula-mini{background:var(--soft);border-left:4px solid var(--primary-light);border-radius:0 var(--radius-sm) var(--radius-sm) 0;padding:.6rem 1rem;margin:.5rem 0 .8rem;overflow-x:auto}
+.formula-box{font:500 .88rem/1.9 'JetBrains Mono',monospace}
+.notice-box,.info-box{background:var(--warn-bg);border-left:4px solid var(--warn-bd);border-radius:0 var(--radius-sm) var(--radius-sm) 0;padding:.7rem 1rem;margin:.6rem 0 1rem;font-size:.9rem}
+.notice-box strong,.info-box strong{color:var(--warn-tx)}
+/* Formelkarten */
+.formula-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:.7rem;margin:.5rem 0 1rem}
+.fcard{background:var(--soft);border:1px solid var(--border);border-radius:var(--radius-sm);padding:.7rem .9rem;min-width:0;overflow-x:auto}
+.flabel{font-size:.74rem;font-weight:600;text-transform:uppercase;letter-spacing:.04em;color:var(--muted);margin-bottom:.3rem}
+.feq{font-size:1.02rem;text-align:center;padding:.2rem 0}
+.fnote{font-size:.76rem;color:var(--muted);margin-top:.3rem;font-style:italic}
+/* Merksatz-Karten */
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(270px,1fr));gap:1rem}
+.card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);box-shadow:var(--shadow-sm);overflow:hidden;min-width:0;scroll-margin-top:70px}
+.card-head{padding:.7rem 1.1rem;font-weight:700;font-size:.95rem;display:flex;align-items:center;gap:.5rem;background:linear-gradient(135deg,var(--soft),var(--soft2));border-bottom:1px solid var(--border)}
+.card-head>span{display:flex;align-items:center;gap:.5rem;flex:1}
+.card-body{padding:.9rem 1.1rem}
+.quote{font-size:1rem;font-weight:700;font-style:italic;color:var(--primary);margin-bottom:.35rem;line-height:1.4}
+.explain{font-size:.86rem;color:var(--muted);margin-bottom:.6rem}.explain:last-child{margin-bottom:0}
+.explain strong{color:var(--text)}
+.divider{height:1px;background:var(--border);margin:.7rem 0}
+.big-letters{font:700 1.3rem 'JetBrains Mono',monospace;letter-spacing:.06em;color:var(--primary);margin:.1rem 0 .5rem}
+.tag{margin-left:auto;font-size:.68rem;font-weight:700;padding:.12rem .55rem;border-radius:999px;background:var(--warn-bg);color:var(--warn-tx);border:1px solid var(--warn-bd)}
+/* Aufgaben mit aufklappbarer Lösung */
+.meta-row{display:flex;flex-wrap:wrap;gap:.6rem;margin-bottom:1rem}
+.meta-row div{background:var(--card);border:1px solid var(--border);border-radius:var(--radius-sm);padding:.5rem .9rem;font-size:.85rem;box-shadow:var(--shadow-sm)}
+.meta-row b{display:block;font-size:.68rem;text-transform:uppercase;letter-spacing:.06em;color:var(--muted)}
+details.loesung{margin-top:.9rem;border:1px solid var(--border);border-radius:var(--radius-sm);overflow:hidden}
+details.loesung summary{cursor:pointer;padding:.55rem .9rem;font-weight:600;font-size:.86rem;color:var(--primary);background:var(--soft);list-style-position:inside}
+details.loesung[open] summary{border-bottom:1px solid var(--border)}
+details.loesung .tbl-wrap{margin:0}
+details.loesung td:first-child{font-weight:600;color:var(--muted);white-space:nowrap;width:1%}
+details.loesung tr.erg td{background:var(--ok-bg)}details.loesung tr.erg td:last-child{font-weight:700;color:var(--ok)}
+details.loesung tr:first-child td{border-top:0}
+:focus-visible{outline:3px solid var(--warn-bd);outline-offset:2px}
+@media(max-width:600px){header{padding:1.1rem 1.1rem 1rem}header h1{font-size:1.65rem}.h-deco{display:none}nav{padding:.5rem 1rem}.sum-body,.sum-header{padding-left:1rem;padding-right:1rem}}
+@media print{nav,#top-progress-bar{display:none}.sum-wrap,.card{break-inside:avoid;box-shadow:none}details.loesung>*{display:block}}
+</style>
+</head>
+<body>
+<div id="top-progress-bar"></div>
+<header>
+    <div class="h-deco">ELI · ICE</div>
+    <div class="h-content">
+        <div class="h-badge">⚡ Wechselstromtechnik</div>
+        <h1>AEE2 — Merksätze &amp; Eselsbrücken</h1>
+        <p class="h-motto">Kompaktkarten zum Auswendiglernen</p>
+    </div>
+</header>
+<nav>
+    
+    <div class="nav-right"><button class="btn btn-dm" id="dm-toggle" title="Dunkles Design">🌙</button></div>
+</nav>
+<main>
+<div class="grid">
+
+  <div class="card">
+    <div class="card-head"><span>⚡ Phasenverschiebung L &amp; C</span></div>
+    <div class="card-body">
+      <div class="big-letters">ELI &nbsp;·&nbsp; ICE</div>
+      <div class="explain"><strong>E–L–I:</strong> Bei der Spule (L) kommt die Spannung E vor dem Strom I → Spannung eilt vor.</div>
+      <div class="explain"><strong>I–C–E:</strong> Beim Kondensator (C) kommt der Strom I vor der Spannung E → Strom eilt vor.</div>
+      <div class="divider"></div>
+      <div class="quote">„Bei der Induktivität kommt der Strom zu spät."</div>
+      <div class="explain">Spule: erst Spannung, dann baut sich der Strom auf (Magnetfeld). \(\varphi = 90°\)</div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-head"><span>📈 X_L und X_C</span></div>
+    <div class="card-body">
+      <div class="quote">„Die Spule Sperrt bei Speed."</div>
+      <div class="explain">\(X_L = \omega L\) — beides „S": je höher die Frequenz, desto größer X_L (Spule bremst mehr).</div>
+      <div class="divider"></div>
+      <div class="quote">„Der Kondensator lässt bei hoher Frequenz durch."</div>
+      <div class="explain">\(X_C = \frac{1}{\omega C}\) — sinkt mit steigender Frequenz, genau gegenläufig.</div>
+      <div class="explain"><strong>Bild:</strong> Spule = Tiefpass, Kondensator = Hochpass.</div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-head"><span>🔢 Effektiv ↔ Scheitel</span></div>
+    <div class="card-body">
+      <div class="quote">„Effektiv ist immer kleiner."</div>
+      <div class="explain">Vom Scheitel runter zum Effektiv: <strong>teilen</strong> durch \(\sqrt{2}\).<br>Vom Effektiv rauf zum Scheitel: <strong>mal</strong> \(\sqrt{2}\).</div>
+      <div class="formula-mini">\( 230\,\text{V} \xrightarrow{\;\times\sqrt2\;} 325\,\text{V} \)</div>
+      <div class="explain">Diese Merkzahl behalten — dann weißt du immer die Richtung.</div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-head"><span>💡 Leistung P · Q · S</span></div>
+    <div class="card-body">
+      <div class="quote">„P wie Power – die echte Leistung."</div>
+      <div class="explain">Wirkleistung, nutzbar, Einheit Watt (W).</div>
+      <div class="divider"></div>
+      <div class="quote">„Q pendelt nur."</div>
+      <div class="explain">Blindleistung pendelt hin und her, bringt nichts. Einheit <strong>var</strong>.</div>
+      <div class="divider"></div>
+      <div class="quote">„S wie Schein."</div>
+      <div class="explain">Scheinbare Gesamtleistung, Einheit VA. PQS-Dreieck = RXZ-Dreieck!</div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-head"><span>🔥 Wann ist P = 0?</span></div>
+    <div class="card-body">
+      <div class="quote">„Nur der Ohmsche macht Arbeit."</div>
+      <div class="explain">Reine Spule und reiner Kondensator: \(P = 0\) (weil \(\cos 90° = 0\)). Nur R erzeugt echte Wärme/Leistung.</div>
+      <div class="formula-mini">\( P = U\cdot I\cdot\cos\varphi \)</div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-head"><span>🧲 Induktion &amp; Trafo <span class="tag">Test!</span></span></div>
+    <div class="card-body">
+      <div class="quote">„Kein Wechsel, keine Induktion."</div>
+      <div class="explain">Ein Trafo braucht eine <strong>Änderung</strong> des Flusses. Gleichspannung → keine Spannung auf der Sekundärseite.</div>
+      <div class="divider"></div>
+      <div class="quote">„Schneller = mehr Spannung."</div>
+      <div class="explain">Je schneller die Bewegung im Magnetfeld, desto höher die induzierte Spannung. (Deine F-Aufgabe im Test!)</div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-head"><span>🔌 Gleichstrom-Schaltungen</span></div>
+    <div class="card-body">
+      <div class="quote">„Serie teilt Spannung, parallel teilt Strom."</div>
+      <div class="explain">Serienschaltung = Spannungsteiler · Parallelschaltung = Stromteiler.</div>
+      <div class="divider"></div>
+      <div class="quote">„Reihe rauf, parallel runter."</div>
+      <div class="explain">Mehr R in Reihe → Gesamtwiderstand rauf (Strom runter).<br>Mehr R parallel → Gesamtwiderstand runter (Strom rauf).</div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-head"><span>△ Das URI-Dreieck</span></div>
+    <div class="card-body">
+      <div class="explain">Dreieck mit <strong>U</strong> oben, <strong>R</strong> und <strong>I</strong> unten. Deck den gesuchten Wert ab → Formel erscheint:</div>
+      <div class="formula-mini">U → \(R\cdot I\) &nbsp;·&nbsp; R → \(\frac{U}{I}\) &nbsp;·&nbsp; I → \(\frac{U}{R}\)</div>
+      <div class="explain">Funktioniert auch im Wechselstrom mit Z statt R: \(U = Z\cdot I\).</div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-head"><span>🔄 Kreisfrequenz &amp; Frequenz</span></div>
+    <div class="card-body">
+      <div class="quote">„Omega dreht im Kreis – 2π pro Umdrehung."</div>
+      <div class="explain">\(\omega = 2\pi\cdot f\) — die Winkelgeschwindigkeit des Zeigers. Eine volle Umdrehung = \(2\pi\).</div>
+      <div class="divider"></div>
+      <div class="quote">„Frequenz und Periode sind Kehrwerte."</div>
+      <div class="explain">\(f = \frac{1}{T}\) und \(T = \frac{1}{f}\). Bei 50 Hz → T = 20 ms.</div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-head"><span>△ Impedanz Z</span></div>
+    <div class="card-body">
+      <div class="quote">„Impedanz ist die Hypotenuse."</div>
+      <div class="explain">R und X kann man nicht einfach addieren (90° versetzt) → Pythagoras:</div>
+      <div class="formula-mini">\( Z = \sqrt{R^2 + X^2} \)</div>
+      <div class="explain">R = Ankathete, X = Gegenkathete, Z = Hypotenuse. Genau wie das Leistungsdreieck (P, Q, S).</div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-head"><span>📐 Phasenwinkel φ</span></div>
+    <div class="card-body">
+      <div class="quote">„Winkel über Gegen durch An."</div>
+      <div class="explain">\(\tan\varphi = \frac{X}{R}\) → also \(\varphi = \arctan\!\frac{X}{R}\) (am TI-34: TRIG → tan⁻¹, DEG-Modus).</div>
+      <div class="formula-mini">\( \tan 45° = 1,\quad \tan 60° \approx 1,73 \)</div>
+      <div class="explain">Zur Kontrolle: \(X/R = 1\) → \(\varphi = 45°\).</div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-head"><span>〰️ Wellenlänge λ</span></div>
+    <div class="card-body">
+      <div class="quote">„Lange Welle = kleine Frequenz."</div>
+      <div class="explain">\(\lambda = \frac{c}{f}\) — je höher die Frequenz, desto kürzer die Welle.</div>
+      <div class="formula-mini">\( c_0 = 3\cdot 10^{8}\ \text{m/s} \)</div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-head"><span>💡 PQS-Dreieck (Formeln)</span></div>
+    <div class="card-body">
+      <div class="explain">Die drei Leistungen bilden das gleiche Dreieck wie R-X-Z:</div>
+      <div class="formula-mini">\( P = U I\cos\varphi \quad Q = U I\sin\varphi \)</div>
+      <div class="formula-mini">\( S = U I = \sqrt{P^2 + Q^2} \)</div>
+      <div class="formula-mini">\( \cos\varphi = \frac{P}{S} = \frac{R}{Z} \)</div>
+    </div>
+  </div>
+
+</div>
+
+</main>
+<script>
+window.addEventListener('scroll',function(){var sh=document.documentElement.scrollHeight-window.innerHeight;
+  document.getElementById('top-progress-bar').style.width=(sh>0?window.scrollY/sh*100:0)+'%';});
+(function(){var btn=document.getElementById('dm-toggle');
+  function apply(d){document.body.classList.toggle('dark',d);btn.textContent=d?'☀️':'🌙';try{localStorage.setItem('lern-seite-theme',d?'dark':'light')}catch(e){}}
+  var s=null;try{s=localStorage.getItem('lern-seite-theme')}catch(e){}
+  apply(s==='dark'||(!s&&window.matchMedia('(prefers-color-scheme: dark)').matches));
+  btn.addEventListener('click',function(){apply(!document.body.classList.contains('dark'))});
+  var all=document.getElementById('sol-toggle');
+  if(all)all.addEventListener('click',function(){var ds=[].slice.call(document.querySelectorAll('details.loesung'));
+    var open=ds.some(function(d){return !d.open});ds.forEach(function(d){d.open=open});all.textContent=open?'Alle Lösungen schließen':'Alle Lösungen zeigen';});
+})();
+</script>
+<script src="../../shared/hub.js"></script>
+</body>
+</html>

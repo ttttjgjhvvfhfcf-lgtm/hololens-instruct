@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Probeschularbeit Mathematik 2Md</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap">
+
+<style>
+:root { --primary:#5b21b6; --primary-light:#6d28d9; --bg:#f3f0ff; --soft:#f5f3ff; --soft2:#ede9fe; --border:#e4defc; --h1:#1e1b6b; --h2:#6d28d9;
+  --card:#ffffff; --text:#0f172a; --muted:#64748b; --ok:#047857; --ok-bg:#ecfdf5;
+  --warn-bg:#fffbeb; --warn-bd:#d97706; --warn-tx:#92400e; --dot:rgba(148,163,184,0.22);
+  --shadow-sm:0 2px 8px rgba(15,23,42,0.07),0 1px 3px rgba(15,23,42,0.04); --radius:16px; --radius-sm:10px; }
+body.dark { --primary:#a78bfa; --primary-light:#c4b5fd; --bg:#0b0818; --soft:#130f26; --soft2:#0d0a1c; --border:#2a2250; --h1:#07051a; --h2:#4c1d95;
+  --card:#0f1626; --text:#e2e8f0; --muted:#94a3b8; --ok:#34d399; --ok-bg:#052e22;
+  --warn-bg:#1a0f00; --warn-bd:#d97706; --warn-tx:#fbbf24; --dot:rgba(51,65,85,0.6);
+  --shadow-sm:0 2px 8px rgba(0,0,0,0.35); color-scheme:dark; }
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Inter',-apple-system,BlinkMacSystemFont,system-ui,sans-serif;background:var(--bg);
+  background-image:radial-gradient(circle,var(--dot) 0.85px,transparent 0.85px);background-size:22px 22px;
+  color:var(--text);min-height:100vh;font-size:15px;line-height:1.57}
+#top-progress-bar{position:fixed;top:0;left:0;height:3px;width:0%;background:var(--primary-light);z-index:9999;pointer-events:none}
+header{background:linear-gradient(135deg,var(--h1) 0%,var(--h2) 100%);color:#fff;padding:1.25rem 2.5rem 1.1rem;position:relative;overflow:hidden}
+.h-deco{position:absolute;right:2.5rem;top:50%;transform:translateY(-50%);font-size:3.5rem;opacity:.08;font-style:italic;user-select:none;white-space:nowrap}
+.h-content{position:relative}
+.h-badge{display:inline-flex;background:rgba(255,255,255,.11);border:1px solid rgba(255,255,255,.18);padding:.3rem .95rem;border-radius:999px;font-size:.75rem;font-weight:600;margin-bottom:.85rem}
+header h1{font-size:2.3rem;font-weight:800;letter-spacing:-.75px;line-height:1.15;margin-bottom:.35rem}
+.h-motto{font-size:.92rem;font-style:italic;color:rgba(255,255,255,.78);max-width:46rem}
+nav{background:var(--card);border-bottom:1px solid var(--border);padding:.55rem 1.75rem;display:flex;flex-wrap:wrap;align-items:center;gap:.6rem;position:sticky;top:0;z-index:50;box-shadow:0 1px 14px rgba(15,23,42,.07)}
+.nav-label{font-size:.72rem;font-weight:600;text-transform:uppercase;letter-spacing:.06em;color:var(--muted)}
+.nav-jump{display:flex;flex-wrap:wrap;gap:.3rem}
+.nav-jump a{font:600 .75rem 'JetBrains Mono',monospace;color:var(--primary);text-decoration:none;padding:.2rem .5rem;border-radius:7px;border:1px solid var(--border);background:var(--soft)}
+.nav-jump a:hover{background:var(--soft2)}
+.btn{display:inline-flex;align-items:center;padding:.33rem .7rem;border-radius:9px;font:500 .78rem Inter,sans-serif;cursor:pointer;background:var(--soft);color:var(--text);border:1px solid var(--border)}
+.btn:hover{background:var(--soft2)}
+.btn-dm{margin-left:auto;font-size:1.05rem;line-height:1}
+.nav-right{margin-left:auto;display:flex;gap:.5rem}.nav-right .btn-dm{margin-left:0}
+main{max-width:900px;margin:0 auto;padding:1.75rem 1.25rem 4rem}
+.sum-wrap{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);margin-bottom:1.5rem;box-shadow:var(--shadow-sm);scroll-margin-top:70px;overflow:hidden}
+.sum-header{display:flex;align-items:center;gap:.75rem;flex-wrap:wrap;padding:.9rem 1.5rem;background:linear-gradient(135deg,var(--soft),var(--soft2));border-bottom:1px solid var(--border)}
+.sum-num{font:600 .72rem 'JetBrains Mono',monospace;background:var(--primary);color:var(--card);padding:.2rem .6rem;border-radius:999px;white-space:nowrap}
+.sum-title{font-weight:700;font-size:1.05rem;flex:1;min-width:10rem}
+.sum-note{font-size:.72rem;font-weight:600;color:var(--primary);border:1px solid var(--border);background:var(--card);padding:.2rem .65rem;border-radius:999px;white-space:nowrap}
+.sum-body{padding:1.25rem 1.5rem 1.4rem}
+.md-out p{margin-bottom:.7rem}.md-out p:last-child{margin-bottom:0}
+.md-out ul{margin:.3rem 0 .8rem 1.3rem}.md-out li{margin-bottom:.3rem}
+.md-out strong{color:var(--primary)}
+.md-out h3{font-size:.95rem;font-weight:700;color:var(--primary);margin:1.2rem 0 .5rem;padding-bottom:.3rem;border-bottom:1px solid var(--border);scroll-margin-top:70px}
+.md-out h3:first-child{margin-top:0}
+.tbl-wrap{overflow-x:auto;margin:.5rem 0 1rem}
+table{border-collapse:collapse;width:100%;font-size:.9rem}
+th{text-align:left;background:var(--soft);color:var(--primary);padding:.5rem .8rem;border-bottom:2px solid var(--border);white-space:nowrap}
+td{padding:.5rem .8rem;border-top:1px solid var(--border);vertical-align:top}
+td.math{font-size:1rem}
+.formula-box,.formula-mini{background:var(--soft);border-left:4px solid var(--primary-light);border-radius:0 var(--radius-sm) var(--radius-sm) 0;padding:.6rem 1rem;margin:.5rem 0 .8rem;overflow-x:auto}
+.formula-box{font:500 .88rem/1.9 'JetBrains Mono',monospace}
+.notice-box,.info-box{background:var(--warn-bg);border-left:4px solid var(--warn-bd);border-radius:0 var(--radius-sm) var(--radius-sm) 0;padding:.7rem 1rem;margin:.6rem 0 1rem;font-size:.9rem}
+.notice-box strong,.info-box strong{color:var(--warn-tx)}
+/* Formelkarten */
+.formula-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:.7rem;margin:.5rem 0 1rem}
+.fcard{background:var(--soft);border:1px solid var(--border);border-radius:var(--radius-sm);padding:.7rem .9rem;min-width:0;overflow-x:auto}
+.flabel{font-size:.74rem;font-weight:600;text-transform:uppercase;letter-spacing:.04em;color:var(--muted);margin-bottom:.3rem}
+.feq{font-size:1.02rem;text-align:center;padding:.2rem 0}
+.fnote{font-size:.76rem;color:var(--muted);margin-top:.3rem;font-style:italic}
+/* Merksatz-Karten */
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(270px,1fr));gap:1rem}
+.card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);box-shadow:var(--shadow-sm);overflow:hidden;min-width:0;scroll-margin-top:70px}
+.card-head{padding:.7rem 1.1rem;font-weight:700;font-size:.95rem;display:flex;align-items:center;gap:.5rem;background:linear-gradient(135deg,var(--soft),var(--soft2));border-bottom:1px solid var(--border)}
+.card-head>span{display:flex;align-items:center;gap:.5rem;flex:1}
+.card-body{padding:.9rem 1.1rem}
+.quote{font-size:1rem;font-weight:700;font-style:italic;color:var(--primary);margin-bottom:.35rem;line-height:1.4}
+.explain{font-size:.86rem;color:var(--muted);margin-bottom:.6rem}.explain:last-child{margin-bottom:0}
+.explain strong{color:var(--text)}
+.divider{height:1px;background:var(--border);margin:.7rem 0}
+.big-letters{font:700 1.3rem 'JetBrains Mono',monospace;letter-spacing:.06em;color:var(--primary);margin:.1rem 0 .5rem}
+.tag{margin-left:auto;font-size:.68rem;font-weight:700;padding:.12rem .55rem;border-radius:999px;background:var(--warn-bg);color:var(--warn-tx);border:1px solid var(--warn-bd)}
+/* Aufgaben mit aufklappbarer Lösung */
+.meta-row{display:flex;flex-wrap:wrap;gap:.6rem;margin-bottom:1rem}
+.meta-row div{background:var(--card);border:1px solid var(--border);border-radius:var(--radius-sm);padding:.5rem .9rem;font-size:.85rem;box-shadow:var(--shadow-sm)}
+.meta-row b{display:block;font-size:.68rem;text-transform:uppercase;letter-spacing:.06em;color:var(--muted)}
+details.loesung{margin-top:.9rem;border:1px solid var(--border);border-radius:var(--radius-sm);overflow:hidden}
+details.loesung summary{cursor:pointer;padding:.55rem .9rem;font-weight:600;font-size:.86rem;color:var(--primary);background:var(--soft);list-style-position:inside}
+details.loesung[open] summary{border-bottom:1px solid var(--border)}
+details.loesung .tbl-wrap{margin:0}
+details.loesung td:first-child{font-weight:600;color:var(--muted);white-space:nowrap;width:1%}
+details.loesung tr.erg td{background:var(--ok-bg)}details.loesung tr.erg td:last-child{font-weight:700;color:var(--ok)}
+details.loesung tr:first-child td{border-top:0}
+:focus-visible{outline:3px solid var(--warn-bd);outline-offset:2px}
+@media(max-width:600px){header{padding:1.1rem 1.1rem 1rem}header h1{font-size:1.65rem}.h-deco{display:none}nav{padding:.5rem 1rem}.sum-body,.sum-header{padding-left:1rem;padding-right:1rem}}
+@media print{nav,#top-progress-bar{display:none}.sum-wrap,.card{break-inside:avoid;box-shadow:none}details.loesung>*{display:block}}
+</style>
+</head>
+<body>
+<div id="top-progress-bar"></div>
+<header>
+    <div class="h-deco">Σ ∫ π</div>
+    <div class="h-content">
+        <div class="h-badge">📝 Probeschularbeit mit Lösungen</div>
+        <h1>Probeschularbeit Mathematik 2Md</h1>
+        <p class="h-motto">Bogenmaß · Winkeldreieck · Wechselstrom · Kondensator · Spule · R+L · Druck</p>
+    </div>
+</header>
+<nav>
+    <span class="nav-label">Aufgabe</span><div class="nav-jump"><a href="#a1">1</a><a href="#a2">2</a><a href="#a3">3</a><a href="#a4">4</a><a href="#a5">5</a><a href="#a6">6</a><a href="#a7">7</a><a href="#a8">8</a><a href="#a9">9</a><a href="#a10">10</a></div>
+    <div class="nav-right"><button class="btn" id="sol-toggle" type="button">Alle Lösungen zeigen</button><button class="btn btn-dm" id="dm-toggle" title="Dunkles Design">🌙</button></div>
+</nav>
+<main>
+<div class="meta-row"><div><b>Arbeitszeit</b>50 Minuten</div><div><b>Hilfsmittel</b>Taschenrechner, Lineal</div><div><b>Gesamt</b>60 Punkte</div></div>
+<div class="notice-box"><strong>Hinweis:</strong> Rechne sauber mit Formeln und schreibe bei jedem Ergebnis die Einheit dazu. Runde in der Regel auf 2 Dezimalstellen, wenn nichts anderes verlangt ist.</div>
+<div class="sum-wrap" id="a1"><div class="sum-header"><span class="sum-num">1</span><span class="sum-title">Bogenmaß umrechnen</span><span class="sum-note">6 P</span></div><div class="sum-body md-out"><ul><li>a) Wandle 150° in Radiant um.</li><li>b) Wandle 5π/6 rad in Grad um.</li></ul><details class="loesung"><summary>Lösung zeigen</summary><div class="tbl-wrap"><table><tr><td>Formel</td><td>α[rad] = α[°] · π / 180</td></tr><tr><td>a)</td><td>150° · π / 180 = 5π/6 rad ≈ 2,62 rad</td></tr><tr><td>b)</td><td>(5π/6) · 180 / π = 150°</td></tr><tr><td>Merke</td><td>180° = π rad</td></tr></table></div></details></div></div>
+<div class="sum-wrap" id="a2"><div class="sum-header"><span class="sum-num">2</span><span class="sum-title">Winkeldreieck</span><span class="sum-note">8 P</span></div><div class="sum-body md-out"><ul><li>In einem rechtwinkligen Dreieck gilt: Gegenkathete GK = 7 cm, Ankathete AK = 24 cm.</li><li>a) Berechne die Hypotenuse h.</li><li>b) Berechne den Winkel α mit tan α = GK / AK.</li></ul><details class="loesung"><summary>Lösung zeigen</summary><div class="tbl-wrap"><table><tr><td>Formel</td><td>h² = GK² + AK² und tan α = GK / AK</td></tr><tr><td>a)</td><td>h = √(7² + 24²) = √625 = 25,0 cm</td></tr><tr><td>b)</td><td>tan α = 7 / 24 = 0,2917 → α = arctan(0,2917) ≈ 16,3°</td></tr><tr><td>Merke</td><td>Im rechtwinkligen Dreieck rechnet man für die Hypotenuse mit dem Satz des Pythagoras.</td></tr></table></div></details></div></div>
+<div class="sum-wrap" id="a3"><div class="sum-header"><span class="sum-num">3</span><span class="sum-title">Wechselstrom-Grundgrößen</span><span class="sum-note">8 P</span></div><div class="sum-body md-out"><ul><li>Eine Sinusspannung hat die Frequenz f = 50 Hz.</li><li>a) Berechne die Periodendauer T.</li><li>b) Berechne die Winkelgeschwindigkeit ω.</li></ul><details class="loesung"><summary>Lösung zeigen</summary><div class="tbl-wrap"><table><tr><td>Formeln</td><td>T = 1 / f und ω = 2π · f</td></tr><tr><td>a)</td><td>T = 1 / 50 s = 0,02 s = 20 ms</td></tr><tr><td>b)</td><td>ω = 2π · 50 = 100π s⁻¹ ≈ 314 s⁻¹</td></tr><tr><td>Merke</td><td>Die Frequenz ist die Anzahl der Perioden pro Sekunde.</td></tr></table></div></details></div></div>
+<div class="sum-wrap" id="a4"><div class="sum-header"><span class="sum-num">4</span><span class="sum-title">Scheitelwert und Effektivwert</span><span class="sum-note">6 P</span></div><div class="sum-body md-out"><ul><li>Eine Netzspannung hat den Effektivwert Ueff = 230 V.</li><li>Berechne den Scheitelwert û.</li></ul><details class="loesung"><summary>Lösung zeigen</summary><div class="tbl-wrap"><table><tr><td>Formel</td><td>û = Ueff · √2</td></tr><tr><td>Rechnung</td><td>û = 230 · √2 ≈ 325,3 V</td></tr><tr class="erg"><td>Ergebnis</td><td>û ≈ 325 V</td></tr><tr><td>Merke</td><td>Für Sinus gilt Ueff = û / √2.</td></tr></table></div></details></div></div>
+<div class="sum-wrap" id="a5"><div class="sum-header"><span class="sum-num">5</span><span class="sum-title">Augenblickswert</span><span class="sum-note">8 P</span></div><div class="sum-body md-out"><ul><li>Gegeben sind û = 325 V, f = 50 Hz und t = 10 ms.</li><li>Berechne den Augenblickswert u(t) mit der Formel u(t) = û · sin(ωt).</li><li>Hinweis: Rechne im RAD-Modus oder mit dem DEG-Trick.</li></ul><details class="loesung"><summary>Lösung zeigen</summary><div class="tbl-wrap"><table><tr><td>Formel</td><td>u(t) = û · sin(ωt) mit ω = 2πf</td></tr><tr><td>Schritt 1</td><td>ω = 2π · 50 ≈ 314 s⁻¹</td></tr><tr><td>Schritt 2</td><td>u(10 ms) = 325 · sin(2π · 50 · 0,010)</td></tr><tr><td>Schritt 3</td><td>u = 325 · sin(π) = 0 V</td></tr><tr class="erg"><td>Ergebnis</td><td>u(t) = 0 V</td></tr><tr><td>Merke</td><td>Bei genau einer halben Periodendauer ist der Sinuswert 0.</td></tr></table></div></details></div></div>
+<div class="sum-wrap" id="a6"><div class="sum-header"><span class="sum-num">6</span><span class="sum-title">Oszilloskop</span><span class="sum-note">8 P</span></div><div class="sum-body md-out"><ul><li>Auf dem Oszilloskop wird eine Periodendauer von T = 20 ms gemessen.</li><li>Der Zeitversatz zwischen zwei Signalen beträgt Δt = 5 ms.</li><li>a) Berechne die Phasenverschiebung φ in Grad.</li><li>b) Berechne φ zusätzlich in Radiant.</li></ul><details class="loesung"><summary>Lösung zeigen</summary><div class="tbl-wrap"><table><tr><td>Formel</td><td>φ = (Δt / T) · 360°</td></tr><tr><td>a)</td><td>φ = (5 ms / 20 ms) · 360° = 90°</td></tr><tr><td>b)</td><td>φ = 90° · π / 180 ≈ 1,57 rad</td></tr><tr><td>Merke</td><td>Zeitversatz im Verhältnis zur Periodendauer ergibt die Phase.</td></tr></table></div></details></div></div>
+<div class="sum-wrap" id="a7"><div class="sum-header"><span class="sum-num">7</span><span class="sum-title">Kondensator</span><span class="sum-note">6 P</span></div><div class="sum-body md-out"><ul><li>Ein Kondensator hat C = 47 µF und wird mit f = 50 Hz betrieben.</li><li>Berechne den kapazitiven Blindwiderstand Xc.</li></ul><details class="loesung"><summary>Lösung zeigen</summary><div class="tbl-wrap"><table><tr><td>Formel</td><td>Xc = 1 / (2π · f · C)</td></tr><tr><td>Rechnung</td><td>Xc = 1 / (2π · 50 · 47·10⁻⁶) ≈ 67,73 Ω</td></tr><tr class="erg"><td>Ergebnis</td><td>Xc ≈ 67,7 Ω</td></tr><tr><td>Merke</td><td>Mit steigender Frequenz wird Xc kleiner.</td></tr></table></div></details></div></div>
+<div class="sum-wrap" id="a8"><div class="sum-header"><span class="sum-num">8</span><span class="sum-title">Spule</span><span class="sum-note">6 P</span></div><div class="sum-body md-out"><ul><li>Eine Spule hat L = 80 mH und wird mit f = 50 Hz betrieben.</li><li>Berechne den induktiven Blindwiderstand XL.</li></ul><details class="loesung"><summary>Lösung zeigen</summary><div class="tbl-wrap"><table><tr><td>Formel</td><td>XL = 2π · f · L</td></tr><tr><td>Rechnung</td><td>XL = 2π · 50 · 0,080 ≈ 25,13 Ω</td></tr><tr class="erg"><td>Ergebnis</td><td>XL ≈ 25,1 Ω</td></tr><tr><td>Merke</td><td>Mit steigender Frequenz wird XL größer.</td></tr></table></div></details></div></div>
+<div class="sum-wrap" id="a9"><div class="sum-header"><span class="sum-num">9</span><span class="sum-title">Reihenschaltung R + L</span><span class="sum-note">4 P</span></div><div class="sum-body md-out"><ul><li>Gegeben: R = 30 Ω und XL = 40 Ω.</li><li>Berechne den Scheinwiderstand Z und den Leistungsfaktor cos φ.</li></ul><details class="loesung"><summary>Lösung zeigen</summary><div class="tbl-wrap"><table><tr><td>Formeln</td><td>Z = √(R² + XL²) und cos φ = R / Z</td></tr><tr><td>a)</td><td>Z = √(30² + 40²) = √2500 = 50 Ω</td></tr><tr><td>b)</td><td>cos φ = 30 / 50 = 0,60</td></tr><tr><td>Merke</td><td>In der Reihenschaltung bildet R zusammen mit XL ein rechtwinkliges Dreieck.</td></tr></table></div></details></div></div>
+<div class="sum-wrap" id="a10"><div class="sum-header"><span class="sum-num">10</span><span class="sum-title">Druck / Hydraulik</span><span class="sum-note">4 P</span></div><div class="sum-body md-out"><ul><li>Auf einen Kolben mit A = 12 cm² wirkt ein Überdruck pe = 5 bar.</li><li>Berechne die Kraft F.</li></ul><details class="loesung"><summary>Lösung zeigen</summary><div class="tbl-wrap"><table><tr><td>Formel</td><td>F = p · A mit 1 bar = 10 N/cm²</td></tr><tr><td>Umrechnung</td><td>pe = 5 bar = 50 N/cm²</td></tr><tr><td>Rechnung</td><td>F = 50 · 12 = 600 N</td></tr><tr class="erg"><td>Ergebnis</td><td>F = 600 N</td></tr><tr><td>Merke</td><td>Bei der Umrechnung in N/cm² muss die Fläche in cm² stehen.</td></tr></table></div></details></div></div>
+<div class="sum-wrap" id="kurzformeln"><div class="sum-header"><span class="sum-title">Kurzformeln zum Lernen</span></div><div class="sum-body md-out"><div class="tbl-wrap"><table><tr><td><strong>Bogenmaß</strong></td><td>α[rad] = α[°] · π / 180</td></tr><tr><td><strong>Winkeldreieck</strong></td><td>sin α = GK / Hy &nbsp;|&nbsp; cos α = AK / Hy &nbsp;|&nbsp; tan α = GK / AK</td></tr><tr><td><strong>Wechselstrom</strong></td><td>T = 1/f &nbsp;|&nbsp; ω = 2πf &nbsp;|&nbsp; Ueff = û / √2</td></tr><tr><td><strong>Augenblickswert</strong></td><td>u(t) = û · sin(ωt)</td></tr><tr><td><strong>Kondensator</strong></td><td>Xc = 1 / (2πfC)</td></tr><tr><td><strong>Spule</strong></td><td>XL = 2πfL</td></tr><tr><td><strong>Druck</strong></td><td>p = F / A &nbsp;|&nbsp; F = p · A</td></tr></table></div></div></div>
+<div class="sum-wrap" id="fehler"><div class="sum-header"><span class="sum-title">Typische Fehler</span></div><div class="sum-body md-out"><ul><li>DEG und RAD verwechseln</li><li>Ueff mit û verwechseln</li><li>bei Kondensator und Spule die Vorzeichen der Phase vertauschen</li><li>bei Druck die Einheit bar nicht in N/cm² umrechnen</li></ul></div></div>
+
+</main>
+<script>
+window.addEventListener('scroll',function(){var sh=document.documentElement.scrollHeight-window.innerHeight;
+  document.getElementById('top-progress-bar').style.width=(sh>0?window.scrollY/sh*100:0)+'%';});
+(function(){var btn=document.getElementById('dm-toggle');
+  function apply(d){document.body.classList.toggle('dark',d);btn.textContent=d?'☀️':'🌙';try{localStorage.setItem('lern-seite-theme',d?'dark':'light')}catch(e){}}
+  var s=null;try{s=localStorage.getItem('lern-seite-theme')}catch(e){}
+  apply(s==='dark'||(!s&&window.matchMedia('(prefers-color-scheme: dark)').matches));
+  btn.addEventListener('click',function(){apply(!document.body.classList.contains('dark'))});
+  var all=document.getElementById('sol-toggle');
+  if(all)all.addEventListener('click',function(){var ds=[].slice.call(document.querySelectorAll('details.loesung'));
+    var open=ds.some(function(d){return !d.open});ds.forEach(function(d){d.open=open});all.textContent=open?'Alle Lösungen schließen':'Alle Lösungen zeigen';});
+})();
+</script>
+<script src="../../shared/hub.js"></script>
+</body>
+</html>
