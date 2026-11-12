@@ -1,0 +1,1248 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CNC-Drehen — Lernseite</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap');
+
+        :root {
+            --primary:       #0369a1;
+            --primary-light: #0ea5e9;
+            --accent:        #dc2626;
+            --bg:            #f0f9ff;
+            --card:          #ffffff;
+            --text:          #1f2937;
+            --muted:         #6b7280;
+            --border:        #e5e7eb;
+            --success:       #059669;
+            --shadow-xs: 0 1px 2px rgba(31,41,55,0.05);
+            --shadow-sm: 0 2px 8px rgba(3,105,161,0.07), 0 1px 3px rgba(3,105,161,0.04);
+            --shadow-md: 0 6px 24px rgba(3,105,161,0.11), 0 2px 8px rgba(3,105,161,0.05);
+            --radius:    16px;
+            --radius-sm: 10px;
+            --dur:       0.18s;
+            --ease:      cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            font-family: 'Inter', -apple-system, system-ui, sans-serif;
+            background: var(--bg);
+            background-image:
+                radial-gradient(ellipse 70% 50% at 5% -5%, rgba(3,105,161,0.07) 0%, transparent 55%),
+                radial-gradient(ellipse 55% 45% at 95% 105%, rgba(14,165,233,0.06) 0%, transparent 55%),
+                radial-gradient(circle, rgba(107,114,128,0.22) 0.85px, transparent 0.85px);
+            background-size: auto, auto, 22px 22px;
+            color: var(--text);
+            min-height: 100vh;
+            font-size: 15px;
+            line-height: 1.57;
+            transition: background-color 0.25s, color 0.25s;
+        }
+
+        /* ── Dark Mode ──────────────────────────────── */
+        body.dark {
+            --primary:       #38bdf8;
+            --primary-light: #7dd3fc;
+            --bg:            #0f172a;
+            --card:          #1e293b;
+            --text:          #e2e8f0;
+            --muted:         #94a3b8;
+            --border:        #334155;
+            --shadow-sm: 0 2px 8px rgba(0,0,0,0.3);
+            --shadow-md: 0 6px 24px rgba(0,0,0,0.4);
+            color-scheme: dark;
+        }
+        body.dark {
+            background-image:
+                radial-gradient(ellipse 70% 50% at 5% -5%, rgba(56,189,248,0.05) 0%, transparent 55%),
+                radial-gradient(ellipse 55% 45% at 95% 105%, rgba(14,165,233,0.05) 0%, transparent 55%),
+                radial-gradient(circle, rgba(255,255,255,0.04) 0.85px, transparent 0.85px);
+            background-size: auto, auto, 22px 22px;
+        }
+        body.dark header { background: linear-gradient(135deg, #0c1e30 0%, #0a2d4a 50%, #071d36 100%); }
+        body.dark .toolbar { background: rgba(15,23,42,0.88); border-bottom-color: #334155; box-shadow: 0 1px 14px rgba(0,0,0,0.4); }
+        body.dark .card       { background: #1e293b; border-color: #334155; }
+        body.dark .card-head  { background: #162033; border-bottom-color: #334155; }
+        body.dark .content-box { background: #1e293b; border-color: #334155; }
+        body.dark .toc-sidebar  { background: #1e293b; }
+        body.dark .toc-head     { color: #475569; border-bottom-color: #334155; }
+        body.dark .toc-item:hover { background: #263348; color: #e2e8f0; }
+        body.dark .toc-item.active { background: #0c2440; border-left-color: var(--primary); color: var(--primary); }
+        body.dark .section-subtitle { color: var(--muted); }
+        body.dark .highlight-box { background: linear-gradient(135deg, #0c2440, #0a1f3a); border-color: #1e3a5f; color: #bae6fd; }
+        body.dark .btn-secondary { background: #334155; color: #e2e8f0; border-color: #475569; }
+        body.dark .btn-secondary:hover { background: #475569; }
+        body.dark .btn-dm { color: #38bdf8; }
+        body.dark table th { background: #0c2440 !important; color: #bae6fd !important; }
+        body.dark table td { color: var(--text); border-top-color: #334155 !important; }
+        body.dark table tr:nth-child(odd) td  { background: #1e293b !important; }
+        body.dark table tr:nth-child(even) td { background: #162033 !important; }
+        body.dark table tr:hover td { background: #0c2440 !important; }
+        body.dark code { background: #334155 !important; color: #7dd3fc !important; }
+        body.dark .learn-modal   { background: #1e293b; border-color: #334155; }
+        body.dark .learn-card    { background: #0f2a45; border-color: #334155; }
+        body.dark .learn-card.flipped .learn-card-back { background: linear-gradient(135deg, #0a1f38, #0d2b4a); }
+        body.dark .learn-progress-bar { background: #334155; }
+        body.dark .learn-category { background: #334155; color: #38bdf8; }
+        body.dark .svg-container { background: #1e293b; border-color: #334155; }
+
+        /* ── Progress Bar ── */
+        #progress-bar { position: fixed; top: 0; left: 0; right: 0; height: 3px; background: var(--border); z-index: 1000; }
+        #progress-fill { height: 100%; background: linear-gradient(90deg, var(--primary), var(--primary-light)); width: 0%; transition: width 0.1s; }
+
+        /* ── Header ── */
+        header {
+            background: linear-gradient(135deg, #082f49 0%, #0c4a6e 45%, #075985 100%);
+            color: white;
+            padding: 2.5rem 2rem 2rem;
+            display: flex;
+            align-items: center;
+            gap: 1.5rem;
+        }
+        .h-icon { font-size: 3.2rem; }
+        .h-content { flex: 1; }
+        .h-badge { display: inline-block; background: rgba(255,255,255,0.15); backdrop-filter: blur(4px); padding: 0.22rem 0.85rem; border-radius: 20px; font-size: 0.75rem; font-weight: 600; letter-spacing: 0.04em; margin-bottom: 0.5rem; }
+        header h1 { font-size: 2rem; font-weight: 800; line-height: 1.2; margin-bottom: 0.35rem; }
+        header p { opacity: 0.85; font-size: 0.93rem; }
+        .h-motto { margin-top: 0.45rem; font-size: 0.82rem; opacity: 0.68; font-style: italic; }
+
+        /* ── Toolbar ── */
+        .toolbar {
+            position: sticky; top: 3px; z-index: 100;
+            background: rgba(255,255,255,0.92);
+            backdrop-filter: blur(14px);
+            border-bottom: 1px solid var(--border);
+            padding: 0.6rem 1.5rem;
+            display: flex; align-items: center; gap: 0.75rem;
+            box-shadow: 0 1px 8px rgba(3,105,161,0.06);
+        }
+        .toolbar-label { font-weight: 700; font-size: 0.84rem; color: var(--primary); margin-right: auto; letter-spacing: 0.02em; }
+
+        /* ── Buttons ── */
+        .btn { border: none; border-radius: 8px; cursor: pointer; font-weight: 600; font-size: 0.82rem; padding: 0.45rem 1rem; transition: all var(--dur) var(--ease); display: inline-flex; align-items: center; gap: 0.4rem; }
+        .btn-primary { background: var(--primary); color: white; box-shadow: 0 2px 6px rgba(3,105,161,0.3); }
+        .btn-primary:hover { background: var(--primary-light); transform: translateY(-1px); }
+        .btn-secondary { background: #f1f5f9; color: var(--text); border: 1px solid var(--border); }
+        .btn-secondary:hover { background: #e2e8f0; }
+        .btn-sm { padding: 0.35rem 0.75rem; font-size: 0.78rem; }
+        .btn-dm { font-size: 1.1rem; padding: 0.3rem 0.6rem; }
+
+        /* ── Layout ── */
+        main { display: grid; grid-template-columns: 220px 1fr; gap: 2rem; max-width: 1300px; margin: 0 auto; padding: 2rem 1.5rem; }
+
+        /* ── TOC ── */
+        .toc-sidebar { position: sticky; top: 60px; height: fit-content; background: var(--card); border-radius: var(--radius); border: 1px solid var(--border); overflow: hidden; box-shadow: var(--shadow-sm); }
+        .toc-head { padding: 0.75rem 1rem; font-size: 0.7rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.09em; color: var(--muted); border-bottom: 1px solid var(--border); }
+        .toc-item { padding: 0.52rem 1rem 0.52rem 1.15rem; font-size: 0.82rem; cursor: pointer; border-left: 3px solid transparent; transition: all var(--dur); display: flex; align-items: center; gap: 0.45rem; line-height: 1.3; }
+        .toc-item:hover { background: #f0f9ff; color: var(--primary); }
+        .toc-item.active { background: #e0f2fe; border-left-color: var(--primary); color: var(--primary); font-weight: 600; }
+
+        /* ── Sections ── */
+        .section { margin-bottom: 3rem; scroll-margin-top: 70px; }
+        .section-header { display: flex; align-items: flex-start; gap: 1rem; margin-bottom: 1.5rem; padding-bottom: 0.75rem; border-bottom: 2px solid var(--border); }
+        .section-icon { font-size: 1.9rem; flex-shrink: 0; margin-top: 0.1rem; }
+        .section-title { font-size: 1.5rem; font-weight: 800; color: var(--primary); }
+        .section-subtitle { font-size: 0.88rem; color: var(--muted); margin-top: 0.2rem; }
+        .section-badge { display: inline-block; background: var(--primary); color: white; font-size: 0.68rem; font-weight: 700; padding: 0.18rem 0.6rem; border-radius: 20px; margin-left: 0.5rem; vertical-align: middle; letter-spacing: 0.04em; }
+
+        /* ── Cards ── */
+        .content-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 1.1rem; margin-bottom: 1.5rem; }
+        .card { background: var(--card); border-radius: var(--radius); border: 1px solid var(--border); overflow: hidden; box-shadow: var(--shadow-sm); transition: box-shadow var(--dur); }
+        .card:hover { box-shadow: var(--shadow-md); }
+        .card-head { padding: 0.65rem 1.1rem; background: linear-gradient(135deg, #f0f9ff, #e0f2fe); border-bottom: 1px solid var(--border); font-weight: 700; font-size: 0.86rem; color: var(--primary); display: flex; align-items: center; gap: 0.4rem; }
+        body.dark .card-head { background: #162033; }
+        .card-body { padding: 1rem 1.1rem; font-size: 0.88rem; }
+        .card-body ul { padding-left: 1.2rem; }
+        .card-body li { margin-bottom: 0.32rem; }
+
+        /* ── Content Box ── */
+        .content-box { background: var(--card); border-radius: var(--radius); border: 1px solid var(--border); padding: 1.4rem 1.6rem; margin-bottom: 1.5rem; box-shadow: var(--shadow-sm); }
+
+        /* ── Highlight Box ── */
+        .highlight-box { background: linear-gradient(135deg, #e0f2fe, #bae6fd); border: 1.5px solid #7dd3fc; border-radius: var(--radius-sm); padding: 1rem 1.2rem; margin-bottom: 1.2rem; color: #0c4a6e; font-size: 0.9rem; }
+        .highlight-box strong { color: #0369a1; }
+
+        /* ── Tables ── */
+        table { width: 100%; border-collapse: collapse; font-size: 0.87rem; }
+        table th { background: #dbeafe; color: #1e40af; padding: 0.7rem 0.9rem; text-align: left; font-weight: 700; font-size: 0.82rem; }
+        table td { padding: 0.6rem 0.9rem; border-top: 1px solid var(--border); vertical-align: top; }
+        table tr:nth-child(odd) td  { background: #f8fbff; }
+        table tr:nth-child(even) td { background: white; }
+        table tr:hover td { background: #e0f2fe; transition: background 0.12s; }
+
+        /* ── Formulas ── */
+        .formula-box { background: linear-gradient(135deg, #0369a1, #0ea5e9); color: white; border-radius: var(--radius-sm); padding: 1.1rem 1.5rem; margin: 0.8rem 0; text-align: center; font-family: 'JetBrains Mono', 'Courier New', monospace; font-size: 1.1rem; font-weight: 700; letter-spacing: 0.03em; }
+        .formula-legend { display: grid; grid-template-columns: auto 1fr; gap: 0.35rem 0.9rem; font-size: 0.84rem; margin-top: 0.6rem; align-items: center; }
+        .formula-legend code { background: #e0f2fe; color: #0369a1; border-radius: 4px; padding: 0.1rem 0.4rem; font-family: 'JetBrains Mono', monospace; font-size: 0.82rem; }
+
+        /* ── SVG Container ── */
+        .svg-container { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 1rem 1.5rem; overflow: hidden; box-shadow: var(--shadow-xs); }
+
+        /* ── Lernmodus ── */
+        .learn-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.6); z-index: 500; align-items: center; justify-content: center; }
+        .learn-overlay.open { display: flex; }
+        .learn-modal { background: white; border-radius: var(--radius); max-width: 640px; width: 95%; max-height: 90vh; overflow-y: auto; box-shadow: 0 20px 60px rgba(0,0,0,0.35); }
+        .learn-header { padding: 1.1rem 1.5rem; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; }
+        .learn-header h2 { font-size: 1.05rem; font-weight: 700; }
+        .learn-body { padding: 1.4rem; }
+        .learn-card { background: #f0f9ff; border: 1.5px solid #7dd3fc; border-radius: var(--radius); min-height: 200px; cursor: pointer; perspective: 1000px; position: relative; transform-style: preserve-3d; transition: transform 0.4s cubic-bezier(0.4,0,0.2,1); }
+        .learn-card.flipped { transform: rotateY(180deg); }
+        .learn-card-front, .learn-card-back { position: absolute; inset: 0; padding: 1.4rem; border-radius: var(--radius); backface-visibility: hidden; display: flex; flex-direction: column; }
+        .learn-card-back { transform: rotateY(180deg); background: linear-gradient(135deg, #dbeafe, #bfdbfe); white-space: pre-line; }
+        .learn-category { display: inline-block; background: #dbeafe; color: #1d4ed8; font-size: 0.7rem; font-weight: 700; padding: 0.18rem 0.65rem; border-radius: 20px; margin-bottom: 0.7rem; letter-spacing: 0.04em; }
+        .learn-question { font-weight: 700; font-size: 1rem; line-height: 1.45; }
+        .learn-hint { color: var(--muted); font-size: 0.78rem; margin-top: auto; padding-top: 0.8rem; }
+        .learn-answer { font-size: 0.87rem; line-height: 1.7; }
+        .learn-rate { display: none; gap: 0.7rem; margin-top: 1rem; justify-content: center; }
+        .learn-progress { margin-bottom: 1rem; }
+        .learn-progress-bar { background: var(--border); border-radius: 20px; height: 6px; }
+        .learn-progress-fill { background: var(--primary); height: 6px; border-radius: 20px; transition: width 0.3s; }
+        .learn-counter { font-size: 0.8rem; color: var(--muted); text-align: right; margin-top: 0.3rem; }
+        .learn-result { text-align: center; padding: 1rem; }
+        .learn-result-icon { font-size: 3rem; margin-bottom: 0.5rem; }
+        .learn-result-bars { display: flex; gap: 2rem; justify-content: center; margin: 1rem 0; }
+        .rbi-num { font-size: 1.8rem; font-weight: 800; }
+        .rbi-lbl { font-size: 0.78rem; color: var(--muted); }
+
+        /* ── Responsive ── */
+        @media (max-width: 768px) {
+            main { grid-template-columns: 1fr; }
+            .toc-sidebar { display: none; }
+            header { flex-direction: column; text-align: center; gap: 0.8rem; }
+            header h1 { font-size: 1.5rem; }
+            .content-grid { grid-template-columns: 1fr; }
+            .toolbar-label { display: none; }
+        }
+    </style>
+</head>
+<body>
+
+<div id="progress-bar"><div id="progress-fill"></div></div>
+
+<!-- ── Header ── -->
+<header>
+    <div class="h-icon">⚙️</div>
+    <div class="h-content">
+        <div class="h-badge">🔧 Fertigungstechnik</div>
+        <h1>CNC-Drehen — Lernseite</h1>
+        <p>Bearbeitungsmethoden · Maschinenbestandteile · Werkzeuge · Schnittdaten · Formeln</p>
+        <div class="h-motto"><strong>CNC1–CNC10:</strong> Alle Prüfungsthemen einfach und genau erklärt</div>
+    </div>
+</header>
+
+<!-- ── Toolbar ── -->
+<div class="toolbar">
+    <span class="toolbar-label">CNC-Drehen</span>
+    <button class="btn btn-primary btn-sm" onclick="startLearningMode()">🎓 Lernmodus</button>
+    <button class="btn btn-secondary btn-sm btn-dm" id="dm-toggle" title="Dunkles Design" onclick="toggleDark()">🌙</button>
+</div>
+
+<main>
+    <!-- ── TOC Sidebar ── -->
+    <aside class="toc-sidebar">
+        <div class="toc-head">CNC1 – CNC10</div>
+        <div class="toc-item active" data-section="bearbeitungsmethoden" onclick="scrollToSection('bearbeitungsmethoden')">⚙️ Bearbeitungsmethoden</div>
+        <div class="toc-item" data-section="achsen" onclick="scrollToSection('achsen')">📐 Achsen</div>
+        <div class="toc-item" data-section="bestandteile" onclick="scrollToSection('bestandteile')">🔩 Maschinenbestandteile</div>
+        <div class="toc-item" data-section="drehautomaten" onclick="scrollToSection('drehautomaten')">🏭 CNC-Drehautomaten</div>
+        <div class="toc-item" data-section="drehverfahren" onclick="scrollToSection('drehverfahren')">🔄 Drehverfahren</div>
+        <div class="toc-item" data-section="werkzeuge" onclick="scrollToSection('werkzeuge')">🗜️ Drehwerkzeuge</div>
+        <div class="toc-item" data-section="schnittdaten" onclick="scrollToSection('schnittdaten')">📊 Schnittdaten</div>
+        <div class="toc-item" data-section="formeln" onclick="scrollToSection('formeln')">🧮 Formeln &amp; Werkstoffe</div>
+    </aside>
+
+    <!-- ── Content ── -->
+    <div>
+
+        <!-- ═══════════════════════════════════════════════
+             1. BEARBEITUNGSMETHODEN  (CNC1)
+        ═══════════════════════════════════════════════ -->
+        <section class="section" id="bearbeitungsmethoden">
+            <div class="section-header">
+                <div class="section-icon">⚙️</div>
+                <div>
+                    <div class="section-title">Bearbeitungsmethoden <span class="section-badge">CNC1</span></div>
+                    <div class="section-subtitle">Klassifizierung des CNC-Drehens nach der Art der Bearbeitung</div>
+                </div>
+            </div>
+
+            <div class="highlight-box">
+                <strong>Grundprinzip:</strong> Beim Drehen rotiert das <strong>Werkstück</strong>, während das Werkzeug (Drehmeisel) die Vorschubbewegung ausführt. Das Ergebnis sind immer <strong>rotationssymmetrische Teile</strong>.
+            </div>
+
+            <div class="content-grid">
+                <div class="card">
+                    <div class="card-head">🔄 Längsdrehen</div>
+                    <div class="card-body">
+                        <p>Werkzeug bewegt sich <strong>parallel zur Drehachse</strong> (Z-Richtung)</p>
+                        <ul style="margin-top:0.5rem;">
+                            <li>Erzeugt <strong>Zylinderflächen</strong></li>
+                            <li>Häufigste CNC-Drehoperation</li>
+                            <li>Außen- und Innenbearbeitung möglich</li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="card">
+                    <div class="card-head">⬛ Plandrehen</div>
+                    <div class="card-body">
+                        <p>Werkzeug bewegt sich <strong>senkrecht zur Drehachse</strong> (X-Richtung)</p>
+                        <ul style="margin-top:0.5rem;">
+                            <li>Erzeugt <strong>plane Stirnflächen</strong></li>
+                            <li>Zum Anpassen der Werkstücklänge</li>
+                            <li>Meistens erster Bearbeitungsschritt</li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="card">
+                    <div class="card-head">🌀 Gewindedrehen</div>
+                    <div class="card-body">
+                        <p>Vorschub exakt mit der <strong>Spindeldrehzahl synchronisiert</strong></p>
+                        <ul style="margin-top:0.5rem;">
+                            <li>Vorschub = Gewindesteigung P [mm/U]</li>
+                            <li>Außen- und Innengewinde möglich</li>
+                            <li>Metrisch, Whitworth, Trapez …</li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="card">
+                    <div class="card-head">📈 Konturdrehen</div>
+                    <div class="card-body">
+                        <p>Simultane <strong>X- und Z-Interpolation</strong></p>
+                        <ul style="margin-top:0.5rem;">
+                            <li>Kegel, Radien, Freiformkonturen</li>
+                            <li>Nur mit CNC-Steuerung möglich!</li>
+                            <li>Steuerung berechnet jeden Punkt automatisch</li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="card">
+                    <div class="card-head">✂️ Einstechen / Abstechen</div>
+                    <div class="card-body">
+                        <p>Werkzeug dringt <strong>radial</strong> ein (X-Richtung)</p>
+                        <ul style="margin-top:0.5rem;">
+                            <li><strong>Einstechen:</strong> Nut / Einstich erzeugen</li>
+                            <li><strong>Abstechen:</strong> Einstechen bis Mitte → Teil trennen</li>
+                            <li>Schmaler Abstechmeisel (2–4 mm)</li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="card">
+                    <div class="card-head">🕳️ Innendrehen (Ausdrehen)</div>
+                    <div class="card-body">
+                        <p>Bearbeitung des <strong>Innendurchmessers</strong></p>
+                        <ul style="margin-top:0.5rem;">
+                            <li>Nach Vorbohren (Kernloch)</li>
+                            <li>Werkzeug: Bohrstange (schlanker Halter)</li>
+                            <li>Passung, Lagersitz, Innengewinde</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ═══════════════════════════════════════════════
+             2. ACHSEN  (CNC2)
+        ═══════════════════════════════════════════════ -->
+        <section class="section" id="achsen">
+            <div class="section-header">
+                <div class="section-icon">📐</div>
+                <div>
+                    <div class="section-title">Achsen <span class="section-badge">CNC2</span></div>
+                    <div class="section-subtitle">Klassifizierung nach Anzahl und Art der Maschinenachsen</div>
+                </div>
+            </div>
+
+            <!-- SVG: Achsenschema -->
+            <div class="svg-container" style="margin-bottom:1.4rem;">
+                <svg viewBox="0 0 580 160" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-height:180px;">
+                    <!-- Werkstück -->
+                    <rect x="200" y="55" width="160" height="50" rx="6" fill="#f59e0b" opacity="0.85"/>
+                    <text x="280" y="85" text-anchor="middle" fill="white" font-size="11" font-weight="bold">WERKSTÜCK ∅</text>
+                    <!-- Z-Achse (horizontal) -->
+                    <line x1="50" y1="80" x2="500" y2="80" stroke="#0369a1" stroke-width="2.5" stroke-dasharray="8,4"/>
+                    <polygon points="500,75 515,80 500,85" fill="#0369a1"/>
+                    <text x="525" y="84" fill="#0369a1" font-size="12" font-weight="bold">Z</text>
+                    <text x="250" y="140" text-anchor="middle" fill="#0369a1" font-size="10">Z-Achse: axial ∥ Spindel → steuert LÄNGE</text>
+                    <!-- X-Achse (vertikal) -->
+                    <line x1="280" y1="150" x2="280" y2="10" stroke="#dc2626" stroke-width="2.5" stroke-dasharray="8,4"/>
+                    <polygon points="275,10 280,0 285,10" fill="#dc2626"/>
+                    <text x="292" y="10" fill="#dc2626" font-size="12" font-weight="bold">X</text>
+                    <!-- Werkzeug -->
+                    <polygon points="360,70 390,80 360,90" fill="#374151"/>
+                    <rect x="390" y="74" width="60" height="12" rx="2" fill="#374151"/>
+                    <text x="455" y="84" fill="#374151" font-size="10">Werkzeug</text>
+                    <!-- C-Achse (rotation) -->
+                    <path d="M170,65 A30,30 0 0,0 170,95" stroke="#059669" stroke-width="2.5" fill="none"/>
+                    <polygon points="165,94 170,107 177,95" fill="#059669"/>
+                    <text x="120" y="75" fill="#059669" font-size="10" font-weight="bold">C-Achse</text>
+                    <text x="118" y="88" fill="#059669" font-size="9">(Rotation n)</text>
+                    <!-- Y-Achse -->
+                    <line x1="50" y1="80" x2="70" y2="55" stroke="#9333ea" stroke-width="2" stroke-dasharray="5,3"/>
+                    <polygon points="65,52 75,53 68,61" fill="#9333ea"/>
+                    <text x="48" y="48" fill="#9333ea" font-size="11" font-weight="bold">Y</text>
+                </svg>
+            </div>
+
+            <table>
+                <tr>
+                    <th>Achse</th>
+                    <th>Richtung</th>
+                    <th>Steuert</th>
+                    <th>Verfügbar ab</th>
+                </tr>
+                <tr><td><strong style="color:#0369a1">X</strong></td><td>radial (⊥ Spindel)</td><td>Durchmesser des Werkstücks</td><td>alle CNC-Drehmaschinen</td></tr>
+                <tr><td><strong style="color:#0369a1">Z</strong></td><td>axial (∥ Spindel)</td><td>Länge / Längsposition</td><td>alle CNC-Drehmaschinen</td></tr>
+                <tr><td><strong style="color:#9333ea">Y</strong></td><td>senkrecht</td><td>Außermittige Operationen</td><td>Dreh-Fräszentrum (3-Achs+)</td></tr>
+                <tr><td><strong style="color:#059669">C</strong></td><td>Rotation Spindel (°)</td><td>Winkelposition der Spindel</td><td>Dreh-Fräszentrum mit angetr. WKZ</td></tr>
+            </table>
+
+            <div class="content-box" style="margin-top:1.2rem;">
+                <table>
+                    <tr><th>Maschinentyp</th><th>Achsen</th><th>Mögliche Operationen</th><th>Typisch für</th></tr>
+                    <tr><td><strong>2-Achs-CNC</strong></td><td>X, Z</td><td>Längs, Plan, Gewinde, Einstechen, Kontur</td><td>Standard-Drehmaschine</td></tr>
+                    <tr><td><strong>3-Achs-CNC</strong></td><td>X, Z, C</td><td>+ Fräsen/Bohren mit angetriebenem WKZ</td><td>Drehzentrum</td></tr>
+                    <tr><td><strong>4-Achs-CNC</strong></td><td>X, Z, Y, C</td><td>+ außermittige Bearbeitung</td><td>Turn-Mill-Center</td></tr>
+                    <tr><td><strong>5-Achs-CNC</strong></td><td>X, Y, Z, C, B/A</td><td>Komplexteile in einer Aufspannung fertig</td><td>Medizin, Luftfahrt</td></tr>
+                </table>
+            </div>
+        </section>
+
+        <!-- ═══════════════════════════════════════════════
+             3. MASCHINENBESTANDTEILE  (CNC3)
+        ═══════════════════════════════════════════════ -->
+        <section class="section" id="bestandteile">
+            <div class="section-header">
+                <div class="section-icon">🔩</div>
+                <div>
+                    <div class="section-title">Maschinenbestandteile <span class="section-badge">CNC3</span></div>
+                    <div class="section-subtitle">Die wichtigsten Baugruppen einer CNC-Drehmaschine</div>
+                </div>
+            </div>
+
+            <!-- SVG: CNC-Drehmaschine Schematisch -->
+            <div class="svg-container" style="margin-bottom:1.5rem;">
+                <svg viewBox="0 0 680 200" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-height:210px;">
+                    <defs>
+                        <marker id="ar1" markerWidth="7" markerHeight="7" refX="3.5" refY="3.5" orient="auto"><path d="M0,0 L7,3.5 L0,7 Z" fill="#475569"/></marker>
+                        <marker id="ar2" markerWidth="6" markerHeight="6" refX="3" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="#7dd3fc"/></marker>
+                    </defs>
+                    <!-- Bett -->
+                    <rect x="20" y="168" width="640" height="24" rx="3" fill="#94a3b8"/>
+                    <text x="340" y="183" text-anchor="middle" fill="white" font-size="10" font-weight="bold">➀ MASCHINENBETT (Grauguss GG25)</text>
+                    <!-- Spindelstock -->
+                    <rect x="30" y="80" width="120" height="92" rx="6" fill="#0369a1"/>
+                    <text x="90" y="125" text-anchor="middle" fill="white" font-size="10" font-weight="bold">➁ SPINDEL-</text>
+                    <text x="90" y="138" text-anchor="middle" fill="white" font-size="10" font-weight="bold">STOCK</text>
+                    <!-- Futter / Spindel -->
+                    <circle cx="152" cy="124" r="30" fill="#0ea5e9" stroke="white" stroke-width="2"/>
+                    <circle cx="152" cy="124" r="12" fill="#075985"/>
+                    <text x="152" y="128" text-anchor="middle" fill="white" font-size="8" font-weight="bold">Futter</text>
+                    <!-- Rotation -->
+                    <path d="M126,105 A26,26 0 0,1 126,143" stroke="#bae6fd" stroke-width="2" fill="none" marker-end="url(#ar2)"/>
+                    <text x="108" y="128" text-anchor="end" fill="#bae6fd" font-size="8">n</text>
+                    <!-- Werkstück -->
+                    <rect x="182" y="114" width="160" height="20" rx="3" fill="#f59e0b"/>
+                    <text x="262" y="127" text-anchor="middle" fill="white" font-size="9" font-weight="bold">WERKSTÜCK</text>
+                    <!-- Revolver -->
+                    <polygon points="380,100 415,88 435,112 415,136 380,124" fill="#dc2626"/>
+                    <text x="415" y="115" text-anchor="middle" fill="white" font-size="9" font-weight="bold">➃ REV.</text>
+                    <!-- Vorschubbewegung -->
+                    <line x1="380" y1="124" x2="355" y2="124" stroke="#dc2626" stroke-width="2" marker-end="url(#ar1)"/>
+                    <text x="360" y="143" fill="#dc2626" font-size="8">f →</text>
+                    <!-- Reitstock -->
+                    <rect x="510" y="100" width="90" height="70" rx="6" fill="#475569"/>
+                    <text x="555" y="137" text-anchor="middle" fill="white" font-size="9" font-weight="bold">➄ REIT-</text>
+                    <text x="555" y="150" text-anchor="middle" fill="white" font-size="9" font-weight="bold">STOCK</text>
+                    <!-- Spitze Reitstock -->
+                    <polygon points="510,120 490,124 510,128" fill="#94a3b8"/>
+                    <!-- CNC-Steuerung -->
+                    <rect x="438" y="28" width="130" height="58" rx="8" fill="#1e293b" stroke="#334155" stroke-width="1.5"/>
+                    <rect x="447" y="37" width="112" height="32" rx="4" fill="#0f172a"/>
+                    <text x="503" y="57" text-anchor="middle" fill="#38bdf8" font-size="9" font-weight="bold">➅ SINUMERIK 840D</text>
+                    <text x="503" y="68" text-anchor="middle" fill="#64748b" font-size="8">CNC-Steuerung</text>
+                    <!-- Kühlmittel-Hinweis -->
+                    <text x="262" y="160" text-anchor="middle" fill="#0891b2" font-size="8">💧 Kühlmittelsystem (Emulsion)</text>
+                    <!-- Labels oben -->
+                    <text x="90"  y="72" text-anchor="middle" fill="#0369a1" font-size="8">➁ Spindelstock</text>
+                    <text x="262" y="105" text-anchor="middle" fill="#92400e" font-size="8">➂ Werkstück</text>
+                    <text x="415" y="80" text-anchor="middle" fill="#dc2626" font-size="8">➃ Revolver</text>
+                    <text x="555" y="92" text-anchor="middle" fill="#475569" font-size="8">➄ Reitstock</text>
+                    <text x="503" y="20" text-anchor="middle" fill="#0369a1" font-size="8">➅ CNC-Steuerung</text>
+                </svg>
+            </div>
+
+            <div class="content-grid">
+                <div class="card">
+                    <div class="card-head">➀ Maschinenbett</div>
+                    <div class="card-body">
+                        <p>Tragende Basis aus <strong>Grauguss GG25</strong></p>
+                        <ul style="margin-top:0.4rem;">
+                            <li>Sehr steif → geringe Verformung</li>
+                            <li>Dämpft Vibrationen</li>
+                            <li>Präzise geschliffene Führungsbahnen</li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="card">
+                    <div class="card-head">➁ Spindelstock + Hauptspindel</div>
+                    <div class="card-body">
+                        <p>Enthält Hauptspindel mit <strong>Antriebsmotor</strong></p>
+                        <ul style="margin-top:0.4rem;">
+                            <li>Werkstück in <strong>Dreibackenfutter</strong></li>
+                            <li>Drehzahl stufenlos regelbar</li>
+                            <li>Hohlspindel für Stangenmaterial</li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="card">
+                    <div class="card-head">➃ Werkzeugrevolver</div>
+                    <div class="card-body">
+                        <p>Aufnahme für <strong>4–12 Werkzeuge</strong></p>
+                        <ul style="margin-top:0.4rem;">
+                            <li>Automatischer Wechsel (&lt; 1 s)</li>
+                            <li>Passiv oder angetrieben</li>
+                            <li>ISO-Werkzeugaufnahme (VDI)</li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="card">
+                    <div class="card-head">➄ Reitstock</div>
+                    <div class="card-body">
+                        <p>Abstützung langer Werkstücke</p>
+                        <ul style="margin-top:0.4rem;">
+                            <li>Verhindert Durchbiegen + Vibrationen</li>
+                            <li>Aufnahme von Körnerspitze oder Bohrfutter</li>
+                            <li>CNC-gesteuert verschiebbar</li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="card">
+                    <div class="card-head">➅ CNC-Steuerung</div>
+                    <div class="card-body">
+                        <p>Computerbasierte Maschinensteuerung</p>
+                        <ul style="margin-top:0.4rem;">
+                            <li><strong>Siemens Sinumerik</strong> (häufig in Europa)</li>
+                            <li><strong>Fanuc</strong> (Japan, weltweit verbreitet)</li>
+                            <li><strong>Heidenhain</strong> (bekannt bei Fräsen)</li>
+                            <li>Interpretiert G-Code (ISO-Code)</li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="card">
+                    <div class="card-head">💧 Kühlmittelsystem</div>
+                    <div class="card-body">
+                        <p>Kühlung + Schmierung der Schneidzone</p>
+                        <ul style="margin-top:0.4rem;">
+                            <li>Verlängert Werkzeugstandzeit</li>
+                            <li>Medien: Emulsion, Schneidöl, Luft (MMS)</li>
+                            <li>Späneförderband entfernt Späne</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ═══════════════════════════════════════════════
+             4. CNC-DREHAUTOMATEN  (CNC4)
+        ═══════════════════════════════════════════════ -->
+        <section class="section" id="drehautomaten">
+            <div class="section-header">
+                <div class="section-icon">🏭</div>
+                <div>
+                    <div class="section-title">CNC-Drehautomaten <span class="section-badge">CNC4</span></div>
+                    <div class="section-subtitle">Wozu werden CNC-Drehautomaten verwendet?</div>
+                </div>
+            </div>
+
+            <div class="highlight-box">
+                <strong>Definition:</strong> CNC-Drehautomaten sind hochautomatisierte Drehmaschinen für die <strong>vollautomatische Serienproduktion</strong> — Stangenmaterial wird automatisch nachgeschoben, kein ständiger Bediener nötig.
+            </div>
+
+            <div class="content-grid">
+                <div class="card">
+                    <div class="card-head">🔁 Einspindler-Drehautomat</div>
+                    <div class="card-body">
+                        <ul>
+                            <li>1 Hauptspindel</li>
+                            <li>Stangenmaterial bis ~Ø 80 mm</li>
+                            <li>Automatischer Stangenlader</li>
+                            <li>Kompakt, präzise, flexibel</li>
+                            <li>Schneller Umbau auf neues Teil</li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="card">
+                    <div class="card-head">⚙️ Mehrspindler-Drehautomat</div>
+                    <div class="card-body">
+                        <ul>
+                            <li>4–8 Spindeln parallel</li>
+                            <li>Jede Spindel = eigene Bearbeitungsstation</li>
+                            <li>Alle Stationen arbeiten gleichzeitig</li>
+                            <li>Sehr hohe Taktrate (Sekunden pro Teil)</li>
+                            <li>Ideal für Millionen Stück / Jahr</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <div class="content-box">
+                <strong style="color:var(--primary)">Typische Einsatzbereiche:</strong>
+                <div style="display:grid; grid-template-columns: repeat(auto-fit,minmax(160px,1fr)); gap:0.6rem; margin-top:0.8rem; font-size:0.88rem;">
+                    <div>🔩 Schrauben &amp; Bolzen</div>
+                    <div>🔧 Verbinder &amp; Fittings</div>
+                    <div>⚙️ Zahnräder &amp; Wellen</div>
+                    <div>🏥 Medizinische Implantate</div>
+                    <div>🚗 Kfz-Komponenten</div>
+                    <div>💡 Elektrische Kontakte</div>
+                    <div>💧 Hydraulikkolben</div>
+                    <div>✈️ Luftfahrt-Kleinteile</div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ═══════════════════════════════════════════════
+             5. DREHVERFAHREN  (CNC5 / CNC6)
+        ═══════════════════════════════════════════════ -->
+        <section class="section" id="drehverfahren">
+            <div class="section-header">
+                <div class="section-icon">🔄</div>
+                <div>
+                    <div class="section-title">Drehverfahren <span class="section-badge">CNC5 · CNC6</span></div>
+                    <div class="section-subtitle">Wichtigste Verfahren — beschrieben und bildlich dargestellt</div>
+                </div>
+            </div>
+
+            <!-- SVG: Drehverfahren Übersicht -->
+            <div class="svg-container" style="margin-bottom:1.5rem;">
+                <svg viewBox="0 0 700 185" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-height:200px;">
+                    <defs>
+                        <marker id="ba" markerWidth="6" markerHeight="6" refX="3" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="#dc2626"/></marker>
+                    </defs>
+                    <!-- ── Längsdrehen ── -->
+                    <g transform="translate(10,10)">
+                        <text x="60" y="12" text-anchor="middle" fill="#0369a1" font-size="10" font-weight="bold">Längsdrehen</text>
+                        <ellipse cx="18" cy="70" rx="12" ry="35" fill="#f59e0b" opacity="0.9"/>
+                        <rect x="18" y="35" width="84" height="70" rx="0" fill="#f59e0b" opacity="0.75"/>
+                        <ellipse cx="102" cy="70" rx="12" ry="35" fill="#d97706"/>
+                        <polygon points="102,60 122,68 102,76" fill="#374151"/>
+                        <line x1="122" y1="60" x2="122" y2="45" stroke="#dc2626" stroke-width="1.5" marker-end="url(#ba)"/>
+                        <text x="130" y="42" fill="#dc2626" font-size="8">f→Z</text>
+                        <text x="60" y="125" text-anchor="middle" fill="#475569" font-size="8">→ Zylinder</text>
+                    </g>
+                    <!-- ── Plandrehen ── -->
+                    <g transform="translate(155,10)">
+                        <text x="60" y="12" text-anchor="middle" fill="#0369a1" font-size="10" font-weight="bold">Plandrehen</text>
+                        <ellipse cx="18" cy="70" rx="12" ry="35" fill="#f59e0b" opacity="0.9"/>
+                        <rect x="18" y="35" width="84" height="70" fill="#f59e0b" opacity="0.75"/>
+                        <ellipse cx="102" cy="70" rx="12" ry="35" fill="#d97706"/>
+                        <polygon points="92,35 112,42 92,50" fill="#374151"/>
+                        <line x1="112" y1="38" x2="112" y2="20" stroke="#dc2626" stroke-width="1.5" marker-end="url(#ba)"/>
+                        <text x="116" y="18" fill="#dc2626" font-size="8">f↑X</text>
+                        <text x="60" y="125" text-anchor="middle" fill="#475569" font-size="8">→ Stirnfläche</text>
+                    </g>
+                    <!-- ── Gewindedrehen ── -->
+                    <g transform="translate(300,10)">
+                        <text x="60" y="12" text-anchor="middle" fill="#0369a1" font-size="10" font-weight="bold">Gewindedrehen</text>
+                        <ellipse cx="18" cy="70" rx="12" ry="35" fill="#f59e0b" opacity="0.9"/>
+                        <rect x="18" y="35" width="84" height="70" fill="#f59e0b" opacity="0.75"/>
+                        <ellipse cx="102" cy="70" rx="12" ry="35" fill="#d97706"/>
+                        <!-- Gewindeprofil -->
+                        <path d="M18,52 Q28,44 38,52 Q48,60 58,52 Q68,44 78,52 Q88,60 98,52" stroke="#0369a1" stroke-width="2" fill="none"/>
+                        <path d="M18,88 Q28,80 38,88 Q48,96 58,88 Q68,80 78,88 Q88,96 98,88" stroke="#0369a1" stroke-width="2" fill="none"/>
+                        <polygon points="102,60 122,68 102,76" fill="#374151"/>
+                        <text x="60" y="125" text-anchor="middle" fill="#475569" font-size="8">f = Steigung P</text>
+                    </g>
+                    <!-- ── Einstechen ── -->
+                    <g transform="translate(445,10)">
+                        <text x="60" y="12" text-anchor="middle" fill="#0369a1" font-size="10" font-weight="bold">Einstechen</text>
+                        <ellipse cx="18" cy="70" rx="12" ry="35" fill="#f59e0b" opacity="0.9"/>
+                        <rect x="18" y="35" width="84" height="70" fill="#f59e0b" opacity="0.75"/>
+                        <ellipse cx="102" cy="70" rx="12" ry="35" fill="#d97706"/>
+                        <!-- Nut -->
+                        <rect x="52" y="35" width="14" height="70" fill="#0f172a" opacity="0.4"/>
+                        <!-- Stechmeisel von oben -->
+                        <rect x="55" y="5" width="8" height="30" fill="#374151"/>
+                        <line x1="59" y1="18" x2="59" y2="5" stroke="#dc2626" stroke-width="1.5" marker-end="url(#ba)"/>
+                        <text x="60" y="125" text-anchor="middle" fill="#475569" font-size="8">→ radial X</text>
+                    </g>
+                    <!-- ── Konturdrehen ── -->
+                    <g transform="translate(570,10)">
+                        <text x="55" y="12" text-anchor="middle" fill="#0369a1" font-size="10" font-weight="bold">Konturdrehen</text>
+                        <ellipse cx="18" cy="70" rx="12" ry="35" fill="#f59e0b" opacity="0.9"/>
+                        <path d="M18,35 Q50,20 80,40 Q95,55 102,70 Q95,85 80,100 Q50,120 18,105 Z" fill="#f59e0b" opacity="0.75"/>
+                        <!-- Kontur -->
+                        <path d="M18,35 Q50,20 80,40 Q95,55 102,70" stroke="#dc2626" stroke-width="2" fill="none" marker-end="url(#ba)"/>
+                        <text x="55" y="125" text-anchor="middle" fill="#475569" font-size="8">X + Z simultan</text>
+                    </g>
+                </svg>
+            </div>
+
+            <div class="content-box">
+                <table>
+                    <tr><th>Verfahren</th><th>Werkzeugbewegung</th><th>Erzeugtes Merkmal</th><th>Bemerkung</th></tr>
+                    <tr><td><strong>Längsdrehen</strong></td><td>Z-Richtung (axial)</td><td>Zylinderfläche, Außen-∅</td><td>Häufigste Operation</td></tr>
+                    <tr><td><strong>Plandrehen</strong></td><td>X-Richtung (radial)</td><td>Plane Stirnfläche</td><td>Meist erster Schritt</td></tr>
+                    <tr><td><strong>Gewindedrehen</strong></td><td>Z, synchron mit n</td><td>Außen- / Innengewinde</td><td>Vorschub f = Steigung P</td></tr>
+                    <tr><td><strong>Konturdrehen</strong></td><td>X + Z simultan</td><td>Kegel, Radien, Freiformkontur</td><td>Nur mit CNC möglich!</td></tr>
+                    <tr><td><strong>Einstechen</strong></td><td>X-Richtung (radial)</td><td>Nut, Einstich, Freistich</td><td>Schmaler Stechmeisel</td></tr>
+                    <tr><td><strong>Abstechen</strong></td><td>X bis Mitte (∅→0)</td><td>Werkstück vollständig trennen</td><td>Achtung: Spannkraft ↓!</td></tr>
+                    <tr><td><strong>Innendrehen</strong></td><td>Z (axial, innen)</td><td>Bohrung aufweiten, Innenkontur</td><td>Bohrstange (schlanker Halter)</td></tr>
+                </table>
+            </div>
+        </section>
+
+        <!-- ═══════════════════════════════════════════════
+             6. DREHWERKZEUGE  (CNC7 / CNC8)
+        ═══════════════════════════════════════════════ -->
+        <section class="section" id="werkzeuge">
+            <div class="section-header">
+                <div class="section-icon">🗜️</div>
+                <div>
+                    <div class="section-title">Drehwerkzeuge (Drehmeisel) <span class="section-badge">CNC7 · CNC8</span></div>
+                    <div class="section-subtitle">Arten, Unterscheidungsmerkmale und bildliche Darstellung (mind. 4–5 cm im Original)</div>
+                </div>
+            </div>
+
+            <div class="highlight-box">
+                <strong>Klassifizierung nach:</strong> ① Angriffsrichtung (links / rechts / neutral) &nbsp;②&nbsp;Bearbeitungsort (Außen / Innen) &nbsp;③&nbsp;Werkstoff (HSS · HM · Keramik · CBN) &nbsp;④&nbsp;Geometrie (gerade / gebogen / abgesetzt)
+            </div>
+
+            <!-- SVG: Drehmeißel Zeichnungen -->
+            <div class="svg-container" style="margin-bottom:1.5rem;">
+                <svg viewBox="0 0 700 210" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-height:230px;">
+                    <!-- Außendrehmeisel rechts -->
+                    <g transform="translate(10,20)">
+                        <text x="80" y="14" text-anchor="middle" fill="#0369a1" font-size="10" font-weight="bold">Außenmeisel rechts</text>
+                        <!-- Schaft -->
+                        <rect x="5" y="55" width="100" height="22" rx="3" fill="#64748b"/>
+                        <!-- WSP-Platte (Dreieck) -->
+                        <polygon points="105,50 130,66 105,82" fill="#fbbf24"/>
+                        <text x="118" y="70" fill="white" font-size="7" font-weight="bold">WSP</text>
+                        <!-- Maßpfeil -->
+                        <line x1="5" y1="90" x2="105" y2="90" stroke="#94a3b8" stroke-width="1"/>
+                        <text x="55" y="102" text-anchor="middle" fill="#94a3b8" font-size="8">Schaft 16×16 mm</text>
+                        <!-- Schnittrichtung -->
+                        <line x1="130" y1="66" x2="160" y2="66" stroke="#dc2626" stroke-width="1.5" stroke-dasharray="4,2"/>
+                        <text x="165" y="70" fill="#dc2626" font-size="8">← Schnitt</text>
+                        <text x="67" y="130" text-anchor="middle" fill="#475569" font-size="8">Schneidet rechts→links</text>
+                    </g>
+
+                    <!-- Außendrehmeisel links -->
+                    <g transform="translate(190,20)">
+                        <text x="80" y="14" text-anchor="middle" fill="#0369a1" font-size="10" font-weight="bold">Außenmeisel links</text>
+                        <rect x="55" y="55" width="100" height="22" rx="3" fill="#64748b"/>
+                        <polygon points="55,50 30,66 55,82" fill="#fbbf24"/>
+                        <text x="40" y="70" fill="white" font-size="7" font-weight="bold">WSP</text>
+                        <line x1="30" y1="66" x2="5" y2="66" stroke="#dc2626" stroke-width="1.5" stroke-dasharray="4,2"/>
+                        <text x="-8" y="70" fill="#dc2626" font-size="8">→</text>
+                        <text x="80" y="130" text-anchor="middle" fill="#475569" font-size="8">Schneidet links→rechts</text>
+                    </g>
+
+                    <!-- Innenmeisel / Bohrstange -->
+                    <g transform="translate(360,20)">
+                        <text x="80" y="14" text-anchor="middle" fill="#0369a1" font-size="10" font-weight="bold">Innenmeisel (Bohrstange)</text>
+                        <!-- Bohrungskontur -->
+                        <ellipse cx="80" cy="66" rx="65" ry="35" fill="none" stroke="#94a3b8" stroke-width="1" stroke-dasharray="5,3"/>
+                        <!-- Schaft -->
+                        <rect x="5" y="59" width="130" height="14" rx="7" fill="#64748b"/>
+                        <!-- WSP an Spitze -->
+                        <polygon points="135,54 155,66 135,78" fill="#fbbf24"/>
+                        <text x="80" y="105" text-anchor="middle" fill="#475569" font-size="8">L : D ≤ 4 : 1 (sonst Rattern!)</text>
+                        <text x="80" y="118" text-anchor="middle" fill="#475569" font-size="8">→ Innendurchmesser bearbeiten</text>
+                    </g>
+
+                    <!-- Abstechmeisel + Gewindemeisel nebeneinander unten -->
+                    <g transform="translate(10,150)">
+                        <text x="80" y="10" text-anchor="middle" fill="#0369a1" font-size="10" font-weight="bold">Abstechmeisel</text>
+                        <rect x="5" y="18" width="90" height="20" rx="2" fill="#64748b"/>
+                        <!-- Schmale Klinge -->
+                        <rect x="95" y="20" width="28" height="16" rx="1" fill="#dc2626" opacity="0.85"/>
+                        <text x="109" y="15" text-anchor="middle" fill="#dc2626" font-size="8">2–4 mm</text>
+                        <line x1="109" y1="15" x2="109" y2="20" stroke="#dc2626" stroke-width="1"/>
+                        <text x="63" y="50" text-anchor="middle" fill="#475569" font-size="8">→ schmal, für Nuten/Abstechen</text>
+                    </g>
+
+                    <g transform="translate(200,150)">
+                        <text x="80" y="10" text-anchor="middle" fill="#0369a1" font-size="10" font-weight="bold">Gewindemeisel</text>
+                        <rect x="5" y="18" width="90" height="20" rx="2" fill="#64748b"/>
+                        <!-- 60°-Spitze -->
+                        <polygon points="95,15 125,28 95,41" fill="#fbbf24"/>
+                        <text x="118" y="15" fill="#b45309" font-size="8">60°</text>
+                        <text x="63" y="50" text-anchor="middle" fill="#475569" font-size="8">→ 60° für metrisches Gewinde</text>
+                    </g>
+
+                    <g transform="translate(400,150)">
+                        <text x="80" y="10" text-anchor="middle" fill="#0369a1" font-size="10" font-weight="bold">Formstahl</text>
+                        <rect x="5" y="18" width="90" height="20" rx="2" fill="#64748b"/>
+                        <!-- Konturschneide -->
+                        <path d="M95,18 Q115,22 125,28 Q115,34 95,38" fill="#fbbf24"/>
+                        <text x="63" y="50" text-anchor="middle" fill="#475569" font-size="8">→ Profil = Kontur des Teils</text>
+                    </g>
+                </svg>
+            </div>
+
+            <div class="content-box">
+                <table>
+                    <tr><th>Werkzeug</th><th>Material</th><th>Einsatz</th><th>Besonderheit</th></tr>
+                    <tr><td><strong>Außenmeisel rechts</strong></td><td>HM-Wendeschneidplatte</td><td>Längs-/Plandrehen Außen</td><td>Schnitt von rechts → links</td></tr>
+                    <tr><td><strong>Außenmeisel links</strong></td><td>HM-Wendeschneidplatte</td><td>Hinterschnitte, Längsdrehen</td><td>Schnitt von links → rechts</td></tr>
+                    <tr><td><strong>Innenmeisel (Bohrstange)</strong></td><td>Stahlhalter + HM-Platte</td><td>Innendrehen, Ausdrehen</td><td>L:D-Verhältnis max. 4:1!</td></tr>
+                    <tr><td><strong>Abstechmeisel</strong></td><td>HM-Einstechwerkzeug</td><td>Einstechen, Abstechen, Nuten</td><td>Schneidbreite 2–4 mm</td></tr>
+                    <tr><td><strong>Gewindemeisel</strong></td><td>HM, 60° Spitzenwinkel</td><td>Außen-/Innengewinde</td><td>Winkel = Gewindewinkel (metrisch)</td></tr>
+                    <tr><td><strong>Formstahl</strong></td><td>HM, profiliert</td><td>Serienproduktion gleicher Profile</td><td>Kein Verfahrweg nötig</td></tr>
+                </table>
+            </div>
+
+            <div class="content-box">
+                <strong style="color:var(--primary)">Wendeschneidplatten (WSP) — ISO-Code:</strong>
+                <p style="margin-top:0.5rem; font-size:0.88rem;">Beispiel: <code style="background:#e0f2fe;color:#0369a1;padding:0.1rem 0.4rem;border-radius:4px;font-family:monospace;">WNMG 080408</code></p>
+                <div style="display:grid;grid-template-columns:auto 1fr;gap:0.3rem 0.8rem;margin-top:0.6rem;font-size:0.83rem;">
+                    <code style="background:#e0f2fe;color:#0369a1;border-radius:4px;padding:0.1rem 0.35rem;">W</code><span>Plattenform: 80° Rautenform</span>
+                    <code style="background:#e0f2fe;color:#0369a1;border-radius:4px;padding:0.1rem 0.35rem;">N</code><span>Freiwinkel: 0°</span>
+                    <code style="background:#e0f2fe;color:#0369a1;border-radius:4px;padding:0.1rem 0.35rem;">M</code><span>Toleranzklasse</span>
+                    <code style="background:#e0f2fe;color:#0369a1;border-radius:4px;padding:0.1rem 0.35rem;">G</code><span>Spanformnuten (Halter-Fixierung)</span>
+                    <code style="background:#e0f2fe;color:#0369a1;border-radius:4px;padding:0.1rem 0.35rem;">08</code><span>Schneidenlänge 8 mm</span>
+                    <code style="background:#e0f2fe;color:#0369a1;border-radius:4px;padding:0.1rem 0.35rem;">04</code><span>Plattendicke 4 mm</span>
+                    <code style="background:#e0f2fe;color:#0369a1;border-radius:4px;padding:0.1rem 0.35rem;">08</code><span>Eckenradius 0,8 mm</span>
+                </div>
+                <p style="font-size:0.82rem;color:var(--muted);margin-top:0.6rem;">Farbanwendung ISO: <strong>P</strong> = blau (Stahl) · <strong>M</strong> = gelb (Niro/rostfrei) · <strong>K</strong> = rot (Grauguss) · <strong>N</strong> = grün (NE-Metalle/Aluminium)</p>
+            </div>
+        </section>
+
+        <!-- ═══════════════════════════════════════════════
+             7. SCHNITTDATEN  (CNC9)
+        ═══════════════════════════════════════════════ -->
+        <section class="section" id="schnittdaten">
+            <div class="section-header">
+                <div class="section-icon">📊</div>
+                <div>
+                    <div class="section-title">Schnittdaten <span class="section-badge">CNC9</span></div>
+                    <div class="section-subtitle">Wichtigste Größen für CNC-Drehen — Bedeutung und Einheiten</div>
+                </div>
+            </div>
+
+            <!-- SVG: Schnittdaten visuell -->
+            <div class="svg-container" style="margin-bottom:1.5rem;">
+                <svg viewBox="0 0 640 160" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-height:175px;">
+                    <defs>
+                        <marker id="a3" markerWidth="7" markerHeight="7" refX="3.5" refY="3.5" orient="auto"><path d="M0,0 L7,3.5 L0,7 Z" fill="#dc2626"/></marker>
+                        <marker id="a4" markerWidth="7" markerHeight="7" refX="3.5" refY="3.5" orient="auto"><path d="M0,0 L7,3.5 L0,7 Z" fill="#16a34a"/></marker>
+                        <marker id="a5" markerWidth="7" markerHeight="7" refX="3.5" refY="3.5" orient="auto"><path d="M0,0 L7,3.5 L0,7 Z" fill="#9333ea"/></marker>
+                    </defs>
+                    <!-- Werkstück Querschnitt -->
+                    <ellipse cx="160" cy="85" rx="55" ry="70" fill="#f59e0b" opacity="0.25"/>
+                    <ellipse cx="160" cy="85" rx="55" ry="70" fill="none" stroke="#f59e0b" stroke-width="2"/>
+                    <!-- Werkstück nach Drehen (kleiner) -->
+                    <ellipse cx="160" cy="85" rx="40" ry="55" fill="#f59e0b" opacity="0.6"/>
+                    <!-- ap (Zustellung) -->
+                    <line x1="160" y1="15" x2="205" y2="15" stroke="#9333ea" stroke-width="2" marker-end="url(#a5)"/>
+                    <line x1="160" y1="15" x2="120" y2="15" stroke="#9333ea" stroke-width="2" marker-end="url(#a5)"/>
+                    <text x="163" y="10" fill="#9333ea" font-size="10" font-weight="bold">ap</text>
+                    <text x="163" y="22" fill="#9333ea" font-size="8">Schnitttiefe</text>
+                    <!-- Werkzeug -->
+                    <polygon points="215,75 245,85 215,95" fill="#374151"/>
+                    <rect x="245" y="79" width="80" height="12" rx="2" fill="#374151"/>
+                    <!-- vc (Schnittgeschwindigkeit - tangential) -->
+                    <path d="M160,30 Q220,40 215,85" stroke="#dc2626" stroke-width="2" fill="none" marker-end="url(#a3)"/>
+                    <text x="230" y="50" fill="#dc2626" font-size="10" font-weight="bold">vc</text>
+                    <text x="228" y="62" fill="#dc2626" font-size="8">[m/min]</text>
+                    <!-- f (Vorschub) -->
+                    <line x1="245" y1="105" x2="300" y2="105" stroke="#16a34a" stroke-width="2" marker-end="url(#a4)"/>
+                    <text x="268" y="120" text-anchor="middle" fill="#16a34a" font-size="10" font-weight="bold">f</text>
+                    <text x="268" y="132" text-anchor="middle" fill="#16a34a" font-size="8">[mm/U]</text>
+                    <!-- d (Durchmesser) -->
+                    <line x1="160" y1="85" x2="160" y2="30" stroke="#0369a1" stroke-width="1.5" stroke-dasharray="5,3"/>
+                    <line x1="160" y1="85" x2="200" y2="85" stroke="#0369a1" stroke-width="1.5" stroke-dasharray="5,3"/>
+                    <text x="183" y="80" fill="#0369a1" font-size="10" font-weight="bold">d/2</text>
+                    <!-- n (Drehrichtung) -->
+                    <path d="M115,60 A46,46 0 0,0 120,115" stroke="#0891b2" stroke-width="2" fill="none"/>
+                    <polygon points="118,116 126,122 124,112" fill="#0891b2"/>
+                    <text x="80" y="92" fill="#0891b2" font-size="10" font-weight="bold">n</text>
+                    <text x="75" y="105" fill="#0891b2" font-size="8">[min⁻¹]</text>
+                    <!-- Legende -->
+                    <text x="370" y="30" fill="#374151" font-size="11" font-weight="bold">Schnittdaten:</text>
+                    <rect x="370" y="40" width="10" height="10" fill="#dc2626"/>
+                    <text x="386" y="50" fill="#374151" font-size="10">vc = Schnittgeschwindigkeit [m/min]</text>
+                    <rect x="370" y="58" width="10" height="10" fill="#0891b2"/>
+                    <text x="386" y="68" fill="#374151" font-size="10">n = Drehzahl [min⁻¹]</text>
+                    <rect x="370" y="76" width="10" height="10" fill="#16a34a"/>
+                    <text x="386" y="86" fill="#374151" font-size="10">f = Vorschub [mm/U]</text>
+                    <rect x="370" y="94" width="10" height="10" fill="#0369a1"/>
+                    <text x="386" y="104" fill="#374151" font-size="10">d = Werkstückdurchmesser [mm]</text>
+                    <rect x="370" y="112" width="10" height="10" fill="#9333ea"/>
+                    <text x="386" y="122" fill="#374151" font-size="10">ap = Schnitttiefe [mm]</text>
+                    <text x="386" y="140" fill="#475569" font-size="9">vf = Vorschubgeschwindigkeit [mm/min]</text>
+                </svg>
+            </div>
+
+            <div class="content-grid">
+                <div class="card">
+                    <div class="card-head" style="border-left:4px solid #dc2626;">🔴 v<sub>c</sub> — Schnittgeschwindigkeit</div>
+                    <div class="card-body">
+                        <p><strong>Einheit: m/min</strong></p>
+                        <p style="margin-top:0.4rem;">Geschwindigkeit der Schneidkante <em>relativ zum Werkstück</em> an der Schnittstelle.</p>
+                        <ul style="margin-top:0.5rem;color:var(--muted);font-size:0.83rem;">
+                            <li>Zu hoch → Werkzeugverschleiß</li>
+                            <li>Zu niedrig → Aufbauschneiden / Rattermarken</li>
+                            <li>Abhängig von Werkstoff + Werkzeugmaterial</li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="card">
+                    <div class="card-head" style="border-left:4px solid #0891b2;">🔵 n — Drehzahl</div>
+                    <div class="card-body">
+                        <p><strong>Einheit: min⁻¹ (= U/min)</strong></p>
+                        <p style="margin-top:0.4rem;">Umdrehungen der Hauptspindel pro Minute.</p>
+                        <ul style="margin-top:0.5rem;color:var(--muted);font-size:0.83rem;">
+                            <li>Aus vc und d berechnet</li>
+                            <li>CNC: n passt sich automatisch an (G96 = konst. vc)</li>
+                            <li>Größeres ∅ → kleinere n (bei gleichem vc)</li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="card">
+                    <div class="card-head" style="border-left:4px solid #16a34a;">🟢 f — Vorschub</div>
+                    <div class="card-body">
+                        <p><strong>Einheit: mm/U</strong></p>
+                        <p style="margin-top:0.4rem;">Werkzeugweg pro Umdrehung des Werkstücks.</p>
+                        <ul style="margin-top:0.5rem;color:var(--muted);font-size:0.83rem;">
+                            <li>Schruppen: f = 0,2–0,5 mm/U</li>
+                            <li>Schlichten: f = 0,05–0,15 mm/U</li>
+                            <li>Kleines f → feine Oberfläche, kleiner Ra</li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="card">
+                    <div class="card-head" style="border-left:4px solid #ca8a04;">🟡 v<sub>f</sub> — Vorschubgeschwindigkeit</div>
+                    <div class="card-body">
+                        <p><strong>Einheit: mm/min</strong></p>
+                        <p style="margin-top:0.4rem;">Tatsächliche Bewegungsgeschwindigkeit des Werkzeugs.</p>
+                        <ul style="margin-top:0.5rem;color:var(--muted);font-size:0.83rem;">
+                            <li>vf = f × n</li>
+                            <li>Am CNC-Gerät als Override (%) einstellbar</li>
+                            <li>Wird direkt als F-Wert im G-Code angegeben</li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="card">
+                    <div class="card-head" style="border-left:4px solid #9333ea;">🟣 a<sub>p</sub> — Schnitttiefe (Zustellung)</div>
+                    <div class="card-body">
+                        <p><strong>Einheit: mm</strong></p>
+                        <p style="margin-top:0.4rem;">Wie weit das Werkzeug radial ins Werkstück eindringt.</p>
+                        <ul style="margin-top:0.5rem;color:var(--muted);font-size:0.83rem;">
+                            <li>Schruppen: ap = 2–5 mm</li>
+                            <li>Schlichten: ap = 0,1–0,5 mm</li>
+                            <li>Beeinflusst Schnittkraft + Spandicke</li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="card">
+                    <div class="card-head" style="border-left:4px solid #0369a1;">⚪ d — Werkstückdurchmesser</div>
+                    <div class="card-body">
+                        <p><strong>Einheit: mm</strong></p>
+                        <p style="margin-top:0.4rem;">Aktueller Durchmesser an der Bearbeitungsstelle.</p>
+                        <ul style="margin-top:0.5rem;color:var(--muted);font-size:0.83rem;">
+                            <li>Geht direkt in die n-Formel ein</li>
+                            <li>Ändert sich während Plandrehen → n muss mitlaufen</li>
+                            <li>G96 = konstante vc → CNC regelt n automatisch</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ═══════════════════════════════════════════════
+             8. FORMELN & WERKSTOFFE  (CNC10)
+        ═══════════════════════════════════════════════ -->
+        <section class="section" id="formeln">
+            <div class="section-header">
+                <div class="section-icon">🧮</div>
+                <div>
+                    <div class="section-title">Formeln &amp; Werkstoffe <span class="section-badge">CNC10</span></div>
+                    <div class="section-subtitle">Berechnung von n und vf + Werkstofftabelle für beschichtetes Hartmetall</div>
+                </div>
+            </div>
+
+            <div class="content-grid">
+                <div class="content-box">
+                    <strong style="color:var(--primary)">Drehzahl n berechnen</strong>
+                    <div class="formula-box">n = (v<sub>c</sub> × 1000) / (π × d)</div>
+                    <div class="formula-legend">
+                        <code>n</code><span>Drehzahl [min⁻¹]</span>
+                        <code>v<sub>c</sub></code><span>Schnittgeschwindigkeit [m/min]</span>
+                        <code>π</code><span>3,14159…</span>
+                        <code>d</code><span>Werkstückdurchmesser [mm]</span>
+                    </div>
+                    <p style="font-size:0.78rem;color:var(--muted);margin-top:0.6rem;">× 1000 weil vc in m/min und d in mm → Einheitenumrechnung!</p>
+                </div>
+
+                <div class="content-box">
+                    <strong style="color:var(--primary)">Schnittgeschwindigkeit vc berechnen</strong>
+                    <div class="formula-box">v<sub>c</sub> = (π × d × n) / 1000</div>
+                    <div class="formula-legend">
+                        <code>v<sub>c</sub></code><span>Schnittgeschwindigkeit [m/min]</span>
+                        <code>d</code><span>Werkstückdurchmesser [mm]</span>
+                        <code>n</code><span>Drehzahl [min⁻¹]</span>
+                    </div>
+                    <p style="font-size:0.78rem;color:var(--muted);margin-top:0.6rem;">Umgestellte Form der n-Formel.</p>
+                </div>
+
+                <div class="content-box">
+                    <strong style="color:var(--primary)">Vorschubgeschwindigkeit vf berechnen</strong>
+                    <div class="formula-box">v<sub>f</sub> = f × n</div>
+                    <div class="formula-legend">
+                        <code>v<sub>f</sub></code><span>Vorschubgeschwindigkeit [mm/min]</span>
+                        <code>f</code><span>Vorschub [mm/U]</span>
+                        <code>n</code><span>Drehzahl [min⁻¹]</span>
+                    </div>
+                    <p style="font-size:0.78rem;color:var(--muted);margin-top:0.6rem;">Im G-Code angegeben als F-Wert (z.B. F190).</p>
+                </div>
+            </div>
+
+            <div class="highlight-box">
+                <strong>Rechenbeispiel:</strong> Werkstück ∅ 60 mm, Werkstoff S235JR, v<sub>c</sub> = 160 m/min, f = 0,2 mm/U<br>
+                <strong>n</strong> = (160 × 1000) / (3,14159 × 60) = <strong>849 min⁻¹</strong> &nbsp;|&nbsp;
+                <strong>vf</strong> = 0,2 × 849 = <strong>170 mm/min</strong>
+            </div>
+
+            <div class="content-box">
+                <strong style="color:var(--primary);display:block;margin-bottom:0.9rem;">Werkstofftabelle — Richtwerte für beschichtetes Hartmetall (HM)</strong>
+                <table>
+                    <tr>
+                        <th>Kurzzeichen</th>
+                        <th>Vollname / Norm</th>
+                        <th>Material</th>
+                        <th>v<sub>c</sub> [m/min]</th>
+                        <th>f [mm/U]</th>
+                        <th>a<sub>p</sub> Schrupp [mm]</th>
+                        <th>ISO-Gruppe / Hinweis</th>
+                    </tr>
+                    <tr>
+                        <td><strong>S235JR</strong></td>
+                        <td>EN 10025, früher St 37</td>
+                        <td>Unlegierter Baustahl</td>
+                        <td style="font-weight:700;color:#0369a1;">120 – 200</td>
+                        <td>0,10 – 0,30</td>
+                        <td>1,5 – 3,0</td>
+                        <td><span style="background:#dbeafe;color:#1e40af;padding:0.1rem 0.4rem;border-radius:4px;font-size:0.78rem;">P (blau)</span> gut zerspanbar</td>
+                    </tr>
+                    <tr>
+                        <td><strong>GG25</strong></td>
+                        <td>EN-GJL-250</td>
+                        <td>Grauguss (Lamellengraphit)</td>
+                        <td style="font-weight:700;color:#0369a1;">60 – 120</td>
+                        <td>0,10 – 0,25</td>
+                        <td>1,0 – 3,0</td>
+                        <td><span style="background:#fee2e2;color:#b91c1c;padding:0.1rem 0.4rem;border-radius:4px;font-size:0.78rem;">K (rot)</span> trocken drehen! bricht spröde</td>
+                    </tr>
+                    <tr>
+                        <td><strong>1.4301</strong></td>
+                        <td>X5CrNi18-10 (V2A)</td>
+                        <td>Austenitischer Edelstahl</td>
+                        <td style="font-weight:700;color:#0369a1;">60 – 100</td>
+                        <td>0,05 – 0,20</td>
+                        <td>0,5 – 2,0</td>
+                        <td><span style="background:#fef9c3;color:#854d0e;padding:0.1rem 0.4rem;border-radius:4px;font-size:0.78rem;">M (gelb)</span> Aufbauschneiden! Kühlen!</td>
+                    </tr>
+                    <tr>
+                        <td><strong>AlMgSi1</strong></td>
+                        <td>EN AW-6082 / 3.2315</td>
+                        <td>Aluminium-Knetlegierung</td>
+                        <td style="font-weight:700;color:#0369a1;">300 – 600</td>
+                        <td>0,10 – 0,40</td>
+                        <td>1,0 – 5,0</td>
+                        <td><span style="background:#dcfce7;color:#15803d;padding:0.1rem 0.4rem;border-radius:4px;font-size:0.78rem;">N (grün)</span> sehr gut, hohe n!</td>
+                    </tr>
+                </table>
+                <p style="font-size:0.78rem;color:var(--muted);margin-top:0.7rem;">* Richtwerte für beschichtetes Hartmetall (TiAlN, TiN). Reale Werte je nach Maschinenstabilität, Kühlung und Oberflächenanforderung.</p>
+            </div>
+        </section>
+
+    </div><!-- /content -->
+</main>
+
+<!-- ── Lernmodus Modal ── -->
+<div class="learn-overlay" id="learn-overlay">
+    <div class="learn-modal">
+        <div class="learn-header">
+            <h2>🎓 Lernmodus — CNC-Drehen</h2>
+            <button class="btn btn-secondary btn-sm" onclick="closeLearningMode()">✕ Schließen</button>
+        </div>
+        <div class="learn-body" id="learn-body"></div>
+    </div>
+</div>
+
+<script>
+    // ════════════════════════════════════════════════════
+    const flashcards = [
+        // Bearbeitungsmethoden
+        { cat: 'Bearbeitungsmethoden', q: 'Nenne 6 wichtige CNC-Drehverfahren und beschreibe kurz welches Merkmal sie erzeugen.', a: '1. Längsdrehen → Zylinderfläche (Z-Richtung)\n2. Plandrehen → Stirnfläche (X-Richtung)\n3. Gewindedrehen → Außen-/Innengewinde (Z synchron)\n4. Konturdrehen → Kegel, Radien, Freiformkontur (X+Z)\n5. Einstechen → Nut / Einstich (X, radial)\n6. Innendrehen → Innendurchmesser (Bohrstange)' },
+        { cat: 'Bearbeitungsmethoden', q: 'Was ist der Unterschied zwischen Einstechen und Abstechen?', a: 'EINSTECHEN:\nWerkzeug dringt radial ein → erzeugt Nut oder Einstich\nWerkstück bleibt ganz!\n\nABSTECHEN:\nEinstechen bis zur MITTE (∅ → 0)\nWerkstück wird vollständig getrennt\n\nBeide: schmaler Abstechmeisel (2–4 mm Breite)' },
+        { cat: 'Bearbeitungsmethoden', q: 'Warum ist Konturdrehen nur mit CNC möglich?', a: 'Konturdrehen erfordert die SIMULTANE INTERPOLATION von X- und Z-Achse:\n→ Beide Achsen bewegen sich gleichzeitig und exakt koordiniert\n→ Erzeugt Kegel, Radien, Freiformkonturen\n→ Konventionelle Maschinen können keine simultane Achssteuerung!\n→ CNC-Steuerung berechnet jeden Bahnpunkt automatisch' },
+        // Achsen
+        { cat: 'Achsen', q: 'Was steuern X-Achse und Z-Achse bei einer CNC-Drehmaschine?', a: 'X-ACHSE (radial, ⊥ zur Spindel):\n→ Steuert den DURCHMESSER des Werkstücks\n\nZ-ACHSE (axial, ∥ zur Spindel):\n→ Steuert die LÄNGE / Längsposition des Werkzeugs\n\nMerke: X = Durchmesser, Z = Länge' },
+        { cat: 'Achsen', q: 'Was ist die C-Achse?', a: 'C-Achse = geregelte Rotation der Hauptspindel in GRAD (°)\n→ Exakte Winkelpositionierung der Spindel\n→ Ermöglicht Fräsen und Bohren mit angetriebenem Werkzeug\n→ Aus Drehmaschine wird Dreh-Fräszentrum\nBeispiel: Außermittige Bohrung = C-Achse + Y-Achse + angetr. Bohrer' },
+        { cat: 'Achsen', q: 'Was kann eine 5-Achs-CNC mehr als eine 2-Achs?', a: '2-ACHS (X, Z): Längsdrehen, Plandrehen, Einstechen, Gewindedrehen\n\n5-ACHS (X, Y, Z, C, B/A) zusätzlich:\n→ Fräsen und Bohren während Drehen\n→ Außermittige Bearbeitung\n→ Komplexteile komplett in EINER Aufspannung\n→ Kein Umspannen → höhere Genauigkeit, kürze Durchlaufzeit' },
+        // Maschinenbestandteile
+        { cat: 'Maschinenbestandteile', q: 'Nenne 6 wichtige Bestandteile einer CNC-Drehmaschine.', a: '① Maschinenbett (Grauguss GG25, steife Basis)\n② Spindelstock + Hauptspindel\n③ Dreibackenfutter / Spannmittel\n④ Werkzeugrevolver (4–12 WKZ, autom. Wechsel)\n⑤ Reitstock (Abstützung langer Teile)\n⑥ CNC-Steuerung (Sinumerik, Fanuc, Heidenhain)\nZusatz: Kühlmittelsystem, Späneförderband' },
+        { cat: 'Maschinenbestandteile', q: 'Warum besteht das Maschinenbett aus Grauguss GG25?', a: 'GG25 = EN-GJL-250\nVorteile für Maschinenbett:\n→ Hohe STEIFIGKEIT → geringe Verformung unter Schnittkraft\n→ Hohe SCHWINGUNGSDÄMPFUNG → bessere Oberflächenqualität\n→ Gut bearbeitbar → Führungsbahnen präzise schleifbar\n→ Gute Gleiteigenschaften der Bettschlitten\nAlternative: Mineralguss (Polymer-Beton) noch besser gedämpft' },
+        { cat: 'Maschinenbestandteile', q: 'Wozu dient der Reitstock?', a: 'Der Reitstock stützt LANGE WERKSTÜCKE auf der gegenüberliegenden Seite des Spindelstocks ab.\nOHNE Reitstock: Werkstück biegt sich durch → Maßungenauigkeiten, Rattern\nMIT Reitstock:\n→ Körnerspitze zentriert am Werkstückende\n→ Kein Durchbiegen, keine Vibrationen\n→ Auch als Bohrfutteraufnahme verwendbar\nFaustregel: ab L:D > 4 Reitstock empfohlen' },
+        // Drehautomaten
+        { cat: 'CNC-Drehautomaten', q: 'Wozu werden CNC-Drehautomaten eingesetzt?', a: 'CNC-Drehautomaten dienen der VOLLAUTOMATISCHEN SERIENPRODUKTION:\n→ Hohe Stückzahlen (1.000 – 1.000.000 Teile)\n→ Kein ständiger Bediener nötig (mannloses Drehen)\n→ Stangenmaterial wird automatisch nachgeschoben\n→ Kurze Taktzeiten (oft nur Sekunden pro Teil)\nTypische Teile: Schrauben, Bolzen, Verbinder, Hülsen, Kolben, Implantate' },
+        { cat: 'CNC-Drehautomaten', q: 'Was ist der Vorteil eines Mehrspindlers?', a: 'MEHRSPINDLER (4–8 Spindeln):\n→ Jede Spindel = eigene Bearbeitungsstation\n→ ALLE STATIONEN ARBEITEN GLEICHZEITIG\n→ Taktzeit = Zeit der langsamsten Station (nicht Summe!)\nVergleich:\nEINSPINDLER: 1 Teil in 30 s\nACHT-SPINDLER: bis zu 8× mehr Ausstoß bei gleichem Zeit\nNachteil: Teuer, Rüstzeit länger, komplex' },
+        // Drehverfahren
+        { cat: 'Drehverfahren', q: 'Erkläre das Längsdrehen in eigenen Worten.', a: 'Beim Längsdrehen dreht sich das Werkstück in der Spindel.\nDer Außendrehmeisel bewegt sich PARALLEL ZUR DREHACHSE (Z-Richtung).\nDabei wird vom Außendurchmesser Material abgespant.\nErgebnis: ZYLINDERFLÄCHE (gerade, zylindrisch).\nBeim Innen-Längsdrehen fährt eine Bohrstange in eine bereits vorhandene Bohrung.' },
+        { cat: 'Drehverfahren', q: 'Wie funktioniert Gewindedrehen?', a: 'Beim Gewindedrehen ist der Vorschub EXAKT MIT DER SPINDELDREHZAHL SYNCHRONISIERT:\n→ Pro Umdrehung bewegt sich Werkzeug um genau EINE GEWINDESTEIGUNG P\n→ Mehrere Durchgänge (jedes Mal etwas tiefer)\n→ Außengewinde: mit Gewindemeisel (60° für metrisch)\n→ Innengewinde: mit Gewindebohrstange\n→ CNC-Befehl: G32 (Gewindedrehen), G76 (Gewindezyklus)' },
+        // Werkzeuge
+        { cat: 'Drehwerkzeuge', q: 'Nach welchen 3 Hauptkriterien werden Drehmeisel unterschieden?', a: '1. ANGRIFFSRICHTUNG:\n   Linkschneidend (→), Rechtschneidend (←), Neutral\n2. BEARBEITUNGSORT:\n   Außen (Außendrehmeisel) vs. Innen (Bohrstange)\n3. SCHNEIDSTOFFMATERIAL:\n   HSS = Schnellarbeitsstahl (Schruppen, konventionell)\n   HM = Hartmetall, beschichtet (häufigste Wahl CNC)\n   Keramik (hohe vc, spröde)\n   CBN = für gehärteten Stahl' },
+        { cat: 'Drehwerkzeuge', q: 'Was ist eine Wendeschneidplatte und warum verwendet man sie?', a: 'WSP = normierte Schneidplatte aus Hartmetall (HM)\nVORTEILE:\n→ Mehrere Schneidkanten (3–8): einfach wenden oder wechseln\n→ KEIN Nachschleifen nötig\n→ ISO-Normung → weltweit austauschbar\n→ Hohe Standzeiten durch Hartstoffbeschichtung (TiN, TiAlN)\n→ Halter wird lange weiterverwendet → wirtschaftlich\nKODE-Beispiel: WNMG 080408 (Form, Freiwinkel, Größe, Eckenradius)' },
+        { cat: 'Drehwerkzeuge', q: 'Was bedeuten die ISO-Farbgruppen P, M, K, N?', a: 'P = BLAU → Stahl (S235JR, 42CrMo4 …)\nM = GELB → Rostfreier Stahl (1.4301 V2A, Niro …)\nK = ROT → Grauguss (GG25, EN-GJL …)\nN = GRÜN → NE-Metalle: Aluminium, Kupfer, Messing …\nS = BRAUN → Superlegierungen (Titan, Inconel)\nH = GRAU → Gehärteter Stahl\nMerke: Bitte Manche Kunden Nicht So Höflich 😄' },
+        // Schnittdaten
+        { cat: 'Schnittdaten', q: 'Was bedeuten vc, n, f, vf und ap? (mit Einheiten)', a: 'vc = Schnittgeschwindigkeit [m/min]\n   → Geschwindigkeit der Schneidkante am Werkstück\nn = Drehzahl [min⁻¹]\n   → Umdrehungen der Spindel pro Minute\nf = Vorschub [mm/U]\n   → Werkzeugweg pro Umdrehung\nvf = Vorschubgeschwindigkeit [mm/min]\n   → Bewegungsgeschwindigkeit des Werkzeugs\nap = Schnitttiefe / Zustellung [mm]\n   → Eindringtiefe des Werkzeugs (radial)' },
+        { cat: 'Schnittdaten', q: 'Was passiert wenn vc zu hoch oder zu niedrig ist?', a: 'ZU HOCH:\n→ Zu viel Reibungswärme → Werkzeugverschleiß oder Ausbruch\n→ Kürzere Standzeit → teurer!\nZU NIEDRIG:\n→ Aufbauschneiden (Werkstoffpartikel kleben an Schneide)\n→ Schlechte Oberflächengüte, Rattermarken\n→ Unvollständiger Span (reißt statt schneidet)\nOPTIMAL: Herstellerangaben für Werkstoff + Schneidstoff beachten!' },
+        // Formeln
+        { cat: 'Formeln', q: 'Wie berechnet man die Drehzahl n? Zeige die Formel und ein Beispiel.', a: 'FORMEL: n = (vc × 1000) / (π × d)\n\nEINHEITEN: n [min⁻¹], vc [m/min], d [mm]\n(× 1000 weil vc in m → mm umrechnen!)\n\nBEISPIEL:\nvc = 120 m/min, d = 40 mm\nn = (120 × 1000) / (3,14159 × 40)\nn = 120.000 / 125,66\nn ≈ 955 min⁻¹' },
+        { cat: 'Formeln', q: 'Wie berechnet man vf? Zeige Formel und Beispiel.', a: 'FORMEL: vf = f × n\n\nEINHEITEN: vf [mm/min], f [mm/U], n [min⁻¹]\n\nBEISPIEL:\nf = 0,2 mm/U, n = 955 min⁻¹\nvf = 0,2 × 955 = 191 mm/min\n\nBEDEUTUNG: Am CNC-Gerät direkt als F-Wert angegeben\n→ F191 bedeutet vf = 191 mm/min' },
+        { cat: 'Formeln', q: 'Welche vc-Richtwerte gelten für S235JR, GG25, 1.4301 und AlMgSi1 mit HM?', a: 'Beschichtetes Hartmetall (HM):\n\nS235JR (Baustahl): vc = 120–200 m/min → gut zerspanbar\nGG25 (Grauguss): vc = 60–120 m/min → trocken drehen!\n1.4301 (V2A Edelstahl): vc = 60–100 m/min → Kühlen! Aufbauschneiden!\nAlMgSi1 (Aluminium): vc = 300–600 m/min → sehr gut, hohe Drehzahlen!\n\nMerke: Alu am schnellsten, Edelstahl am langsamsten!' },
+    ];
+    // ════════════════════════════════════════════════════
+
+    let learnState = { idx: 0, flipped: false, easy: 0, ok: 0, hard: 0, order: [] };
+
+    function toggleDark() {
+        const isDark = document.body.classList.toggle('dark');
+        localStorage.setItem('cnc-dark', isDark ? '1' : '');
+        document.getElementById('dm-toggle').textContent = isDark ? '☀️' : '🌙';
+    }
+    (function () {
+        if (localStorage.getItem('cnc-dark')) {
+            document.body.classList.add('dark');
+            const btn = document.getElementById('dm-toggle');
+            if (btn) btn.textContent = '☀️';
+        }
+    })();
+
+    function scrollToSection(id) {
+        const el = document.getElementById(id);
+        if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+
+    function updateTOC() {
+        const sections = ['bearbeitungsmethoden','achsen','bestandteile','drehautomaten','drehverfahren','werkzeuge','schnittdaten','formeln'];
+        let current = sections[0];
+        const scrollY = window.scrollY + 120;
+        sections.forEach(id => {
+            const el = document.getElementById(id);
+            if (el && el.offsetTop <= scrollY) current = id;
+        });
+        document.querySelectorAll('.toc-item').forEach(item => {
+            item.classList.toggle('active', item.dataset.section === current);
+        });
+        const total = document.documentElement.scrollHeight - window.innerHeight;
+        const pct = total > 0 ? Math.min(100, Math.round(window.scrollY / total * 100)) : 0;
+        const fill = document.getElementById('progress-fill');
+        if (fill) fill.style.width = pct + '%';
+    }
+    window.addEventListener('scroll', updateTOC, { passive: true });
+
+    function startLearningMode() {
+        learnState = { idx: 0, flipped: false, easy: 0, ok: 0, hard: 0, order: shuffle([...Array(flashcards.length).keys()]) };
+        document.getElementById('learn-overlay').classList.add('open');
+        renderCard();
+    }
+
+    function closeLearningMode() {
+        document.getElementById('learn-overlay').classList.remove('open');
+    }
+
+    function restartLearning() {
+        learnState = { idx: 0, flipped: false, easy: 0, ok: 0, hard: 0, order: shuffle([...Array(flashcards.length).keys()]) };
+        renderCard();
+    }
+
+    function shuffle(arr) {
+        for (let i = arr.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [arr[i], arr[j]] = [arr[j], arr[i]];
+        }
+        return arr;
+    }
+
+    function renderCard() {
+        const body = document.getElementById('learn-body');
+        if (learnState.idx >= flashcards.length) { showResult(); return; }
+        const card = flashcards[learnState.order[learnState.idx]];
+        const pct = Math.round(learnState.idx / flashcards.length * 100);
+        body.innerHTML = `
+            <div class="learn-progress">
+                <div class="learn-progress-bar"><div class="learn-progress-fill" id="learn-progress-fill" style="width:${pct}%"></div></div>
+                <div class="learn-counter" id="learn-counter">${learnState.idx + 1} / ${flashcards.length}</div>
+            </div>
+            <div class="learn-card" id="flip-card" onclick="flipCard()">
+                <div class="learn-card-front">
+                    <span class="learn-category">${card.cat}</span>
+                    <div class="learn-question">${card.q}</div>
+                    <div class="learn-hint">👆 Tippen zum Aufdecken</div>
+                </div>
+                <div class="learn-card-back">
+                    <span class="learn-category">${card.cat}</span>
+                    <div class="learn-answer">${card.a}</div>
+                </div>
+            </div>
+            <div class="learn-rate" id="learn-rate">
+                <button class="btn btn-sm" style="background:#dcfce7;color:#15803d;border:1px solid #86efac;" onclick="rateCard('easy')">😊 Leicht</button>
+                <button class="btn btn-sm" style="background:#fef9c3;color:#854d0e;border:1px solid #fde68a;" onclick="rateCard('ok')">🤔 OK</button>
+                <button class="btn btn-sm" style="background:#fee2e2;color:#b91c1c;border:1px solid #fca5a5;" onclick="rateCard('hard')">😅 Schwer</button>
+            </div>
+        `;
+        learnState.flipped = false;
+    }
+
+    function flipCard() {
+        learnState.flipped = !learnState.flipped;
+        document.getElementById('flip-card').classList.toggle('flipped', learnState.flipped);
+        if (learnState.flipped) document.getElementById('learn-rate').style.display = 'flex';
+    }
+
+    function rateCard(level) {
+        if (level === 'easy') learnState.easy++;
+        else if (level === 'ok') learnState.ok++;
+        else learnState.hard++;
+        learnState.idx++;
+        renderCard();
+    }
+
+    function showResult() {
+        const total = flashcards.length;
+        const pct = Math.round(learnState.easy / total * 100);
+        document.getElementById('learn-body').innerHTML = `
+            <div class="learn-result">
+                <div class="learn-result-icon">${pct >= 80 ? '🏆' : pct >= 60 ? '👍' : '💪'}</div>
+                <h2>${pct >= 80 ? 'Sehr gut!' : pct >= 60 ? 'Gut gemacht!' : 'Weiter üben!'}</h2>
+                <p>Du hast alle ${total} Karteikarten durchgearbeitet.</p>
+                <div class="learn-result-bars">
+                    <div class="result-bar-item">
+                        <div class="rbi-num" style="color:#16a34a">${learnState.easy}</div>
+                        <div class="rbi-lbl">😊 Leicht</div>
+                    </div>
+                    <div class="result-bar-item">
+                        <div class="rbi-num" style="color:#ca8a04">${learnState.ok}</div>
+                        <div class="rbi-lbl">🤔 OK</div>
+                    </div>
+                    <div class="result-bar-item">
+                        <div class="rbi-num" style="color:#dc2626">${learnState.hard}</div>
+                        <div class="rbi-lbl">😅 Schwer</div>
+                    </div>
+                </div>
+                <button class="btn btn-primary" onclick="restartLearning()" style="margin-top:0.5rem;">🔄 Nochmal üben</button>
+            </div>
+        `;
+    }
+</script>
+<script src="../../shared/hub.js"></script>
+</body>
+</html>

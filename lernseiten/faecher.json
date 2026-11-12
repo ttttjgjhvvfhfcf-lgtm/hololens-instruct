@@ -1,0 +1,88 @@
+[
+  {
+    "id": "mathematik",
+    "name": "Mathematik",
+    "kurz": "AM",
+    "farbe": "#6d28d9",
+    "farbeDunkel": "#a78bfa",
+    "info": "Trigonometrie, Funktionen, Wechselstromrechnung",
+    "seiten": [
+      {
+        "datei": "faecher/mathematik/mathematik-2md.html",
+        "titel": "Mathematik 2Md",
+        "art": "Lernseite",
+        "info": "Lernzusammenfassungen, Übungsaufgaben, Lernmodus und Probeschularbeit"
+      }
+    ]
+  },
+  {
+    "id": "aee",
+    "name": "Angewandte Elektrotechnik",
+    "kurz": "AEE",
+    "farbe": "#1d4ed8",
+    "farbeDunkel": "#60a5fa",
+    "info": "Wechselstromtechnik, RLC-Schaltungen, Leistung",
+    "seiten": [
+      {
+        "datei": "faecher/aee/kompensation.html",
+        "titel": "Kompensation — RLC-Schaltungen",
+        "art": "Lernseite",
+        "info": "Reihen- und Parallelschaltung, Resonanz, Blindleistungskompensation"
+      },
+      {
+        "datei": "faecher/aee/test-2a-loesungen.html",
+        "titel": "Test 2a — Lösungen",
+        "art": "Testlösung",
+        "info": "Musterlösung zum Test vom 19.06.2026, 8 Aufgaben"
+      }
+    ]
+  },
+  {
+    "id": "awl",
+    "name": "Wirtschaftsrecht",
+    "kurz": "AWL",
+    "farbe": "#047857",
+    "farbeDunkel": "#34d399",
+    "info": "Kaufvertrag, Leasing, Ratengeschäft, Verzüge",
+    "seiten": [
+      {
+        "datei": "faecher/awl/awl-lernseite.html",
+        "titel": "AWL — Allgemeines Wirtschaftsrecht",
+        "art": "Lernseite",
+        "info": "Schularbeitenstoff mit Lernmodus, Formeln und Probeschularbeit"
+      }
+    ]
+  },
+  {
+    "id": "met",
+    "name": "MET · Elektrotechnik",
+    "kurz": "MET",
+    "farbe": "#b45309",
+    "farbeDunkel": "#fbbf24",
+    "info": "Schutzmaßnahmen, Sicherungen, Schutzleiter",
+    "seiten": [
+      {
+        "datei": "faecher/met/met-test2-schutzmassnahmen.html",
+        "titel": "MET — Test 2: Schutzmaßnahmen",
+        "art": "Lernseite",
+        "info": "Teststoff zu Schutzmaßnahmen und Überstromschutz"
+      }
+    ]
+  },
+  {
+    "id": "cnc",
+    "name": "Fertigungstechnik",
+    "kurz": "CNC",
+    "farbe": "#0369a1",
+    "farbeDunkel": "#38bdf8",
+    "info": "CNC-Drehen",
+    "seiten": [
+      {
+        "datei": "faecher/cnc/cnc-drehen.html",
+        "titel": "CNC-Drehen — Lernseite",
+        "art": "Lernseite",
+        "info": "Grundlagen und Programmierung beim CNC-Drehen"
+      }
+    ]
+  }
+]
