@@ -1,0 +1,1388 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Kompensation — RLC-Schaltungen</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap">
+<style>
+:root {
+    --primary:       #1d4ed8;
+    --primary-light: #2563eb;
+    --accent:        #3b82f6;
+    --bg:            #eff6ff;
+    --card:          #ffffff;
+    --text:          #0f172a;
+    --muted:         #64748b;
+    --border:        #dbeafe;
+    --success:       #059669;
+    --shadow-xs: 0 1px 2px rgba(15,23,42,0.05);
+    --shadow-sm: 0 2px 8px rgba(29,78,216,0.08), 0 1px 3px rgba(29,78,216,0.04);
+    --shadow-md: 0 6px 24px rgba(29,78,216,0.11), 0 2px 8px rgba(29,78,216,0.05);
+    --radius:    16px;
+    --radius-sm: 10px;
+    --dur:       0.18s;
+    --ease:      cubic-bezier(0.4,0,0.2,1);
+}
+body.dark {
+    --primary:       #60a5fa;
+    --primary-light: #93c5fd;
+    --accent:        #3b82f6;
+    --bg:            #050d1a;
+    --card:          #0d1829;
+    --text:          #e2e8f0;
+    --muted:         #94a3b8;
+    --border:        #1a2d4a;
+    --success:       #34d399;
+    color-scheme: dark;
+}
+body.dark {
+    background-image:
+        radial-gradient(ellipse 70% 50% at 5% -5%, rgba(59,130,246,0.06) 0%, transparent 55%),
+        radial-gradient(ellipse 55% 45% at 95% 105%, rgba(96,165,250,0.05) 0%, transparent 55%),
+        radial-gradient(circle, rgba(26,45,74,0.8) 0.85px, transparent 0.85px);
+    background-size: auto, auto, 22px 22px;
+}
+body.dark header   { background: linear-gradient(135deg, #030a1a 0%, #0c2a6e 50%, #1e40af 100%); }
+body.dark .rlc-nav { background: rgba(5,13,26,0.88); border-bottom-color: #1a2d4a; }
+body.dark .sum-wrap   { background: #0d1829; border-color: #1a2d4a; }
+body.dark .sum-header { background: linear-gradient(135deg, #091524 0%, #050d1a 100%); border-bottom-color: #1a2d4a; }
+body.dark .sum-title  { color: #e2e8f0; }
+body.dark .sum-note   { background: rgba(59,130,246,0.15); color: #93c5fd; }
+body.dark .card       { background: #0d1829; border-color: #1a2d4a; }
+body.dark .card-head  { background: #060f1e; border-bottom-color: #1a2d4a; }
+body.dark .btn-secondary { background: #1a2d4a; color: #e2e8f0; border-color: #233d60; }
+body.dark .btn-secondary:hover { background: #233d60; }
+body.dark .btn-dm { color: #fbbf24; }
+body.dark .md-out h2,body.dark .md-out h1 { color: #93c5fd; border-bottom-color: #1a2d4a; }
+body.dark .md-out h3  { color: #60a5fa; }
+body.dark .md-out strong { color: #93c5fd; }
+body.dark .md-out code   { background: #1a2d4a; color: #e2e8f0; }
+body.dark .md-out blockquote { background: #060f1e; border-left-color: #2563eb; }
+body.dark .md-out th   { background: #0d1829; color: #93c5fd; border-bottom-color: #1a2d4a; }
+body.dark .md-out tr:nth-child(even) td { background: #091524; }
+body.dark .md-out td   { border-top-color: #1a2d4a; }
+body.dark .formula-box  { background: #091524; border-left-color: #2563eb; }
+body.dark .textbook-head { background: #060f1e; }
+body.dark .def-box  { background: #091524; border-color: #1a2d4a; }
+body.dark .def-item { background: #060f1e; border-left-color: #93c5fd; }
+body.dark .notice-box { background: #1a0f00; border-left-color: #d97706; }
+body.dark .notice-box strong { color: #fbbf24; }
+body.dark .calc-block { background: #060f1e; }
+body.dark .calc-row.result { border-top-color: #1a2d4a; }
+body.dark .phasor-wrap { background: #060f1e; border-color: #1a2d4a; }
+body.dark .lm-card  { background: #0d1829; border-color: #1a2d4a; }
+body.dark .lm-phase-badge { background: #1a2d4a; color: #60a5fa; }
+
+*,*::before,*::after { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+    font-family: 'Inter',-apple-system,BlinkMacSystemFont,system-ui,sans-serif;
+    background: var(--bg);
+    background-image:
+        radial-gradient(ellipse 70% 50% at 5% -5%, rgba(59,130,246,0.07) 0%, transparent 55%),
+        radial-gradient(ellipse 55% 45% at 95% 105%, rgba(59,130,246,0.06) 0%, transparent 55%),
+        radial-gradient(circle, rgba(148,163,184,0.22) 0.85px, transparent 0.85px);
+    background-size: auto, auto, 22px 22px;
+    color: var(--text); min-height: 100vh; font-size: 15px; line-height: 1.57;
+}
+#top-progress-bar {
+    position: fixed; top: 0; left: 0; height: 3px; width: 0%;
+    background: linear-gradient(90deg, var(--primary-light), var(--accent));
+    z-index: 9999; transition: width 0.1s linear; pointer-events: none;
+}
+header {
+    background: linear-gradient(135deg, #1e40af 0%, #1d4ed8 50%, #2563eb 100%);
+    color: white; padding: 1.25rem 2.5rem 1.1rem; position: relative; overflow: hidden;
+}
+header::before {
+    content: ''; position: absolute; inset: 0;
+    background: radial-gradient(ellipse 55% 75% at 0% 50%, rgba(255,255,255,0.04) 0%, transparent 65%);
+}
+header::after {
+    content: ''; position: absolute; bottom: 0; left: 0; right: 0; height: 1px;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.14), transparent);
+}
+.h-deco { position: absolute; right: 2.5rem; top: 50%; transform: translateY(-50%); font-size: 3.5rem; opacity: 0.08; font-style: italic; user-select: none; line-height: 1; letter-spacing: 0.3rem; }
+.h-content { position: relative; }
+.h-badge {
+    display: inline-flex; align-items: center; gap: 0.35rem;
+    background: rgba(255,255,255,0.11); border: 1px solid rgba(255,255,255,0.18);
+    backdrop-filter: blur(8px); padding: 0.3rem 0.95rem; border-radius: 999px;
+    font-size: 0.75rem; font-weight: 600; margin-bottom: 0.85rem; letter-spacing: 0.025em;
+}
+.h-motto { font-size: 0.92rem; font-style: italic; color: rgba(255,255,255,0.72); margin-top: 0.4rem; }
+header h1 { font-size: 2.3rem; font-weight: 800; letter-spacing: -0.75px; margin-bottom: 0.35rem; line-height: 1.15; }
+header p  { font-size: 0.9rem; opacity: 0.7; }
+
+/* ── Nav */
+.rlc-nav {
+    background: rgba(255,255,255,0.88); backdrop-filter: blur(18px) saturate(1.8);
+    -webkit-backdrop-filter: blur(18px) saturate(1.8);
+    border-bottom: 1px solid rgba(219,234,254,0.8); padding: 0.55rem 1.75rem;
+    display: flex; align-items: center; gap: 0.75rem; position: sticky; top: 0; z-index: 50;
+    box-shadow: 0 1px 14px rgba(29,78,216,0.07);
+}
+.nav-label { font-size: 0.72rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted); margin-right: 0.25rem; }
+#lp-bar-wrap { display: flex; align-items: center; gap: 0.5rem; }
+#lp-text { font-size: 0.75rem; font-weight: 600; color: var(--primary); min-width: 28px; }
+#lp-bar  { width: 90px; height: 5px; background: var(--border); border-radius: 999px; overflow: hidden; }
+#lp-fill { height: 100%; background: var(--primary); border-radius: 999px; width: 0%; transition: width 0.4s; }
+.btn-dm { margin-left: auto; font-size: 1.1rem; line-height: 1; }
+
+/* ── Layout / Buttons */
+main { max-width: 900px; margin: 0 auto; padding: 1.75rem 1.25rem 4rem; }
+.btn { display: inline-flex; align-items: center; justify-content: center; gap: 0.35rem; padding: 0.5rem 1rem; border-radius: 9px; border: none; font-size: 0.84rem; font-weight: 500; cursor: pointer; transition: all var(--dur) var(--ease); white-space: nowrap; font-family: inherit; }
+.btn-primary   { background: #3b82f6; color: white; border: 1px solid #2563eb; box-shadow: var(--shadow-xs); }
+.btn-primary:hover { background: #2563eb; }
+.btn-secondary { background: #f8fafc; color: var(--text); border: 1px solid var(--border); box-shadow: var(--shadow-xs); }
+.btn-secondary:hover { background: #f1f5f9; }
+.btn-sm { padding: 0.33rem 0.7rem; font-size: 0.78rem; }
+
+/* ── Cards / Sections */
+.sum-wrap {
+    background: var(--card); border: 1px solid var(--border); border-radius: var(--radius);
+    margin-bottom: 1.5rem; box-shadow: var(--shadow-sm);
+    transition: box-shadow var(--dur) var(--ease), transform var(--dur) var(--ease);
+}
+.sum-wrap:hover { box-shadow: var(--shadow-md); transform: translateY(-1px); }
+.sum-header {
+    background: linear-gradient(135deg, #eff6ff, #dbeafe);
+    padding: 1rem 1.5rem; border-bottom: 1px solid var(--border);
+    display: flex; align-items: center; gap: 0.75rem; border-radius: var(--radius) var(--radius) 0 0;
+}
+.sum-title { font-weight: 700; font-size: 1.05rem; flex: 1; }
+.sum-note  { font-size: 0.72rem; font-weight: 600; background: rgba(59,130,246,0.1); color: var(--primary); border: 1px solid rgba(59,130,246,0.2); padding: 0.2rem 0.65rem; border-radius: 999px; }
+.sum-body  { padding: 1.5rem 1.75rem; }
+.card { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius); margin-bottom: 1.5rem; box-shadow: var(--shadow-sm); }
+.card-head { display: flex; align-items: center; gap: 0.6rem; padding: 0.9rem 1.25rem; background: linear-gradient(135deg, #eff6ff, #dbeafe); border-bottom: 1px solid var(--border); border-radius: var(--radius) var(--radius) 0 0; }
+.card-title { font-weight: 700; font-size: 0.95rem; }
+.card-body  { padding: 1.25rem 1.5rem; }
+
+/* ── Markdown output */
+.md-out h2 { font-size: 1.1rem; font-weight: 700; color: var(--primary); border-bottom: 1px solid var(--border); padding-bottom: 0.4rem; margin: 1.4rem 0 0.7rem; }
+.md-out h3 { font-size: 0.97rem; font-weight: 700; color: var(--primary-light); margin: 1.1rem 0 0.45rem; }
+.md-out p  { margin: 0.6rem 0; }
+.md-out ul,.md-out ol { margin: 0.5rem 0 0.5rem 1.4rem; }
+.md-out li { margin: 0.25rem 0; }
+.md-out strong { color: var(--primary); }
+.md-out em { color: var(--muted); font-style: italic; }
+.md-out table { width: 100%; border-collapse: collapse; font-size: 0.875rem; margin: 0.85rem 0; }
+.md-out th { background: #eff6ff; padding: 0.5rem 0.85rem; text-align: left; border-bottom: 2px solid var(--border); color: var(--primary); font-weight: 700; }
+.md-out td { padding: 0.45rem 0.85rem; border-top: 1px solid var(--border); }
+.md-out tr:nth-child(even) td { background: #f8faff; }
+.md-out blockquote { border-left: 3px solid var(--primary); background: #eff6ff; padding: 0.7rem 1rem; margin: 0.85rem 0; border-radius: 0 8px 8px 0; font-size: 0.875rem; color: var(--muted); }
+
+/* ── Formulas / Content Blocks */
+.formula-box {
+    background: #eff6ff; border-left: 3px solid var(--primary);
+    padding: 0.8rem 1.1rem; border-radius: 0 8px 8px 0; margin: 0.85rem 0;
+    font-family: 'JetBrains Mono', monospace; font-size: 0.88rem; line-height: 1.9;
+    white-space: pre-line;
+}
+.textbook-block { border: 1px solid var(--border); border-radius: var(--radius-sm); overflow: hidden; margin: 1.25rem 0; background: var(--card); box-shadow: var(--shadow-sm); }
+.textbook-head { padding: 0.55rem 1rem; background: linear-gradient(135deg, #eff6ff, #dbeafe); border-bottom: 1px solid var(--border); font-size: 0.71rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; color: var(--primary); }
+.textbook-content { padding: 1.1rem 1.25rem; }
+.def-row { display: flex; gap: 0.75rem; margin: 0.85rem 0; flex-wrap: wrap; }
+.def-box { flex: 1; min-width: 190px; padding: 0.85rem; border-radius: 8px; background: #eff6ff; border: 1px solid #bfdbfe; font-size: 0.875rem; }
+.def-list { display: flex; flex-direction: column; gap: 0.5rem; margin: 0.75rem 0; }
+.def-item { display: flex; gap: 0.75rem; align-items: flex-start; padding: 0.6rem 0.85rem; background: #f8faff; border-radius: 7px; border-left: 3px solid #bfdbfe; font-size: 0.875rem; }
+.def-item-key { font-weight: 700; color: var(--primary); min-width: 120px; flex-shrink: 0; }
+.calc-block { background: #f8faff; border: 1px solid var(--border); border-radius: 8px; padding: 0.9rem 1.1rem; font-family: 'JetBrains Mono', monospace; font-size: 0.83rem; line-height: 2; margin: 0.75rem 0; }
+.calc-row { display: flex; justify-content: space-between; gap: 1rem; }
+.calc-row.result { font-weight: 700; color: var(--primary); border-top: 1px solid var(--border); padding-top: 0.2rem; margin-top: 0.1rem; }
+.notice-box { border-left: 3px solid #d97706; background: #fffbeb; padding: 0.75rem 1rem; border-radius: 0 8px 8px 0; margin: 0.85rem 0; font-size: 0.875rem; }
+.notice-box strong { color: #92400e; }
+
+/* ── Phasor diagram */
+.phasor-wrap { background: #f8faff; border: 1px solid var(--border); border-radius: 10px; padding: 1rem; margin: 0.85rem 0; display: flex; flex-direction: column; align-items: center; gap: 0.5rem; }
+.phasor-svg  { max-width: 100%; height: auto; }
+.phasor-legend { display: flex; flex-wrap: wrap; gap: 0.6rem; justify-content: center; font-size: 0.78rem; }
+.phasor-leg-item { display: flex; align-items: center; gap: 0.3rem; }
+.phasor-leg-dot  { width: 10px; height: 10px; border-radius: 2px; flex-shrink: 0; }
+
+/* ── Leistungsdreieck */
+.power-tri { display: flex; align-items: center; justify-content: center; gap: 0; flex-wrap: wrap; margin: 0.85rem 0; }
+.pt-box { padding: 0.5rem 0.8rem; border-radius: 7px; font-size: 0.82rem; text-align: center; border: 1px solid; }
+.pt-p { background: #dbeafe; border-color: #93c5fd; color: #1e40af; }
+.pt-q { background: #fce7f3; border-color: #f9a8d4; color: #9d174d; }
+.pt-s { background: #d1fae5; border-color: #6ee7b7; color: #065f46; font-weight: 700; }
+body.dark .pt-p { background: #091524; border-color: #1a2d4a; color: #60a5fa; }
+body.dark .pt-q { background: #1a0617; border-color: #4a0933; color: #f9a8d4; }
+body.dark .pt-s { background: #031b0f; border-color: #059669; color: #34d399; }
+.pt-arr { font-size: 1.3rem; color: var(--muted); padding: 0 0.3rem; }
+
+/* ── Lernmodus (same as AWL) */
+#learn-overlay { display:none; position:fixed; inset:0; background:rgba(2,8,20,0.72); backdrop-filter:blur(4px); z-index:100; }
+#learn-modal {
+    display:none; position:fixed; top:50%; left:50%; transform:translate(-50%,-50%);
+    width:min(640px,95vw); max-height:85vh; background:var(--card);
+    border-radius:var(--radius); box-shadow:0 24px 80px rgba(29,78,216,0.22);
+    border:1px solid var(--border); z-index:101; flex-direction:column;
+}
+.lm-head { display:flex; align-items:center; gap:0.75rem; padding:0.85rem 1.25rem; border-bottom:1px solid var(--border); flex-shrink:0; }
+.lm-title { font-weight:700; font-size:1rem; flex:1; }
+.lm-counter { font-size:0.8rem; color:var(--muted); font-weight:600; background:var(--bg); padding:0.2rem 0.6rem; border-radius:999px; border:1px solid var(--border); }
+.lm-close-btn { background:#e8f4ff; color:#1d4ed8; border:1px solid #bfdbfe; border-radius:8px; width:2rem; height:2rem; cursor:pointer; font-size:0.95rem; display:flex; align-items:center; justify-content:center; flex-shrink:0; transition:background 0.12s; }
+.lm-close-btn:hover { background:#dbeafe; }
+body.dark .lm-close-btn { background:#1a2d4a; color:#60a5fa; border-color:#233d60; }
+body.dark .lm-close-btn:hover { background:#233d60; }
+.lm-progress-track { height:3px; background:var(--border); flex-shrink:0; }
+.lm-progress-fill  { height:100%; background:linear-gradient(90deg,var(--primary-light),var(--accent)); transition:width 0.3s; width:0%; }
+.lm-card-area { flex:1; overflow-y:auto; padding:1.5rem 1.25rem; display:flex; flex-direction:column; gap:1rem; }
+.lm-phase-badge { display:inline-block; background:#dbeafe; color:#1d4ed8; border-radius:999px; padding:0.18rem 0.7rem; font-size:0.72rem; font-weight:700; text-transform:uppercase; letter-spacing:0.05em; width:fit-content; }
+.lm-question { font-size:1rem; font-weight:600; line-height:1.55; }
+.lm-flip-btn { background:var(--primary); color:white; border:none; border-radius:9px; padding:0.55rem 1.2rem; font-size:0.84rem; font-weight:600; cursor:pointer; font-family:inherit; transition:background 0.15s; width:fit-content; }
+.lm-flip-btn:hover { background:var(--primary-light); }
+.lm-answer { background:#f0f7ff; border:1px solid #bfdbfe; border-radius:10px; padding:1rem; font-size:0.875rem; line-height:1.65; }
+body.dark .lm-answer { background:#091524; border-color:#1a2d4a; }
+.lm-actions { display:flex; gap:0.75rem; padding:0.85rem 1.25rem; border-top:1px solid var(--border); flex-shrink:0; }
+.lm-actions.hidden { display:none; }
+.lm-btn-wrong { flex:1; background:#fee2e2; color:#dc2626; border:1px solid #fca5a5; border-radius:9px; padding:0.55rem; font-size:0.84rem; font-weight:600; cursor:pointer; font-family:inherit; transition:background 0.12s; }
+.lm-btn-wrong:hover { background:#fecaca; }
+.lm-btn-right { flex:1; background:#dbeafe; color:#1d4ed8; border:1px solid #93c5fd; border-radius:9px; padding:0.55rem; font-size:0.84rem; font-weight:600; cursor:pointer; font-family:inherit; transition:background 0.12s; }
+.lm-btn-right:hover  { background:#bfdbfe; }
+body.dark .lm-btn-right { background:#1a2d4a; color:#60a5fa; border-color:#233d60; }
+body.dark .lm-btn-right:hover  { background:#233d60; }
+body.dark .lm-btn-wrong { background:#2d0707; color:#f87171; border-color:#7f1d1d; }
+.lm-result { display:none; flex-direction:column; align-items:center; gap:0.85rem; padding:2rem 1.25rem; text-align:center; }
+.lm-result-score { font-size:2.8rem; font-weight:800; }
+.lm-result-text  { font-size:0.95rem; color:var(--muted); }
+.lm-result-bar-wrap { width:100%; max-width:320px; height:8px; background:var(--border); border-radius:999px; overflow:hidden; }
+.lm-result-bar { height:100%; background:linear-gradient(90deg,var(--primary-light),var(--accent)); border-radius:999px; transition:width 0.6s; }
+.lm-restart-btn { background:var(--primary); color:white; border:none; border-radius:9px; padding:0.6rem 1.4rem; font-size:0.84rem; font-weight:600; cursor:pointer; font-family:inherit; transition:background 0.15s; }
+.lm-restart-btn:hover { background:var(--primary-light); }
+
+/* ── Probeschularbeit */
+#exam-overlay { display:none; position:fixed; inset:0; background:rgba(2,8,20,0.75); backdrop-filter:blur(4px); z-index:200; }
+#exam-modal   { display:none; position:fixed; inset:0; z-index:201; flex-direction:column; background:var(--bg); }
+.exam-head { display:flex; align-items:center; gap:0.65rem; padding:0.6rem 1.25rem; flex-shrink:0; background:linear-gradient(135deg,#1e40af 0%,#1d4ed8 100%); color:white; }
+body.dark .exam-head { background:linear-gradient(135deg,#030a1a 0%,#0c2a6e 100%); }
+.exam-title { font-weight:700; font-size:0.92rem; flex:1; }
+.exam-timer { font-family:'JetBrains Mono',monospace; font-size:0.97rem; font-weight:700; background:rgba(255,255,255,0.15); border:1px solid rgba(255,255,255,0.25); padding:0.25rem 0.7rem; border-radius:7px; letter-spacing:0.05em; min-width:64px; text-align:center; }
+.exam-timer.warning { background:rgba(220,38,38,0.35); border-color:rgba(239,68,68,0.6); animation:pulse-warn 1s infinite; }
+@keyframes pulse-warn { 0%,100%{opacity:1;}50%{opacity:0.5;} }
+.exam-submit-btn { background:#10b981; color:white; border:1px solid #059669; padding:0.32rem 0.85rem; border-radius:7px; font-size:0.8rem; font-weight:600; cursor:pointer; font-family:inherit; transition:background 0.15s; }
+.exam-submit-btn:hover { background:#059669; }
+.exam-close-btn  { background:rgba(255,255,255,0.12); color:white; border:1px solid rgba(255,255,255,0.25); border-radius:7px; width:1.9rem; height:1.9rem; cursor:pointer; font-size:0.9rem; display:flex; align-items:center; justify-content:center; flex-shrink:0; }
+.exam-close-btn:hover { background:rgba(255,255,255,0.22); }
+.exam-meta-bar { display:flex; align-items:center; gap:0.6rem; padding:0.35rem 1.25rem; background:var(--card); border-bottom:1px solid var(--border); font-size:0.74rem; color:var(--muted); flex-shrink:0; }
+#exam-answered { margin-left:auto; color:var(--primary); font-weight:600; }
+.exam-body { flex:1; overflow-y:auto; padding:1rem 1.25rem; display:flex; flex-direction:column; gap:1rem; }
+.exam-result-screen { flex:1; overflow-y:auto; padding:2rem 1.5rem; display:flex; flex-direction:column; align-items:center; gap:1.25rem; text-align:center; }
+.aufgabe { background:var(--card); border:1px solid var(--border); border-radius:var(--radius-sm); overflow:hidden; box-shadow:var(--shadow-sm); }
+.aufgabe-head { display:flex; align-items:center; gap:0.55rem; padding:0.5rem 0.9rem; background:linear-gradient(135deg,#eff6ff,#dbeafe); border-bottom:1px solid var(--border); }
+body.dark .aufgabe-head { background:#060f1e; }
+.aufgabe-num   { font-size:0.66rem; font-weight:700; text-transform:uppercase; letter-spacing:0.07em; color:var(--muted); background:var(--card); padding:0.15rem 0.45rem; border-radius:4px; border:1px solid var(--border); flex-shrink:0; }
+.aufgabe-title { font-weight:700; font-size:0.875rem; flex:1; }
+.aufgabe-pts   { font-size:0.7rem; font-weight:700; color:var(--primary); background:rgba(59,130,246,0.1); border:1px solid rgba(59,130,246,0.3); padding:0.13rem 0.5rem; border-radius:999px; flex-shrink:0; }
+.aufgabe-body  { padding:0.85rem 0.9rem; display:flex; flex-direction:column; gap:0.6rem; }
+.exam-text-box { background:#f8faff; border:1px solid var(--border); border-radius:7px; padding:0.7rem 0.85rem; font-size:0.84rem; }
+body.dark .exam-text-box { background:#060f1e; }
+.exam-text-box p { margin-bottom:0.25rem; }
+.exam-text-box ul { margin:0.2rem 0 0 1.1rem; }
+.exam-text-box li { margin:0.12rem 0; }
+.exam-q { display:flex; align-items:baseline; gap:0.4rem; font-size:0.875rem; }
+.exam-q-label { font-weight:700; color:var(--primary); min-width:24px; flex-shrink:0; }
+.exam-q-text  { flex:1; }
+.exam-q-pts   { font-size:0.7rem; color:var(--muted); flex-shrink:0; }
+.exam-hint { font-size:0.765rem; color:var(--muted); font-style:italic; background:#fefce8; border:1px dashed #fde047; border-radius:6px; padding:0.38rem 0.65rem; }
+body.dark .exam-hint { background:#1c1505; border-color:#854d0e; color:#d97706; }
+.exam-ci-wrap { display:flex; align-items:center; gap:0.45rem; }
+input.exam-ci { background:var(--bg); border:2px solid var(--border); border-radius:7px; padding:0.38rem 0.6rem; font-family:'JetBrains Mono',monospace; font-size:0.9rem; color:var(--text); width:145px; outline:none; transition:border-color 0.15s; }
+input.exam-ci:focus { border-color:var(--primary); }
+input.exam-ci.correct { border-color:#059669 !important; background:#f0fdf4; }
+input.exam-ci.wrong   { border-color:#dc2626 !important; background:#fef2f2; }
+body.dark input.exam-ci.correct { background:#031b0f; }
+body.dark input.exam-ci.wrong   { background:#1f0707; }
+.exam-ci-unit { font-size:0.82rem; color:var(--muted); font-weight:600; }
+.exam-ci-fb   { font-size:0.76rem; font-weight:600; }
+.exam-ci-fb.ok  { color:#059669; }
+.exam-ci-fb.err { color:#dc2626; }
+.exam-instruct { font-size:0.82rem; color:var(--muted); font-style:italic; }
+.exam-q-mc      { padding:0.1rem 0; }
+.exam-q-mc-text { font-size:0.875rem; margin-bottom:0.3rem; }
+.exam-mc-opts { display:flex; flex-direction:column; gap:0.22rem; padding-left:0.4rem; }
+.exam-mc-opt  { display:flex; align-items:center; gap:0.45rem; font-size:0.83rem; cursor:pointer; padding:0.28rem 0.55rem; border-radius:6px; border:1px solid transparent; transition:background 0.1s,border-color 0.1s; }
+.exam-mc-opt:hover { background:#eff6ff; border-color:#93c5fd; }
+body.dark .exam-mc-opt:hover { background:#091524; border-color:#1a2d4a; }
+.exam-mc-opt input[type=radio] { accent-color:var(--primary); flex-shrink:0; }
+.exam-mc-opt.correct      { background:#f0fdf4; border-color:#059669; }
+.exam-mc-opt.wrong        { background:#fef2f2; border-color:#dc2626; }
+.exam-mc-opt.show-correct { background:#eff6ff; border-color:#2563eb; font-weight:600; }
+body.dark .exam-mc-opt.correct      { background:#031b0f; border-color:#059669; }
+body.dark .exam-mc-opt.wrong        { background:#1f0707; border-color:#dc2626; }
+body.dark .exam-mc-opt.show-correct { background:#091524; border-color:#60a5fa; font-weight:600; }
+.exam-grade-badge { width:108px; height:108px; border-radius:50%; display:flex; flex-direction:column; align-items:center; justify-content:center; border:4px solid; box-shadow:0 6px 24px rgba(0,0,0,0.12); }
+.exam-grade-badge .g-num  { font-size:2.7rem; font-weight:800; line-height:1; }
+.exam-grade-badge .g-text { font-size:0.68rem; font-weight:700; text-transform:uppercase; letter-spacing:0.05em; margin-top:0.15rem; }
+.exam-pts-big { font-size:1.4rem; font-weight:700; color:var(--primary); }
+.exam-pts-sub { font-size:0.82rem; color:var(--muted); margin-top:0.2rem; }
+.exam-res-table { width:100%; max-width:400px; border-collapse:collapse; font-size:0.84rem; text-align:left; }
+.exam-res-table th { padding:0.38rem 0.65rem; color:var(--muted); font-weight:600; border-bottom:2px solid var(--border); }
+.exam-res-table td { padding:0.35rem 0.65rem; border-bottom:1px solid var(--border); }
+.exam-res-table .pts-col { font-weight:700; text-align:right; white-space:nowrap; }
+.pts-full { color:#059669; } .pts-part { color:#d97706; } .pts-zero { color:#dc2626; }
+.exam-res-actions { display:flex; gap:0.75rem; flex-wrap:wrap; justify-content:center; margin-top:0.5rem; }
+.exam-grade-scale { font-size:0.76rem; color:var(--muted); max-width:360px; }
+.exam-grade-scale table { width:100%; border-collapse:collapse; }
+.exam-grade-scale td { padding:0.2rem 0.5rem; border:1px solid var(--border); text-align:center; }
+.exam-grade-scale tr.active-grade td { background:rgba(59,130,246,0.1); font-weight:700; color:var(--primary); }
+.exam-auto-note { font-size:0.78rem; color:#d97706; }
+
+/* ── Formelblatt Modal */
+.fml-overlay { display:none; position:fixed; inset:0; background:rgba(5,13,26,0.7); z-index:600; align-items:flex-start; justify-content:center; padding:2rem 1rem; backdrop-filter:blur(6px); }
+.fml-overlay.open { display:flex; }
+.fml-modal { background:#fff; border-radius:20px; max-width:720px; width:100%; max-height:88vh; overflow:hidden; display:flex; flex-direction:column; box-shadow:0 32px 80px rgba(0,0,0,0.25); animation:fml-in 0.2s var(--ease); border:1px solid rgba(255,255,255,0.5); }
+@keyframes fml-in { from{opacity:0;transform:translateY(-14px) scale(0.97)} to{opacity:1;transform:translateY(0) scale(1)} }
+.fml-head { padding:1rem 1.5rem; border-bottom:1px solid var(--border); display:flex; align-items:center; gap:0.75rem; background:linear-gradient(135deg,#eff6ff,#dbeafe); }
+.fml-title { flex:1; font-size:1.05rem; font-weight:700; color:var(--primary); }
+.fml-body { overflow-y:auto; padding:1.25rem 1.5rem; display:flex; flex-direction:column; gap:1.25rem; }
+.fml-section-head { font-size:0.71rem; font-weight:700; text-transform:uppercase; color:var(--muted); letter-spacing:0.07em; margin-bottom:0.5rem; padding-bottom:0.3rem; border-bottom:1px solid var(--border); }
+.fml-list { display:flex; flex-direction:column; gap:0.3rem; }
+.fml-item { background:#f8faff; border:1px solid #e0e7ff; border-radius:8px; padding:0.42rem 0.9rem; font-family:'JetBrains Mono','Consolas',monospace; font-size:0.875rem; color:#0f172a; white-space:pre-wrap; line-height:1.5; transition:background var(--dur) var(--ease),border-color var(--dur) var(--ease); }
+.fml-item:hover { background:#eff6ff; border-color:#c7d2fe; }
+body.dark .fml-modal { background:#0d1829; }
+body.dark .fml-head { background:linear-gradient(135deg,#0f1e3d,#0a1a32); border-bottom-color:#1a2d4a; }
+body.dark .fml-title { color:#60a5fa; }
+body.dark .fml-section-head { color:#475569; border-bottom-color:#1a2d4a; }
+body.dark .fml-item { background:#0a1628; border-color:#1d3a6e; color:#e2e8f0; }
+body.dark .fml-item:hover { background:#0f2040; border-color:#2563eb; }
+@media(max-width:600px){ .fml-modal{ border-radius:14px; } .fml-body{ padding:1rem; } }
+
+/* ── Triangle Grid */
+.tri-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 0.85rem; margin: 1rem 0; }
+.tri-card { background: var(--bg); border: 1px solid var(--border); border-radius: 10px; padding: 0.85rem 0.7rem; display: flex; flex-direction: column; align-items: center; gap: 0.5rem; }
+.tri-card-title { font-size: 0.8rem; font-weight: 700; color: var(--primary); text-align: center; line-height: 1.45; }
+.tri-formula { font-family: 'JetBrains Mono', monospace; font-size: 0.75rem; background: var(--card); border: 1px solid var(--border); border-radius: 6px; padding: 0.38rem 0.55rem; width: 100%; text-align: center; line-height: 1.7; white-space: pre-line; }
+.tri-svg { width: 100%; max-width: 175px; height: auto; }
+body.dark .tri-card { background: #060f1e; }
+body.dark .tri-svg polygon { fill: rgba(59,130,246,0.04); }
+.angle-rule { display: flex; flex-direction: column; gap: 0.35rem; margin: 0.75rem 0; }
+.angle-row  { display: flex; align-items: center; gap: 0.65rem; font-size: 0.875rem; }
+.angle-key  { font-family: 'JetBrains Mono', monospace; font-weight: 700; color: var(--primary); min-width: 60px; flex-shrink: 0; }
+
+@media print {
+    .rlc-nav,#learn-overlay,#learn-modal,#exam-overlay,#exam-modal,#top-progress-bar { display:none !important; }
+    body { background:white !important; }
+    header { background:none !important; color:black !important; }
+}
+@media (max-width:820px) {
+    header { padding:0.85rem 1rem 0.75rem; }
+    header h1 { font-size:1.5rem; }
+    .h-deco { display:none; }
+    .rlc-nav { padding:0.4rem 0.75rem; gap:0.4rem; }
+    main { padding:1.5rem 1rem; }
+    .sum-body { padding:1.25rem 1.5rem; }
+}
+</style>
+</head>
+<body>
+<div id="top-progress-bar"></div>
+<header>
+    <div class="h-deco">⚡ LC</div>
+    <div class="h-content">
+        <div class="h-badge">⚡ Elektrotechnik</div>
+        <h1>Kompensation — RLC-Schaltungen</h1>
+        <p class="h-motto">Reihenschaltung · Parallelschaltung · Resonanz · Blindleistungskompensation</p>
+    </div>
+</header>
+
+<!-- Probeschularbeit Modal -->
+<div id="exam-overlay"></div>
+<div id="exam-modal" role="dialog" aria-modal="true">
+    <div class="exam-head">
+        <span class="exam-title">📝 Probeschularbeit — Kompensation</span>
+        <div class="exam-timer" id="exam-timer">45:00</div>
+        <button class="exam-submit-btn" id="exam-submit-btn" onclick="submitExam(false)">Abgeben ✓</button>
+        <button class="exam-close-btn" onclick="closeExamMode()" title="Schließen">✕</button>
+    </div>
+    <div class="exam-meta-bar">
+        <span>40 Punkte · 5 Aufgaben</span>
+        <span id="exam-answered">0 / 19 beantwortet</span>
+    </div>
+    <div class="exam-body" id="exam-body">
+
+        <!-- Aufgabe 1: Reihenschaltung -->
+        <div class="aufgabe">
+            <div class="aufgabe-head">
+                <span class="aufgabe-num">Aufgabe 1</span>
+                <span class="aufgabe-title">RLC-Reihenschaltung</span>
+                <span class="aufgabe-pts">10 Punkte</span>
+            </div>
+            <div class="aufgabe-body">
+                <div class="exam-text-box">
+                    <p>Gegeben: <strong>U = 200 V</strong>, <strong>R = 60 Ω</strong>, <strong>X<sub>L</sub> = 100 Ω</strong>, <strong>X<sub>C</sub> = 20 Ω</strong></p>
+                </div>
+                <div class="exam-q"><span class="exam-q-label">1a)</span><span class="exam-q-text">Berechne die <strong>Gesamtimpedanz Z</strong>.</span><span class="exam-q-pts">(3 P.)</span></div>
+                <div class="exam-hint">Z = √(R² + (X<sub>L</sub> − X<sub>C</sub>)²)</div>
+                <div class="exam-ci-wrap"><input type="text" class="exam-ci" id="ans-1a" placeholder="z.B. 100" inputmode="decimal" autocomplete="off"><span class="exam-ci-unit">Ω</span><span class="exam-ci-fb" id="fb-1a"></span></div>
+                <div class="exam-q"><span class="exam-q-label">1b)</span><span class="exam-q-text">Berechne den <strong>Strom I</strong>.</span><span class="exam-q-pts">(2 P.)</span></div>
+                <div class="exam-ci-wrap"><input type="text" class="exam-ci" id="ans-1b" placeholder="z.B. 2" inputmode="decimal" autocomplete="off"><span class="exam-ci-unit">A</span><span class="exam-ci-fb" id="fb-1b"></span></div>
+                <div class="exam-q"><span class="exam-q-label">1c)</span><span class="exam-q-text">Berechne den <strong>Leistungsfaktor cos φ</strong>.</span><span class="exam-q-pts">(2 P.)</span></div>
+                <div class="exam-hint">cos φ = R / Z</div>
+                <div class="exam-ci-wrap"><input type="text" class="exam-ci" id="ans-1c" placeholder="z.B. 0,60" inputmode="decimal" autocomplete="off"><span class="exam-ci-fb" id="fb-1c"></span></div>
+                <div class="exam-q"><span class="exam-q-label">1d)</span><span class="exam-q-text">Wie verhält sich die Schaltung? (X<sub>L</sub> vs. X<sub>C</sub>)</span><span class="exam-q-pts">(1 P.)</span></div>
+                <div class="exam-mc-opts" id="mc-1d">
+                    <label class="exam-mc-opt"><input type="radio" name="q1d" value="1"> Induktiv (X<sub>L</sub> > X<sub>C</sub>)</label>
+                    <label class="exam-mc-opt"><input type="radio" name="q1d" value="2"> Kapazitiv (X<sub>C</sub> > X<sub>L</sub>)</label>
+                    <label class="exam-mc-opt"><input type="radio" name="q1d" value="3"> Resonanz (X<sub>L</sub> = X<sub>C</sub>)</label>
+                </div>
+                <div class="exam-q"><span class="exam-q-label">1e)</span><span class="exam-q-text">Berechne die Spannung am Wirkwiderstand <strong>U<sub>R</sub></strong>.</span><span class="exam-q-pts">(2 P.)</span></div>
+                <div class="exam-ci-wrap"><input type="text" class="exam-ci" id="ans-1e" placeholder="z.B. 120" inputmode="decimal" autocomplete="off"><span class="exam-ci-unit">V</span><span class="exam-ci-fb" id="fb-1e"></span></div>
+            </div>
+        </div>
+
+        <!-- Aufgabe 2: Parallelschaltung -->
+        <div class="aufgabe">
+            <div class="aufgabe-head">
+                <span class="aufgabe-num">Aufgabe 2</span>
+                <span class="aufgabe-title">RLC-Parallelschaltung</span>
+                <span class="aufgabe-pts">10 Punkte</span>
+            </div>
+            <div class="aufgabe-body">
+                <div class="exam-text-box">
+                    <p>Gegeben: <strong>U = 120 V</strong>, <strong>R = 40 Ω</strong>, <strong>X<sub>L</sub> = 20 Ω</strong>, <strong>X<sub>C</sub> = 60 Ω</strong></p>
+                </div>
+                <div class="exam-q"><span class="exam-q-label">2a)</span><span class="exam-q-text">Berechne <strong>I<sub>R</sub></strong>.</span><span class="exam-q-pts">(1 P.)</span></div>
+                <div class="exam-ci-wrap"><input type="text" class="exam-ci" id="ans-2a" placeholder="z.B. 3" inputmode="decimal" autocomplete="off"><span class="exam-ci-unit">A</span><span class="exam-ci-fb" id="fb-2a"></span></div>
+                <div class="exam-q"><span class="exam-q-label">2b)</span><span class="exam-q-text">Berechne <strong>I<sub>L</sub></strong>.</span><span class="exam-q-pts">(1 P.)</span></div>
+                <div class="exam-ci-wrap"><input type="text" class="exam-ci" id="ans-2b" placeholder="z.B. 6" inputmode="decimal" autocomplete="off"><span class="exam-ci-unit">A</span><span class="exam-ci-fb" id="fb-2b"></span></div>
+                <div class="exam-q"><span class="exam-q-label">2c)</span><span class="exam-q-text">Berechne <strong>I<sub>C</sub></strong>.</span><span class="exam-q-pts">(1 P.)</span></div>
+                <div class="exam-ci-wrap"><input type="text" class="exam-ci" id="ans-2c" placeholder="z.B. 2" inputmode="decimal" autocomplete="off"><span class="exam-ci-unit">A</span><span class="exam-ci-fb" id="fb-2c"></span></div>
+                <div class="exam-q"><span class="exam-q-label">2d)</span><span class="exam-q-text">Berechne den <strong>Gesamtstrom I<sub>ges</sub></strong>.</span><span class="exam-q-pts">(3 P.)</span></div>
+                <div class="exam-hint">I = √(I<sub>R</sub>² + (I<sub>L</sub> − I<sub>C</sub>)²)</div>
+                <div class="exam-ci-wrap"><input type="text" class="exam-ci" id="ans-2d" placeholder="z.B. 5" inputmode="decimal" autocomplete="off"><span class="exam-ci-unit">A</span><span class="exam-ci-fb" id="fb-2d"></span></div>
+                <div class="exam-q"><span class="exam-q-label">2e)</span><span class="exam-q-text">Berechne <strong>cos φ</strong>.</span><span class="exam-q-pts">(2 P.)</span></div>
+                <div class="exam-hint">cos φ = I<sub>R</sub> / I<sub>ges</sub></div>
+                <div class="exam-ci-wrap"><input type="text" class="exam-ci" id="ans-2e" placeholder="z.B. 0,60" inputmode="decimal" autocomplete="off"><span class="exam-ci-fb" id="fb-2e"></span></div>
+                <div class="exam-q"><span class="exam-q-label">2f)</span><span class="exam-q-text">Verhält sich die Parallelschaltung induktiv oder kapazitiv?</span><span class="exam-q-pts">(2 P.)</span></div>
+                <div class="exam-mc-opts" id="mc-2f">
+                    <label class="exam-mc-opt"><input type="radio" name="q2f" value="1"> Induktiv (I<sub>L</sub> > I<sub>C</sub>)</label>
+                    <label class="exam-mc-opt"><input type="radio" name="q2f" value="2"> Kapazitiv (I<sub>C</sub> > I<sub>L</sub>)</label>
+                    <label class="exam-mc-opt"><input type="radio" name="q2f" value="3"> Im Resonanzfall</label>
+                </div>
+            </div>
+        </div>
+
+        <!-- Aufgabe 3: Resonanz -->
+        <div class="aufgabe">
+            <div class="aufgabe-head">
+                <span class="aufgabe-num">Aufgabe 3</span>
+                <span class="aufgabe-title">Resonanz</span>
+                <span class="aufgabe-pts">6 Punkte</span>
+            </div>
+            <div class="aufgabe-body">
+                <div class="exam-q-mc">
+                    <div class="exam-q-mc-text"><strong>3a)</strong> Bei <strong>Serienresonanz</strong> ist die Gesamtimpedanz Z ... <em>(2 P.)</em></div>
+                    <div class="exam-mc-opts" id="mc-3a">
+                        <label class="exam-mc-opt"><input type="radio" name="q3a" value="1"> minimal (Z = R)</label>
+                        <label class="exam-mc-opt"><input type="radio" name="q3a" value="2"> maximal</label>
+                        <label class="exam-mc-opt"><input type="radio" name="q3a" value="3"> gleich X<sub>L</sub></label>
+                    </div>
+                </div>
+                <div class="exam-q-mc">
+                    <div class="exam-q-mc-text"><strong>3b)</strong> Bei <strong>Parallelresonanz</strong> ist der Gesamtstrom I ... <em>(2 P.)</em></div>
+                    <div class="exam-mc-opts" id="mc-3b">
+                        <label class="exam-mc-opt"><input type="radio" name="q3b" value="1"> minimal (I = I<sub>R</sub>)</label>
+                        <label class="exam-mc-opt"><input type="radio" name="q3b" value="2"> maximal</label>
+                        <label class="exam-mc-opt"><input type="radio" name="q3b" value="3"> gleich I<sub>L</sub></label>
+                    </div>
+                </div>
+                <div class="exam-q-mc">
+                    <div class="exam-q-mc-text"><strong>3c)</strong> Die <strong>Resonanzfrequenz f<sub>0</sub></strong> berechnet sich als ... <em>(2 P.)</em></div>
+                    <div class="exam-mc-opts" id="mc-3c">
+                        <label class="exam-mc-opt"><input type="radio" name="q3c" value="1"> f<sub>0</sub> = 1 / (2π · √(L · C))</label>
+                        <label class="exam-mc-opt"><input type="radio" name="q3c" value="2"> f<sub>0</sub> = 2π · √(L · C)</label>
+                        <label class="exam-mc-opt"><input type="radio" name="q3c" value="3"> f<sub>0</sub> = 1 / (2π · L · C)</label>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Aufgabe 4: Kompensation -->
+        <div class="aufgabe">
+            <div class="aufgabe-head">
+                <span class="aufgabe-num">Aufgabe 4</span>
+                <span class="aufgabe-title">Blindleistungskompensation</span>
+                <span class="aufgabe-pts">8 Punkte</span>
+            </div>
+            <div class="aufgabe-body">
+                <div class="exam-text-box">
+                    <p>Ein Motor hat folgende Daten: <strong>P = 3 kW</strong>, <strong>cos φ<sub>1</sub> = 0,6</strong> (induktiv), soll auf <strong>cos φ<sub>2</sub> = 1,0</strong> kompensiert werden.</p>
+                    <p>Netzspannung: <strong>U = 230 V</strong>, <strong>f = 50 Hz</strong></p>
+                </div>
+                <div class="exam-q"><span class="exam-q-label">4a)</span><span class="exam-q-text">Berechne die benötigte <strong>Blindleistung Q<sub>C</sub></strong>.</span><span class="exam-q-pts">(3 P.)</span></div>
+                <div class="exam-hint">Q<sub>C</sub> = P · (tan φ<sub>1</sub> − tan φ<sub>2</sub>) · Tipp: cos φ = 0,6 → sin φ = 0,8 → tan φ = ?</div>
+                <div class="exam-ci-wrap"><input type="text" class="exam-ci" id="ans-4a" placeholder="z.B. 4000" inputmode="decimal" autocomplete="off"><span class="exam-ci-unit">var</span><span class="exam-ci-fb" id="fb-4a"></span></div>
+                <div class="exam-q"><span class="exam-q-label">4b)</span><span class="exam-q-text">Berechne die benötigte <strong>Kapazität C</strong> des Kondensators.</span><span class="exam-q-pts">(5 P.)</span></div>
+                <div class="exam-hint">C = Q<sub>C</sub> / (2π · f · U²)</div>
+                <div class="exam-ci-wrap"><input type="text" class="exam-ci" id="ans-4b" placeholder="z.B. 241" inputmode="decimal" autocomplete="off"><span class="exam-ci-unit">µF</span><span class="exam-ci-fb" id="fb-4b"></span></div>
+            </div>
+        </div>
+
+        <!-- Aufgabe 5: Grundlagen -->
+        <div class="aufgabe">
+            <div class="aufgabe-head">
+                <span class="aufgabe-num">Aufgabe 5</span>
+                <span class="aufgabe-title">Grundlagen Wechselstrom</span>
+                <span class="aufgabe-pts">6 Punkte</span>
+            </div>
+            <div class="aufgabe-body">
+                <div class="exam-q-mc">
+                    <div class="exam-q-mc-text"><strong>5a)</strong> Welcher Widerstand <strong>steigt mit der Frequenz</strong>? <em>(2 P.)</em></div>
+                    <div class="exam-mc-opts" id="mc-5a">
+                        <label class="exam-mc-opt"><input type="radio" name="q5a" value="1"> X<sub>L</sub> (induktiver Widerstand)</label>
+                        <label class="exam-mc-opt"><input type="radio" name="q5a" value="2"> X<sub>C</sub> (kapazitiver Widerstand)</label>
+                        <label class="exam-mc-opt"><input type="radio" name="q5a" value="3"> R (Wirkwiderstand)</label>
+                    </div>
+                </div>
+                <div class="exam-q-mc">
+                    <div class="exam-q-mc-text"><strong>5b)</strong> Was bedeutet <strong>cos φ = 1</strong>? <em>(2 P.)</em></div>
+                    <div class="exam-mc-opts" id="mc-5b">
+                        <label class="exam-mc-opt"><input type="radio" name="q5b" value="1"> Keine Blindleistung, Scheinleistung = Wirkleistung</label>
+                        <label class="exam-mc-opt"><input type="radio" name="q5b" value="2"> Keine Wirkleistung, nur Blindleistung</label>
+                        <label class="exam-mc-opt"><input type="radio" name="q5b" value="3"> Gleiche Blind- und Wirkleistung</label>
+                    </div>
+                </div>
+                <div class="exam-q-mc">
+                    <div class="exam-q-mc-text"><strong>5c)</strong> Wie berechnet sich die <strong>Scheinleistung S</strong>? <em>(2 P.)</em></div>
+                    <div class="exam-mc-opts" id="mc-5c">
+                        <label class="exam-mc-opt"><input type="radio" name="q5c" value="1"> S = √(P² + Q²)</label>
+                        <label class="exam-mc-opt"><input type="radio" name="q5c" value="2"> S = P + Q</label>
+                        <label class="exam-mc-opt"><input type="radio" name="q5c" value="3"> S = P × Q</label>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div><!-- /exam-body -->
+    <div class="exam-result-screen" id="exam-result-screen" style="display:none;"></div>
+</div><!-- /exam-modal -->
+
+<!-- Lernmodus Modal -->
+<div id="learn-overlay" onclick="if(event.target===this) closeLearningMode()"></div>
+<div id="learn-modal" role="dialog" aria-modal="true">
+    <div class="lm-head">
+        <span class="lm-title">⚡ Karteikarten-Lernmodus</span>
+        <span class="lm-counter" id="lm-counter">1 / 16</span>
+        <button class="lm-close-btn" onclick="closeLearningMode()" title="Schließen">✕</button>
+    </div>
+    <div class="lm-progress-track"><div class="lm-progress-fill" id="lm-progress" style="width:0%"></div></div>
+    <div class="lm-card-area" id="lm-card-area">
+        <div id="lm-phase-badge" class="lm-phase-badge"></div>
+        <div id="lm-question" class="lm-question"></div>
+        <button class="lm-flip-btn" id="lm-flip-btn" onclick="revealAnswer()">👁 Antwort anzeigen</button>
+        <div id="lm-answer" class="lm-answer"></div>
+    </div>
+    <div class="lm-result" id="lm-result">
+        <div id="lm-score" class="lm-result-score"></div>
+        <div id="lm-result-text" class="lm-result-text"></div>
+        <div class="lm-result-bar-wrap"><div class="lm-result-bar" id="lm-result-bar" style="width:0%"></div></div>
+        <div id="lm-wrong-list" style="text-align:left;font-size:0.85rem;margin-top:1rem;"></div>
+        <button class="lm-restart-btn" onclick="restartLearningMode()">🔄 Nochmal üben</button>
+    </div>
+    <div class="lm-actions hidden" id="lm-actions">
+        <button class="lm-btn-wrong" onclick="rateCard(false)">↺ Nochmal</button>
+        <button class="lm-btn-right" onclick="rateCard(true)">✓ Gewusst</button>
+    </div>
+</div>
+
+<!-- Formelblatt Modal -->
+<div class="fml-overlay" id="fml-overlay">
+    <div class="fml-modal">
+        <div class="fml-head">
+            <span style="font-size:1.3rem">📐</span>
+            <span class="fml-title">Formelübersicht — RLC &amp; Kompensation</span>
+            <button class="btn btn-secondary btn-sm" id="fml-close">✕ Schließen</button>
+        </div>
+        <div class="fml-body" id="fml-body"></div>
+    </div>
+</div>
+
+<!-- Sticky Nav -->
+<nav class="rlc-nav">
+    <span class="nav-label">Kompensation</span>
+    <div id="lp-bar-wrap">
+        <span id="lp-text"></span>
+        <div id="lp-bar"><div id="lp-fill"></div></div>
+    </div>
+    <button class="btn btn-primary btn-sm" id="learn-btn" onclick="startLearningMode()">🎓 Lernmodus</button>
+    <button class="btn btn-secondary btn-sm" id="exam-btn" onclick="startExamMode()" style="border-color:#d97706;color:#92400e;background:#fefce8">📝 Probeschularbeit</button>
+    <button class="btn btn-secondary btn-sm" id="formula-btn" title="Formelübersicht" style="border-color:#1d4ed8;color:#1e40af;background:#eff6ff">📐 Formeln</button>
+    <button class="btn btn-secondary btn-sm btn-dm" id="dm-toggle" title="Dunkles Design">🌙</button>
+</nav>
+
+<main>
+
+<!-- ─────────────── Abschnitt 1: Wechselstrom-Grundlagen ─────────────── -->
+<div class="sum-wrap">
+    <div class="sum-header">
+        <div class="sum-title">⚡ Wechselstrom-Grundlagen: R, X<sub>L</sub>, X<sub>C</sub></div>
+        <span class="sum-note">Grundbegriffe</span>
+    </div>
+    <div class="sum-body md-out">
+        <h3>Die drei Grundwiderstände</h3>
+        <div class="def-row">
+            <div class="def-box"><strong>R — Wirkwiderstand</strong><br>Frequenzunabhängig [Ω]<br>Phasenverschiebung: <em>keine</em><br>Verlustleistung: <strong>ja</strong></div>
+            <div class="def-box"><strong>X<sub>L</sub> — Induktiver Widerstand</strong><br>Steigt mit Frequenz [Ω]<br>Strom eilt Spannung <strong>nach</strong> (φ = −90°)<br>Verlustleistung: <em>nein</em></div>
+            <div class="def-box"><strong>X<sub>C</sub> — Kapazitiver Widerstand</strong><br>Fällt mit Frequenz [Ω]<br>Strom eilt Spannung <strong>vor</strong> (φ = +90°)<br>Verlustleistung: <em>nein</em></div>
+        </div>
+        <div class="formula-box">X<sub>L</sub> = ω · L = 2π · f · L          [Ω]
+X<sub>C</sub> = 1 / (ω · C) = 1 / (2π · f · C)  [Ω]</div>
+
+        <h3>Leistungsdreieck</h3>
+        <p>Im Wechselstromkreis unterscheidet man drei Leistungsarten:</p>
+        <div class="power-tri">
+            <div class="pt-box pt-p"><strong>P</strong><br>Wirkleistung<br>[W]</div>
+            <span class="pt-arr">→</span>
+            <div class="pt-box pt-q"><strong>Q</strong><br>Blindleistung<br>[var]</div>
+            <span class="pt-arr">→</span>
+            <div class="pt-box pt-s"><strong>S = √(P² + Q²)</strong><br>Scheinleistung<br>[VA]</div>
+        </div>
+        <div class="formula-box">S² = P² + Q²     →  S = √(P² + Q²)   [VA]
+cos φ = P / S                        (Leistungsfaktor)
+Q = P · tan φ                        [var]</div>
+        <div class="notice-box"><strong>Ziel:</strong> cos φ möglichst nahe an 1 bringen → minimale Blindleistung → niedrige Leitungsbelastung und keine Strafgebühren vom Netzbetreiber.</div>
+    </div>
+</div>
+
+<!-- ─────────────── Abschnitt 2: RLC-Reihenschaltung ─────────────── -->
+<div class="sum-wrap">
+    <div class="sum-header">
+        <div class="sum-title">🔗 RLC-Reihenschaltung (Serienresonanz)</div>
+        <span class="sum-note">Reihenschaltung</span>
+    </div>
+    <div class="sum-body md-out">
+        <h3>Schaltung &amp; Formeln</h3>
+        <p>In der Reihenschaltung fließt durch alle Bauteile <strong>derselbe Strom I</strong>. Die Spannung teilt sich auf.</p>
+        <div class="formula-box">Z = √(R² + (X<sub>L</sub> − X<sub>C</sub>)²)   [Ω]   ← Gesamtimpedanz
+I  = U / Z                       [A]   ← Strom (gleich durch alle)
+U<sub>R</sub> = I · R                    [V]
+U<sub>L</sub> = I · X<sub>L</sub>                  [V]
+U<sub>C</sub> = I · X<sub>C</sub>                  [V]
+cos φ = R / Z                         ← Leistungsfaktor
+φ = arctan((X<sub>L</sub> − X<sub>C</sub>) / R)      ← Phasenwinkel</div>
+
+        <h3>Verhalten nach Dominanz</h3>
+        <div class="def-list">
+            <div class="def-item"><span class="def-item-key">X<sub>L</sub> > X<sub>C</sub></span><span><strong>induktiv</strong> — Strom eilt Spannung nach · φ &gt; 0°</span></div>
+            <div class="def-item"><span class="def-item-key">X<sub>C</sub> > X<sub>L</sub></span><span><strong>kapazitiv</strong> — Strom eilt Spannung vor · φ &lt; 0°</span></div>
+            <div class="def-item"><span class="def-item-key">X<sub>L</sub> = X<sub>C</sub></span><span><strong>Resonanz</strong> — Z = R (minimal), I = U/R (maximal), cos φ = 1</span></div>
+        </div>
+
+        <h3>Serienresonanz</h3>
+        <div class="formula-box">f<sub>0</sub> = 1 / (2π · √(L · C))    [Hz]   ← Resonanzfrequenz
+Bei f = f₀:  X<sub>L</sub> = X<sub>C</sub>  →  Z = R (min)  →  I = U/R (max)</div>
+        <div class="notice-box"><strong>Merke:</strong> Bei Serienresonanz kann U<sub>L</sub> oder U<sub>C</sub> <em>größer als die Gesamtspannung U</em> sein! Die Teilspannungen heben sich auf, aber einzeln können sie sehr hoch sein (Spannungsresonanz).</div>
+
+        <h3>Berechnungsbeispiel</h3>
+        <div class="textbook-block">
+            <div class="textbook-head">📖 Beispiel: R = 30 Ω, X<sub>L</sub> = 70 Ω, X<sub>C</sub> = 30 Ω, U = 250 V</div>
+            <div class="textbook-content">
+                <div class="calc-block">
+                    <div class="calc-row"><span>X<sub>L</sub> − X<sub>C</sub></span><span>= 70 − 30 = 40 Ω</span></div>
+                    <div class="calc-row">(X<sub>L</sub> − X<sub>C</sub>)²</span><span>= 40² = 1.600</span></div>
+                    <div class="calc-row">R²</span><span>= 30² = 900</span></div>
+                    <div class="calc-row result"><span>Z = √(900 + 1600)</span><span>= √2500 = <strong>50 Ω</strong></span></div>
+                    <div class="calc-row result"><span>I = U / Z = 250 / 50</span><span>= <strong>5 A</strong></span></div>
+                    <div class="calc-row result"><span>cos φ = R / Z = 30 / 50</span><span>= <strong>0,60</strong> (induktiv)</span></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ─────────────── Abschnitt 3: RLC-Parallelschaltung ─────────────── -->
+<div class="sum-wrap">
+    <div class="sum-header">
+        <div class="sum-title">⚡ RLC-Parallelschaltung (Parallelresonanz)</div>
+        <span class="sum-note">Parallelschaltung</span>
+    </div>
+    <div class="sum-body md-out">
+        <h3>Schaltung &amp; Formeln</h3>
+        <p>In der Parallelschaltung liegt an allen Bauteilen <strong>dieselbe Spannung U</strong>. Der Strom teilt sich auf.</p>
+        <div class="formula-box">I<sub>R</sub> = U / R           [A]   ← In Phase mit U
+I<sub>L</sub> = U / X<sub>L</sub>         [A]   ← eilt U um 90° nach
+I<sub>C</sub> = U / X<sub>C</sub>         [A]   ← eilt U um 90° vor
+
+I<sub>blind</sub> = |I<sub>L</sub> − I<sub>C</sub>|  [A]   ← Blindstrom
+I<sub>ges</sub>   = √(I<sub>R</sub>² + I<sub>blind</sub>²) [A]   ← Gesamtstrom
+cos φ = I<sub>R</sub> / I<sub>ges</sub>               ← Leistungsfaktor</div>
+
+        <h3>Verhalten nach Dominanz</h3>
+        <div class="def-list">
+            <div class="def-item"><span class="def-item-key">I<sub>L</sub> > I<sub>C</sub></span><span><strong>induktiv</strong> — Gesamtstrom eilt Spannung nach</span></div>
+            <div class="def-item"><span class="def-item-key">I<sub>C</sub> > I<sub>L</sub></span><span><strong>kapazitiv</strong> — Gesamtstrom eilt Spannung vor</span></div>
+            <div class="def-item"><span class="def-item-key">I<sub>L</sub> = I<sub>C</sub></span><span><strong>Resonanz</strong> — Z = R (maximal), I = I<sub>R</sub> (minimal), cos φ = 1</span></div>
+        </div>
+
+        <h3>Parallelresonanz</h3>
+        <div class="formula-box">f<sub>0</sub> = 1 / (2π · √(L · C))    [Hz]   ← gleiche Formel wie Serie!
+Bei f = f₀:  I<sub>L</sub> = I<sub>C</sub>  →  I<sub>ges</sub> = I<sub>R</sub> (min)  →  Z = max</div>
+        <div class="notice-box"><strong>Merke:</strong> Im Parallelschwingkreis können I<sub>L</sub> und I<sub>C</sub> <em>sehr viel größer</em> als I<sub>ges</sub> sein! Sie heben sich auf, zirkulieren aber als großer Strom im Kreis (Stromresonanz).</div>
+
+        <h3>Berechnungsbeispiel</h3>
+        <div class="textbook-block">
+            <div class="textbook-head">📖 Beispiel: R = 50 Ω, X<sub>L</sub> = 25 Ω, X<sub>C</sub> = 100 Ω, U = 200 V</div>
+            <div class="textbook-content">
+                <div class="calc-block">
+                    <div class="calc-row result"><span>I<sub>R</sub> = 200 / 50</span><span>= <strong>4 A</strong></span></div>
+                    <div class="calc-row result"><span>I<sub>L</sub> = 200 / 25</span><span>= <strong>8 A</strong></span></div>
+                    <div class="calc-row result"><span>I<sub>C</sub> = 200 / 100</span><span>= <strong>2 A</strong></span></div>
+                    <div class="calc-row"><span>I<sub>blind</sub> = I<sub>L</sub> − I<sub>C</sub> = 8 − 2</span><span>= 6 A (induktiv)</span></div>
+                    <div class="calc-row result"><span>I<sub>ges</sub> = √(4² + 6²) = √52</span><span>≈ <strong>7,21 A</strong></span></div>
+                    <div class="calc-row result"><span>cos φ = 4 / 7,21</span><span>≈ <strong>0,555</strong></span></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ─────────────── Abschnitt 4: Kompensation ─────────────── -->
+<div class="sum-wrap">
+    <div class="sum-header">
+        <div class="sum-title">🔧 Blindleistungskompensation</div>
+        <span class="sum-note">Kondensator parallel</span>
+    </div>
+    <div class="sum-body md-out">
+        <h3>Warum kompensieren?</h3>
+        <p>Induktive Verbraucher (Motoren, Transformatoren) haben einen niedrigen Leistungsfaktor (cos φ &lt; 1). Das führt zu:</p>
+        <ul>
+            <li>Unnötig hohem Strom in den Leitungen → Spannungsabfall und Verluste</li>
+            <li>Mehrkosten durch Blindleistung beim Netzbetreiber</li>
+            <li>Überlastung von Transformatoren</li>
+        </ul>
+        <p><strong>Lösung:</strong> Kondensator <em>parallel</em> zum Verbraucher schalten. Der kapazitive Blindstrom des Kondensators kompensiert den induktiven Blindstrom des Verbrauchers.</p>
+
+        <h3>Berechnung der Kompensation</h3>
+        <div class="formula-box">Q<sub>C</sub> = P · (tan φ<sub>1</sub> − tan φ<sub>2</sub>)        [var]
+C   = Q<sub>C</sub> / (ω · U²) = Q<sub>C</sub> / (2π·f·U²) [F]
+
+φ<sub>1</sub> = Ausgangs-Phasenwinkel (vor Kompensation)
+φ<sub>2</sub> = Ziel-Phasenwinkel    (nach Kompensation)</div>
+
+        <h3>Berechnungsbeispiel</h3>
+        <div class="textbook-block">
+            <div class="textbook-head">📖 Beispiel: P = 5 kW, cos φ₁ = 0,7 → cos φ₂ = 0,95, U = 230 V, f = 50 Hz</div>
+            <div class="textbook-content">
+                <div class="calc-block">
+                    <div class="calc-row"><span>sin φ₁ = √(1 − 0,7²) = √0,51</span><span>≈ 0,714</span></div>
+                    <div class="calc-row"><span>tan φ₁ = 0,714 / 0,7</span><span>≈ 1,020</span></div>
+                    <div class="calc-row"><span>sin φ₂ = √(1 − 0,95²) = √0,0975</span><span>≈ 0,312</span></div>
+                    <div class="calc-row"><span>tan φ₂ = 0,312 / 0,95</span><span>≈ 0,329</span></div>
+                    <div class="calc-row result"><span>Q<sub>C</sub> = 5000 · (1,020 − 0,329)</span><span>≈ <strong>3.455 var</strong></span></div>
+                    <div class="calc-row result"><span>C = 3455 / (2π · 50 · 230²)</span><span>≈ <strong>208 µF</strong></span></div>
+                </div>
+            </div>
+        </div>
+
+        <h3>Arten der Kompensation</h3>
+        <div class="def-list">
+            <div class="def-item"><span class="def-item-key">Einzelkompensation</span><span>Kondensator direkt beim einzelnen Verbraucher — höchste Wirkung, aber teurer</span></div>
+            <div class="def-item"><span class="def-item-key">Gruppenkompensation</span><span>Kondensator für eine Gruppe von Verbrauchern — guter Kompromiss</span></div>
+            <div class="def-item"><span class="def-item-key">Zentralkompensation</span><span>Ein großer Kondensatorsatz für die gesamte Anlage (Hauptverteilung) — günstig, aber weniger wirksam für einzelne Leitungen</span></div>
+        </div>
+    </div>
+</div>
+
+<!-- ─────────────── Abschnitt 5: Die 5 Dreiecke ─────────────── -->
+<div class="sum-wrap">
+    <div class="sum-header">
+        <div class="sum-title">📐 Die 5 Dreiecke im Wechselstromkreis</div>
+        <span class="sum-note">Widerstand · Leitwert · Spannung · Strom · Leistung</span>
+    </div>
+    <div class="sum-body md-out">
+        <p>Im Wechselstromkreis gibt es fünf <strong>rechtwinklige Dreiecke</strong> — alle geometrisch ähnlich mit demselben Phasenwinkel φ. Alle folgen dem <strong>Pythagoras-Prinzip</strong>:</p>
+        <div class="formula-box">Hypotenuse² = Wirkseite² + Blindseite²
+
+cos φ = Wirkseite / Hypotenuse
+sin φ = Blindseite / Hypotenuse
+tan φ = Blindseite / Wirkseite</div>
+
+        <div class="tri-grid">
+
+            <!-- 1. Widerstandsdreieck -->
+            <div class="tri-card">
+                <div class="tri-card-title">① Widerstands&shy;dreieck<br><span style="font-weight:400;color:var(--muted);font-size:0.73rem">Reihenschaltung [Ω]</span></div>
+                <svg viewBox="0 0 200 150" class="tri-svg" xmlns="http://www.w3.org/2000/svg">
+                    <polygon points="18,133 170,133 170,12" fill="rgba(59,130,246,0.06)"/>
+                    <line x1="18" y1="133" x2="170" y2="133" stroke="#1d4ed8" stroke-width="2.5" stroke-linecap="round"/>
+                    <line x1="170" y1="133" x2="170" y2="12" stroke="#db2777" stroke-width="2.5" stroke-linecap="round"/>
+                    <line x1="18" y1="133" x2="170" y2="12" stroke="#059669" stroke-width="2.5" stroke-linecap="round"/>
+                    <rect x="155" y="118" width="15" height="15" fill="none" stroke="#94a3b8" stroke-width="1.5"/>
+                    <path d="M 42,133 A 24,24 0 0,1 35,111" fill="none" stroke="#d97706" stroke-width="1.5"/>
+                    <text x="94" y="147" text-anchor="middle" font-family="JetBrains Mono,monospace" font-size="14" fill="#1d4ed8" font-weight="700">R</text>
+                    <text x="183" y="78" text-anchor="middle" font-family="JetBrains Mono,monospace" font-size="14" fill="#db2777" font-weight="700">X</text>
+                    <text x="82" y="60" text-anchor="middle" font-family="JetBrains Mono,monospace" font-size="14" fill="#059669" font-weight="700">Z</text>
+                    <text x="48" y="120" text-anchor="start" font-family="sans-serif" font-size="12" fill="#d97706" font-weight="600">φ</text>
+                </svg>
+                <div class="tri-formula">Z = √(R² + X²)
+cos φ = R / Z</div>
+            </div>
+
+            <!-- 2. Leitwertdreieck -->
+            <div class="tri-card">
+                <div class="tri-card-title">② Leitwert&shy;dreieck<br><span style="font-weight:400;color:var(--muted);font-size:0.73rem">Parallelschaltung [S]</span></div>
+                <svg viewBox="0 0 200 150" class="tri-svg" xmlns="http://www.w3.org/2000/svg">
+                    <polygon points="18,133 170,133 170,12" fill="rgba(59,130,246,0.06)"/>
+                    <line x1="18" y1="133" x2="170" y2="133" stroke="#1d4ed8" stroke-width="2.5" stroke-linecap="round"/>
+                    <line x1="170" y1="133" x2="170" y2="12" stroke="#db2777" stroke-width="2.5" stroke-linecap="round"/>
+                    <line x1="18" y1="133" x2="170" y2="12" stroke="#059669" stroke-width="2.5" stroke-linecap="round"/>
+                    <rect x="155" y="118" width="15" height="15" fill="none" stroke="#94a3b8" stroke-width="1.5"/>
+                    <path d="M 42,133 A 24,24 0 0,1 35,111" fill="none" stroke="#d97706" stroke-width="1.5"/>
+                    <text x="94" y="147" text-anchor="middle" font-family="JetBrains Mono,monospace" font-size="14" fill="#1d4ed8" font-weight="700">G</text>
+                    <text x="183" y="78" text-anchor="middle" font-family="JetBrains Mono,monospace" font-size="14" fill="#db2777" font-weight="700">B</text>
+                    <text x="82" y="60" text-anchor="middle" font-family="JetBrains Mono,monospace" font-size="14" fill="#059669" font-weight="700">Y</text>
+                    <text x="48" y="120" text-anchor="start" font-family="sans-serif" font-size="12" fill="#d97706" font-weight="600">φ</text>
+                </svg>
+                <div class="tri-formula">Y = √(G² + B²)
+cos φ = G / Y</div>
+            </div>
+
+            <!-- 3. Spannungsdreieck -->
+            <div class="tri-card">
+                <div class="tri-card-title">③ Spannungs&shy;dreieck<br><span style="font-weight:400;color:var(--muted);font-size:0.73rem">Reihenschaltung [V]</span></div>
+                <svg viewBox="0 0 200 150" class="tri-svg" xmlns="http://www.w3.org/2000/svg">
+                    <polygon points="18,133 170,133 170,12" fill="rgba(59,130,246,0.06)"/>
+                    <line x1="18" y1="133" x2="170" y2="133" stroke="#1d4ed8" stroke-width="2.5" stroke-linecap="round"/>
+                    <line x1="170" y1="133" x2="170" y2="12" stroke="#db2777" stroke-width="2.5" stroke-linecap="round"/>
+                    <line x1="18" y1="133" x2="170" y2="12" stroke="#059669" stroke-width="2.5" stroke-linecap="round"/>
+                    <rect x="155" y="118" width="15" height="15" fill="none" stroke="#94a3b8" stroke-width="1.5"/>
+                    <path d="M 42,133 A 24,24 0 0,1 35,111" fill="none" stroke="#d97706" stroke-width="1.5"/>
+                    <text x="94" y="148" text-anchor="middle" font-family="JetBrains Mono,monospace" font-size="11" fill="#1d4ed8" font-weight="700">U<tspan dy="3" font-size="9">R</tspan></text>
+                    <text x="183" y="78" text-anchor="middle" font-family="JetBrains Mono,monospace" font-size="11" fill="#db2777" font-weight="700">U<tspan dy="3" font-size="9">X</tspan></text>
+                    <text x="82" y="60" text-anchor="middle" font-family="JetBrains Mono,monospace" font-size="14" fill="#059669" font-weight="700">U</text>
+                    <text x="48" y="120" text-anchor="start" font-family="sans-serif" font-size="12" fill="#d97706" font-weight="600">φ</text>
+                </svg>
+                <div class="tri-formula">U = √(U_R² + U_X²)
+cos φ = U_R / U</div>
+            </div>
+
+            <!-- 4. Stromdreieck -->
+            <div class="tri-card">
+                <div class="tri-card-title">④ Stromdreieck<br><span style="font-weight:400;color:var(--muted);font-size:0.73rem">Parallelschaltung [A]</span></div>
+                <svg viewBox="0 0 200 150" class="tri-svg" xmlns="http://www.w3.org/2000/svg">
+                    <polygon points="18,133 170,133 170,12" fill="rgba(59,130,246,0.06)"/>
+                    <line x1="18" y1="133" x2="170" y2="133" stroke="#1d4ed8" stroke-width="2.5" stroke-linecap="round"/>
+                    <line x1="170" y1="133" x2="170" y2="12" stroke="#db2777" stroke-width="2.5" stroke-linecap="round"/>
+                    <line x1="18" y1="133" x2="170" y2="12" stroke="#059669" stroke-width="2.5" stroke-linecap="round"/>
+                    <rect x="155" y="118" width="15" height="15" fill="none" stroke="#94a3b8" stroke-width="1.5"/>
+                    <path d="M 42,133 A 24,24 0 0,1 35,111" fill="none" stroke="#d97706" stroke-width="1.5"/>
+                    <text x="94" y="148" text-anchor="middle" font-family="JetBrains Mono,monospace" font-size="11" fill="#1d4ed8" font-weight="700">I<tspan dy="3" font-size="9">R</tspan></text>
+                    <text x="183" y="78" text-anchor="middle" font-family="JetBrains Mono,monospace" font-size="11" fill="#db2777" font-weight="700">I<tspan dy="3" font-size="9">X</tspan></text>
+                    <text x="82" y="60" text-anchor="middle" font-family="JetBrains Mono,monospace" font-size="14" fill="#059669" font-weight="700">I</text>
+                    <text x="48" y="120" text-anchor="start" font-family="sans-serif" font-size="12" fill="#d97706" font-weight="600">φ</text>
+                </svg>
+                <div class="tri-formula">I = √(I_R² + I_X²)
+cos φ = I_R / I</div>
+            </div>
+
+            <!-- 5. Leistungsdreieck -->
+            <div class="tri-card">
+                <div class="tri-card-title">⑤ Leistungs&shy;dreieck<br><span style="font-weight:400;color:var(--muted);font-size:0.73rem">Reihe &amp; Parallel</span></div>
+                <svg viewBox="0 0 200 150" class="tri-svg" xmlns="http://www.w3.org/2000/svg">
+                    <polygon points="18,133 170,133 170,12" fill="rgba(59,130,246,0.06)"/>
+                    <line x1="18" y1="133" x2="170" y2="133" stroke="#1d4ed8" stroke-width="2.5" stroke-linecap="round"/>
+                    <line x1="170" y1="133" x2="170" y2="12" stroke="#db2777" stroke-width="2.5" stroke-linecap="round"/>
+                    <line x1="18" y1="133" x2="170" y2="12" stroke="#059669" stroke-width="2.5" stroke-linecap="round"/>
+                    <rect x="155" y="118" width="15" height="15" fill="none" stroke="#94a3b8" stroke-width="1.5"/>
+                    <path d="M 42,133 A 24,24 0 0,1 35,111" fill="none" stroke="#d97706" stroke-width="1.5"/>
+                    <text x="94" y="147" text-anchor="middle" font-family="JetBrains Mono,monospace" font-size="14" fill="#1d4ed8" font-weight="700">P</text>
+                    <text x="183" y="78" text-anchor="middle" font-family="JetBrains Mono,monospace" font-size="14" fill="#db2777" font-weight="700">Q</text>
+                    <text x="82" y="60" text-anchor="middle" font-family="JetBrains Mono,monospace" font-size="14" fill="#059669" font-weight="700">S</text>
+                    <text x="48" y="120" text-anchor="start" font-family="sans-serif" font-size="12" fill="#d97706" font-weight="600">φ</text>
+                </svg>
+                <div class="tri-formula">S = √(P² + Q²)
+cos φ = P / S</div>
+            </div>
+
+        </div><!-- /tri-grid -->
+
+        <h3>Übersichtstabelle</h3>
+        <table>
+            <thead>
+                <tr>
+                    <th>Dreieck</th>
+                    <th style="color:#1d4ed8">① Wirkseite<br><small style="font-weight:400">cos φ · Hyp</small></th>
+                    <th style="color:#db2777">② Blindseite<br><small style="font-weight:400">sin φ · Hyp</small></th>
+                    <th style="color:#059669">Hypotenuse</th>
+                    <th>Schaltung</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr><td><strong>① Widerstand</strong></td><td>R [Ω]</td><td>X = X<sub>L</sub>−X<sub>C</sub> [Ω]</td><td>Z [Ω]</td><td>Reihe</td></tr>
+                <tr><td><strong>② Leitwert</strong></td><td>G = 1/R [S]</td><td>B = |B<sub>L</sub>−B<sub>C</sub>| [S]</td><td>Y = 1/Z [S]</td><td>Parallel</td></tr>
+                <tr><td><strong>③ Spannung</strong></td><td>U<sub>R</sub> = I·R [V]</td><td>U<sub>X</sub> = I·X [V]</td><td>U [V]</td><td>Reihe</td></tr>
+                <tr><td><strong>④ Strom</strong></td><td>I<sub>R</sub> = U/R [A]</td><td>I<sub>X</sub> = |I<sub>L</sub>−I<sub>C</sub>| [A]</td><td>I [A]</td><td>Parallel</td></tr>
+                <tr><td><strong>⑤ Leistung</strong></td><td>P [W]</td><td>Q [var]</td><td>S [VA]</td><td>beide</td></tr>
+            </tbody>
+        </table>
+
+        <h3>Das Leitwertdreieck im Detail</h3>
+        <p>Das Leitwertdreieck ist das „Kehrwert-Dreieck" zum Widerstandsdreieck und gilt für <strong>Parallelschaltungen</strong>:</p>
+        <div class="def-list">
+            <div class="def-item"><span class="def-item-key">Y — Admittanz</span><span>Scheinleitwert [S] = Kehrwert der Impedanz: Y = 1/Z = I/U</span></div>
+            <div class="def-item"><span class="def-item-key">G — Konduktanz</span><span>Wirkleitwert [S] = 1/R = I<sub>R</sub>/U · verbraucht Wirkleistung</span></div>
+            <div class="def-item"><span class="def-item-key">B<sub>L</sub> — Suszeptanz L</span><span>Induktiver Blindleitwert [S] = 1/X<sub>L</sub> = I<sub>L</sub>/U</span></div>
+            <div class="def-item"><span class="def-item-key">B<sub>C</sub> — Suszeptanz C</span><span>Kapazitiver Blindleitwert [S] = 1/X<sub>C</sub> = I<sub>C</sub>/U</span></div>
+        </div>
+        <div class="formula-box">Y = √(G² + B²)    mit B = |B<sub>L</sub> − B<sub>C</sub>|
+G  = I<sub>R</sub> / U = 1 / R         [S]
+B<sub>L</sub> = I<sub>L</sub> / U = 1 / X<sub>L</sub>     [S]
+B<sub>C</sub> = I<sub>C</sub> / U = 1 / X<sub>C</sub>     [S]
+cos φ = G / Y</div>
+
+        <h3>Wie hängen die Dreiecke zusammen?</h3>
+        <p>Die Dreiecke sind untereinander direkt verknüpft. Multipliziert man das <strong>Widerstandsdreieck</strong> mit dem Strom I, erhält man das <strong>Spannungsdreieck</strong>. Multipliziert man mit I², erhält man das <strong>Leistungsdreieck</strong>:</p>
+        <div class="formula-box">Widerstandsdreieck  × I   →  Spannungsdreieck
+  R · I = U<sub>R</sub>     X · I = U<sub>X</sub>     Z · I = U
+
+Widerstandsdreieck  × I²  →  Leistungsdreieck
+  R · I² = P     X · I² = Q     Z · I² = S
+
+Widerstandsdreieck  ÷ Z²  →  Leitwertdreieck
+  R / Z² = G     X / Z² = B     Z / Z² = Y = 1/Z</div>
+        <div class="notice-box"><strong>Merke:</strong> Alle Dreiecke haben den <em>gleichen Winkel φ</em> — deshalb gilt cos φ überall gleich: immer Wirkseite durch Hypotenuse.</div>
+    </div>
+</div>
+
+<!-- ─────────────── Formelübersicht ─────────────── -->
+<div class="card">
+    <div class="card-head">
+        <span>📋</span>
+        <span class="card-title">Formelübersicht — Alle wichtigen Formeln auf einen Blick</span>
+    </div>
+    <div class="card-body md-out">
+        <table>
+            <thead><tr><th>Größe</th><th>Reihenschaltung</th><th>Parallelschaltung</th></tr></thead>
+            <tbody>
+                <tr><td><strong>Gleich durch alle</strong></td><td>Strom I</td><td>Spannung U</td></tr>
+                <tr><td><strong>Impedanz / Strom</strong></td><td>Z = √(R²+(X<sub>L</sub>−X<sub>C</sub>)²) · I=U/Z</td><td>I<sub>ges</sub>=√(I<sub>R</sub>²+(I<sub>L</sub>−I<sub>C</sub>)²)</td></tr>
+                <tr><td><strong>cos φ</strong></td><td>cos φ = R / Z</td><td>cos φ = I<sub>R</sub> / I<sub>ges</sub></td></tr>
+                <tr><td><strong>Resonanz</strong></td><td>Z = R (min), I = max</td><td>I = I<sub>R</sub> (min), Z = max</td></tr>
+                <tr><td><strong>f₀</strong></td><td colspan="2" style="text-align:center">f₀ = 1 / (2π · √(L·C)) — gleich für beide!</td></tr>
+                <tr><td><strong>Kompensation</strong></td><td colspan="2">Q<sub>C</sub> = P·(tan φ₁−tan φ₂) · C = Q<sub>C</sub>/(2π·f·U²)</td></tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+
+</main>
+
+<script>
+// ── Reading Progress Bar
+window.addEventListener('scroll', () => {
+    const sh = document.documentElement.scrollHeight - window.innerHeight;
+    document.getElementById('top-progress-bar').style.width = (sh > 0 ? window.scrollY / sh * 100 : 0) + '%';
+});
+
+// ── Dark Mode
+(function() {
+    const btn = document.getElementById('dm-toggle');
+    const apply = dark => {
+        document.body.classList.toggle('dark', dark);
+        btn.textContent = dark ? '☀️' : '🌙';
+        btn.title = dark ? 'Helles Design' : 'Dunkles Design';
+        try { localStorage.setItem('rlc-theme', dark ? 'dark' : 'light'); } catch(e) {}
+    };
+    const saved = (() => { try { return localStorage.getItem('rlc-theme'); } catch(e) { return null; } })();
+    apply(saved === 'dark' || (!saved && window.matchMedia('(prefers-color-scheme: dark)').matches));
+    btn.addEventListener('click', () => apply(!document.body.classList.contains('dark')));
+})();
+
+// ── Formelblatt
+const FORMULA_DATA = [
+    { cat: '⚡ Grundlagen', items: [
+        'XL = 2π · f · L                    [Ω]',
+        'XC = 1 / (2π · f · C)              [Ω]',
+        'P  = U · I · cos φ                 [W]',
+        'Q  = U · I · sin φ                 [var]',
+        'S  = U · I                          [VA]',
+        'S  = √(P² + Q²)',
+        'cos φ = P / S',
+        'sin φ = √(1 − cos²φ)',
+        'tan φ = sin φ / cos φ',
+    ]},
+    { cat: '📎 Reihenschaltung', items: [
+        'X    = XL − XC                      [Ω]',
+        'Z    = √(R² + (XL − XC)²)           [Ω]',
+        'I    = U / Z                         [A]',
+        'cos φ = R / Z',
+        'UR   = I · R                         [V]',
+        'UX   = I · |XL − XC|                [V]',
+        'U    = √(UR² + UX²)                 [V]',
+    ]},
+    { cat: '🔀 Parallelschaltung', items: [
+        'IR   = U / R                         [A]',
+        'IL   = U / XL                        [A]',
+        'IC   = U / XC                        [A]',
+        'Iges = √(IR² + (IL − IC)²)          [A]',
+        'cos φ = IR / Iges',
+        'G    = 1 / R                         [S]',
+        'BL   = 1 / XL                        [S]',
+        'BC   = 1 / XC                        [S]',
+        'Y    = √(G² + B²)                    [S]',
+        'cos φ = G / Y',
+    ]},
+    { cat: '〰 Resonanz', items: [
+        'f₀ = 1 / (2π · √(L · C))            [Hz]',
+        'Bei f₀:  XL = XC',
+        'Serie:    Z = R (min)  ·  I = max',
+        'Parallel: I = IR (min) ·  Z = max',
+    ]},
+    { cat: '🔧 Kompensation', items: [
+        'sin φ = √(1 − cos²φ)',
+        'tan φ = sin φ / cos φ',
+        'QC = P · (tan φ₁ − tan φ₂)          [var]',
+        'C  = QC / (2π · f · U²)             [F → µF]',
+    ]},
+    { cat: '📐 Die 5 Dreiecke  —  Hyp² = Wirk² + Blind²', items: [
+        'cos φ = Wirkseite / Hypotenuse',
+        'sin φ = Blindseite / Hypotenuse',
+        'tan φ = Blindseite / Wirkseite',
+        '① Widerstand: Z = √(R² + X²)          cos φ = R  / Z',
+        '② Leitwert:   Y = √(G² + B²)          cos φ = G  / Y',
+        '③ Spannung:   U = √(UR² + UX²)        cos φ = UR / U',
+        '④ Strom:      I = √(IR² + IX²)        cos φ = IR / I',
+        '⑤ Leistung:   S = √(P² + Q²)          cos φ = P  / S',
+    ]},
+];
+function buildFormulaSheet() {
+    const body = document.getElementById('fml-body');
+    body.innerHTML = '';
+    FORMULA_DATA.forEach(({ cat, items }) => {
+        const sec = document.createElement('div');
+        sec.className = 'fml-section';
+        const head = document.createElement('div');
+        head.className = 'fml-section-head';
+        head.textContent = cat;
+        sec.appendChild(head);
+        const list = document.createElement('div');
+        list.className = 'fml-list';
+        items.forEach(txt => {
+            const el = document.createElement('div');
+            el.className = 'fml-item';
+            el.textContent = txt;
+            list.appendChild(el);
+        });
+        sec.appendChild(list);
+        body.appendChild(sec);
+    });
+}
+let formulaBuilt = false;
+function openFormulaSheet() {
+    if (!formulaBuilt) { buildFormulaSheet(); formulaBuilt = true; }
+    document.getElementById('fml-overlay').classList.add('open');
+}
+function closeFormulaSheet() {
+    document.getElementById('fml-overlay').classList.remove('open');
+}
+(function(){
+    document.getElementById('formula-btn').addEventListener('click', openFormulaSheet);
+    document.getElementById('fml-close').addEventListener('click', closeFormulaSheet);
+    document.getElementById('fml-overlay').addEventListener('click', e => {
+        if (e.target.id === 'fml-overlay') closeFormulaSheet();
+    });
+    document.addEventListener('keydown', e => {
+        if (e.key === 'Escape' && document.getElementById('fml-overlay').classList.contains('open')) closeFormulaSheet();
+    });
+})();
+
+// ── Lernmodus
+const CARDS = [
+    { phase: 'Grundlagen', q: 'Wie berechnet sich der induktive Widerstand XL?', a: '<strong>X<sub>L</sub> = ω · L = 2π · f · L</strong><br><br>XL steigt proportional mit der Frequenz f und der Induktivität L.<br>Phasenverschub: Strom eilt Spannung um <strong>90° nach</strong>.' },
+    { phase: 'Grundlagen', q: 'Wie berechnet sich der kapazitive Widerstand XC?', a: '<strong>X<sub>C</sub> = 1 / (ω · C) = 1 / (2π · f · C)</strong><br><br>XC fällt mit steigender Frequenz f.<br>Phasenverschub: Strom eilt Spannung um <strong>90° vor</strong>.' },
+    { phase: 'Grundlagen', q: 'Was ist der Unterschied zwischen P, Q und S?', a: '<strong>P</strong> = Wirkleistung [W] — wird tatsächlich verbraucht<br><strong>Q</strong> = Blindleistung [var] — pendelt zwischen Generator und Verbraucher<br><strong>S</strong> = Scheinleistung [VA] = √(P² + Q²)<br><br>cos φ = P / S (Leistungsfaktor)' },
+    { phase: 'Reihenschaltung', q: 'Wie berechnet man Z in der RLC-Reihenschaltung?', a: '<strong>Z = √(R² + (X<sub>L</sub> − X<sub>C</sub>)²)</strong><br><br>Danach: I = U / Z<br>cos φ = R / Z<br>φ = arctan((X<sub>L</sub> − X<sub>C</sub>) / R)' },
+    { phase: 'Reihenschaltung', q: 'Wann ist eine RLC-Reihenschaltung induktiv, wann kapazitiv?', a: '<strong>Induktiv:</strong> X<sub>L</sub> > X<sub>C</sub> → φ &gt; 0° (Strom eilt nach)<br><strong>Kapazitiv:</strong> X<sub>C</sub> > X<sub>L</sub> → φ &lt; 0° (Strom eilt vor)<br><strong>Resonanz:</strong> X<sub>L</sub> = X<sub>C</sub> → Z = R, cos φ = 1' },
+    { phase: 'Reihenschaltung', q: 'Was passiert bei Serienresonanz?', a: 'Bei Serienresonanz gilt X<sub>L</sub> = X<sub>C</sub>:<br><br>• Z = R → <strong>minimal</strong><br>• I = U / R → <strong>maximal</strong><br>• cos φ = 1<br>• U<sub>L</sub> und U<sub>C</sub> können größer als U sein! (Spannungsresonanz)' },
+    { phase: 'Parallelschaltung', q: 'Wie berechnet man den Gesamtstrom in der RLC-Parallelschaltung?', a: 'Teilströme: I<sub>R</sub> = U/R · I<sub>L</sub> = U/X<sub>L</sub> · I<sub>C</sub> = U/X<sub>C</sub><br><br><strong>I<sub>ges</sub> = √(I<sub>R</sub>² + (I<sub>L</sub> − I<sub>C</sub>)²)</strong><br><br>cos φ = I<sub>R</sub> / I<sub>ges</sub>' },
+    { phase: 'Parallelschaltung', q: 'Wann ist eine RLC-Parallelschaltung induktiv, wann kapazitiv?', a: '<strong>Induktiv:</strong> I<sub>L</sub> > I<sub>C</sub><br><strong>Kapazitiv:</strong> I<sub>C</sub> > I<sub>L</sub><br><strong>Resonanz:</strong> I<sub>L</sub> = I<sub>C</sub> → I<sub>ges</sub> = I<sub>R</sub> (minimal), Z = maximal' },
+    { phase: 'Parallelschaltung', q: 'Was passiert bei Parallelresonanz?', a: 'Bei Parallelresonanz gilt I<sub>L</sub> = I<sub>C</sub>:<br><br>• I<sub>ges</sub> = I<sub>R</sub> → <strong>minimal</strong><br>• Z = R → <strong>maximal</strong><br>• cos φ = 1<br>• I<sub>L</sub> und I<sub>C</sub> können sehr groß sein! (Stromresonanz)' },
+    { phase: 'Resonanz', q: 'Wie berechnet man die Resonanzfrequenz f₀?', a: '<strong>f₀ = 1 / (2π · √(L · C))</strong><br><br>Diese Formel gilt sowohl für die Serien- als auch für die Parallelresonanz!<br>Bei f = f₀ ist X<sub>L</sub> = X<sub>C</sub>.' },
+    { phase: 'Kompensation', q: 'Wie berechnet man die nötige Blindleistung QC für Kompensation?', a: '<strong>Q<sub>C</sub> = P · (tan φ<sub>1</sub> − tan φ<sub>2</sub>)</strong><br><br>φ₁ = Ausgangswinkel (vor Kompensation)<br>φ₂ = Zielwinkel (nach Kompensation)<br><br>Beispiel: cos φ = 0,6 → sin φ = 0,8 → tan φ = 0,8/0,6 = 4/3 ≈ 1,333' },
+    { phase: 'Kompensation', q: 'Wie berechnet man den Kondensator C für Kompensation?', a: '<strong>C = Q<sub>C</sub> / (2π · f · U²)</strong><br><br>U = Netzspannung, f = Netzfrequenz (50 Hz)<br><br>Der Kondensator wird <em>parallel</em> zum induktiven Verbraucher geschaltet, damit sein kapazitiver Strom den induktiven Blindstrom kompensiert.' },
+    { phase: 'Dreiecke', q: 'Welche 5 Dreiecke gibt es im Wechselstromkreis?', a: 'Alle 5 sind rechtwinklig, geometrisch ähnlich, mit demselben Winkel φ:<br><br>① <strong>Widerstandsdreieck:</strong> R · X · Z [Ω] — Reihe<br>② <strong>Leitwertdreieck:</strong> G · B · Y [S] — Parallel<br>③ <strong>Spannungsdreieck:</strong> U<sub>R</sub> · U<sub>X</sub> · U [V] — Reihe<br>④ <strong>Stromdreieck:</strong> I<sub>R</sub> · I<sub>X</sub> · I [A] — Parallel<br>⑤ <strong>Leistungsdreieck:</strong> P · Q · S — beide<br><br>Grundregel: Hypotenuse² = Wirkseite² + Blindseite²' },
+    { phase: 'Dreiecke', q: 'Was ist die allgemeine Winkelregel aller Dreiecke?', a: '<strong>Hypotenuse² = Wirkseite² + Blindseite²</strong><br><br>cos φ = Wirkseite / Hypotenuse<br>sin φ = Blindseite / Hypotenuse<br>tan φ = Blindseite / Wirkseite<br><br><em>Alle 5 Dreiecke haben denselben Winkel φ!</em>' },
+    { phase: 'Dreiecke', q: 'Was bedeuten G, B und Y im Leitwertdreieck?', a: '<strong>Y</strong> = Admittanz (Scheinleitwert) [S] = 1/Z<br><strong>G</strong> = Konduktanz (Wirkleitwert) [S] = 1/R = I<sub>R</sub>/U<br><strong>B<sub>L</sub></strong> = Induktive Suszeptanz [S] = 1/X<sub>L</sub><br><strong>B<sub>C</sub></strong> = Kapazitive Suszeptanz [S] = 1/X<sub>C</sub><br><br>Y = √(G² + B²) · cos φ = G/Y' },
+    { phase: 'Dreiecke', q: 'Wie hängen Widerstands-, Spannungs- und Leistungsdreieck zusammen?', a: 'Alle entstehen aus dem Widerstandsdreieck durch Multiplikation:<br><br>× I → <strong>Spannungsdreieck</strong>: R·I=U<sub>R</sub>, X·I=U<sub>X</sub>, Z·I=U<br>× I² → <strong>Leistungsdreieck</strong>: R·I²=P, X·I²=Q, Z·I²=S<br>÷ Z² → <strong>Leitwertdreieck</strong>: R/Z²=G, X/Z²=B, 1/Z=Y' },
+];
+
+let lm = { idx: 0, correct: 0, wrong: [], revealed: false, active: false };
+
+function startLearningMode() {
+    lm.idx = 0; lm.correct = 0; lm.wrong = []; lm.revealed = false; lm.active = true;
+    document.getElementById('learn-overlay').style.display = 'block';
+    const modal = document.getElementById('learn-modal');
+    modal.style.display = 'flex';
+    document.getElementById('lm-result').style.display = 'none';
+    document.getElementById('lm-card-area').style.display = 'flex';
+    document.getElementById('lm-actions').classList.add('hidden');
+    document.body.style.overflow = 'hidden';
+    showCard();
+}
+function closeLearningMode() {
+    document.getElementById('learn-overlay').style.display = 'none';
+    document.getElementById('learn-modal').style.display = 'none';
+    document.body.style.overflow = '';
+    lm.active = false;
+}
+function showCard() {
+    if (lm.idx >= CARDS.length) { showResult(); return; }
+    const card = CARDS[lm.idx];
+    document.getElementById('lm-progress').style.width = Math.round(lm.idx / CARDS.length * 100) + '%';
+    document.getElementById('lm-counter').textContent = (lm.idx + 1) + ' / ' + CARDS.length;
+    document.getElementById('lm-phase-badge').textContent = card.phase;
+    document.getElementById('lm-question').textContent = card.q;
+    const ansEl = document.getElementById('lm-answer');
+    ansEl.style.display = 'none'; ansEl.innerHTML = card.a;
+    document.getElementById('lm-flip-btn').style.display = 'block';
+    document.getElementById('lm-actions').classList.add('hidden');
+    lm.revealed = false;
+    document.getElementById('lm-card-area').scrollTop = 0;
+}
+function revealAnswer() {
+    document.getElementById('lm-answer').style.display = 'block';
+    document.getElementById('lm-flip-btn').style.display = 'none';
+    document.getElementById('lm-actions').classList.remove('hidden');
+    lm.revealed = true;
+}
+function rateCard(correct) {
+    if (correct) lm.correct++; else lm.wrong.push(lm.idx);
+    lm.idx++; showCard();
+}
+function showResult() {
+    document.getElementById('lm-card-area').style.display = 'none';
+    document.getElementById('lm-actions').classList.add('hidden');
+    document.getElementById('lm-result').style.display = 'flex';
+    document.getElementById('lm-progress').style.width = '100%';
+    document.getElementById('lm-counter').textContent = 'Fertig!';
+    const pct = Math.round(lm.correct / CARDS.length * 100);
+    const emoji = pct >= 80 ? '🎉' : pct >= 60 ? '👍' : '📖';
+    const msg   = pct >= 80 ? 'Ausgezeichnet!' : pct >= 60 ? 'Gut! Noch ein bisschen üben.' : 'Weitermachen!';
+    document.getElementById('lm-score').textContent = emoji + ' ' + pct + '%';
+    document.getElementById('lm-result-text').textContent = lm.correct + ' von ' + CARDS.length + ' richtig — ' + msg;
+    document.getElementById('lm-result-bar').style.width = pct + '%';
+    if (lm.wrong.length > 0) {
+        let html = '<p style="font-weight:600;margin-bottom:0.5rem;color:var(--muted)">Nochmal üben:</p><ul style="list-style:disc;padding-left:1.25rem">';
+        lm.wrong.forEach(i => { html += '<li style="margin-bottom:0.3rem">' + CARDS[i].q + '</li>'; });
+        html += '</ul>';
+        document.getElementById('lm-wrong-list').innerHTML = html;
+    } else {
+        document.getElementById('lm-wrong-list').innerHTML = '<p style="color:#059669;font-weight:600">✅ Alle Karten gewusst!</p>';
+    }
+    updateLpBar(pct);
+    try { localStorage.setItem('rlc-lp', pct.toString()); } catch(e) {}
+}
+function restartLearningMode() { startLearningMode(); }
+function updateLpBar(pct) {
+    document.getElementById('lp-fill').style.width = pct + '%';
+    document.getElementById('lp-text').textContent = pct + '%';
+}
+(() => { try { const s = localStorage.getItem('rlc-lp'); if (s) updateLpBar(parseInt(s)); } catch(e) {} })();
+
+// ── Probeschularbeit
+// Answers:
+// 1a: Z = √(60²+(100-20)²) = √(3600+6400) = √10000 = 100 Ω
+// 1b: I = 200/100 = 2 A
+// 1c: cos φ = 60/100 = 0.60
+// 1d: induktiv (XL=100 > XC=20) → option 1
+// 1e: UR = 2×60 = 120 V
+// 2a: IR = 120/40 = 3 A
+// 2b: IL = 120/20 = 6 A
+// 2c: IC = 120/60 = 2 A
+// 2d: Iblind=6-2=4, Iges=√(9+16)=5 A
+// 2e: cosφ = 3/5 = 0.60
+// 2f: induktiv (IL=6 > IC=2) → option 1
+// 3a: minimal → option 1
+// 3b: minimal → option 1
+// 3c: 1/(2π√LC) → option 1
+// 4a: QC = 3000×(4/3-0) = 4000 var (cosφ1=0.6→tanφ1=4/3, cosφ2=1→tanφ2=0)
+// 4b: C = 4000/(2π×50×230²) ≈ 240.8 µF ≈ 241 µF
+// 5a: XL steigt → option 1
+// 5b: keine Blindleistung → option 1
+// 5c: S=√(P²+Q²) → option 1
+const EXAM_QS = [
+    { id:'1a', type:'calc', answer:100,   tol:0.5,  pts:3 },
+    { id:'1b', type:'calc', answer:2,     tol:0.05, pts:2 },
+    { id:'1c', type:'calc', answer:0.60,  tol:0.01, pts:2 },
+    { id:'1d', type:'mc',   answer:'1',   pts:1 },
+    { id:'1e', type:'calc', answer:120,   tol:0.5,  pts:2 },
+    { id:'2a', type:'calc', answer:3,     tol:0.05, pts:1 },
+    { id:'2b', type:'calc', answer:6,     tol:0.05, pts:1 },
+    { id:'2c', type:'calc', answer:2,     tol:0.05, pts:1 },
+    { id:'2d', type:'calc', answer:5,     tol:0.05, pts:3 },
+    { id:'2e', type:'calc', answer:0.60,  tol:0.01, pts:2 },
+    { id:'2f', type:'mc',   answer:'1',   pts:2 },
+    { id:'3a', type:'mc',   answer:'1',   pts:2 },
+    { id:'3b', type:'mc',   answer:'1',   pts:2 },
+    { id:'3c', type:'mc',   answer:'1',   pts:2 },
+    { id:'4a', type:'calc', answer:4000,  tol:5,    pts:3 },
+    { id:'4b', type:'calc', answer:241,   tol:10,   pts:5 },
+    { id:'5a', type:'mc',   answer:'1',   pts:2 },
+    { id:'5b', type:'mc',   answer:'1',   pts:2 },
+    { id:'5c', type:'mc',   answer:'1',   pts:2 },
+];
+const EXAM_DURATION = 45 * 60;
+let examState = { active:false, submitted:false, secondsLeft:EXAM_DURATION, timerInterval:null };
+
+function startExamMode() {
+    examState.active = true; examState.submitted = false; examState.secondsLeft = EXAM_DURATION;
+    EXAM_QS.forEach(q => {
+        if (q.type === 'calc') {
+            const inp = document.getElementById('ans-' + q.id);
+            if (inp) { inp.value = ''; inp.className = 'exam-ci'; inp.disabled = false; }
+            const fb = document.getElementById('fb-' + q.id);
+            if (fb) { fb.textContent = ''; fb.className = 'exam-ci-fb'; }
+        } else {
+            document.querySelectorAll('input[name="q' + q.id + '"]').forEach(r => { r.checked = false; r.disabled = false; });
+            document.querySelectorAll('#mc-' + q.id + ' .exam-mc-opt').forEach(o => o.classList.remove('correct','wrong','show-correct'));
+        }
+    });
+    document.getElementById('exam-timer').classList.remove('warning');
+    document.getElementById('exam-body').style.display = 'flex';
+    document.getElementById('exam-result-screen').style.display = 'none';
+    document.getElementById('exam-submit-btn').style.display = '';
+    document.getElementById('exam-overlay').style.display = 'block';
+    document.getElementById('exam-modal').style.display = 'flex';
+    document.body.style.overflow = 'hidden';
+    updateExamTimer(); updateAnsweredCount();
+    if (examState.timerInterval) clearInterval(examState.timerInterval);
+    examState.timerInterval = setInterval(tickExamTimer, 1000);
+}
+function closeExamMode() {
+    if (examState.timerInterval) clearInterval(examState.timerInterval);
+    document.getElementById('exam-overlay').style.display = 'none';
+    document.getElementById('exam-modal').style.display = 'none';
+    document.body.style.overflow = '';
+    examState.active = false;
+}
+function tickExamTimer() {
+    if (examState.submitted) return;
+    examState.secondsLeft--;
+    if (examState.secondsLeft <= 0) { examState.secondsLeft = 0; updateExamTimer(); clearInterval(examState.timerInterval); submitExam(true); return; }
+    updateExamTimer();
+    if (examState.secondsLeft <= 300) document.getElementById('exam-timer').classList.add('warning');
+}
+function updateExamTimer() {
+    const m = Math.floor(examState.secondsLeft/60), s = examState.secondsLeft%60;
+    document.getElementById('exam-timer').textContent = String(m).padStart(2,'0')+':'+String(s).padStart(2,'0');
+}
+function updateAnsweredCount() {
+    let count = 0;
+    EXAM_QS.forEach(q => {
+        if (q.type === 'calc') { const el = document.getElementById('ans-'+q.id); if (el && el.value.trim()) count++; }
+        else { if (document.querySelector('input[name="q'+q.id+'"]:checked')) count++; }
+    });
+    document.getElementById('exam-answered').textContent = count+' / '+EXAM_QS.length+' beantwortet';
+}
+(function attachListeners() {
+    EXAM_QS.forEach(q => {
+        if (q.type === 'calc') { const el = document.getElementById('ans-'+q.id); if (el) el.addEventListener('input', updateAnsweredCount); }
+        else { document.querySelectorAll('input[name="q'+q.id+'"]').forEach(r => r.addEventListener('change', updateAnsweredCount)); }
+    });
+})();
+function parseExamInput(val) {
+    let s = val.replace(/\s/g,'').replace(/[ΩµAVF%]/g,'').trim();
+    const dots=(s.match(/\./g)||[]).length, commas=(s.match(/,/g)||[]).length;
+    if (commas>0&&dots>0) { s=s.replace(/\./g,'').replace(',','.'); }
+    else if (commas>0) { s=s.replace(',','.'); }
+    else if (dots===1) { const after=s.split('.')[1]||''; if(after.length===3) s=s.replace('.',''); }
+    return parseFloat(s);
+}
+function submitExam(autoSubmit) {
+    if (examState.submitted) return;
+    examState.submitted = true;
+    if (examState.timerInterval) clearInterval(examState.timerInterval);
+    let totalPts = 0;
+    const results = [];
+    EXAM_QS.forEach(q => {
+        let earned = 0;
+        if (q.type === 'calc') {
+            const inp=document.getElementById('ans-'+q.id), fb=document.getElementById('fb-'+q.id);
+            if (inp) {
+                const val=parseExamInput(inp.value), ok=!isNaN(val)&&Math.abs(val-q.answer)<=q.tol;
+                earned = ok ? q.pts : 0;
+                inp.classList.add(ok?'correct':'wrong'); inp.disabled=true;
+                if (fb) {
+                    if (ok) { fb.textContent='✓ Richtig'; fb.className='exam-ci-fb ok'; }
+                    else {
+                        const disp = (q.id==='1c'||q.id==='2e') ? q.answer.toFixed(2).replace('.',',') :
+                                     (q.id==='4b') ? q.answer+' µF' : q.answer;
+                        fb.textContent='✗ '+disp; fb.className='exam-ci-fb err';
+                    }
+                }
+            }
+        } else {
+            const checked=document.querySelector('input[name="q'+q.id+'"]:checked');
+            earned = (checked&&checked.value===q.answer)?q.pts:0;
+            document.querySelectorAll('input[name="q'+q.id+'"]').forEach(r=>{r.disabled=true;});
+            document.querySelectorAll('#mc-'+q.id+' .exam-mc-opt').forEach(opt=>{
+                const inp=opt.querySelector('input[type=radio]'); if(!inp)return;
+                if(inp.value===q.answer) opt.classList.add('show-correct');
+                if(inp.checked&&inp.value!==q.answer) opt.classList.add('wrong');
+            });
+        }
+        totalPts+=earned; results.push({q,earned});
+    });
+    showExamResults(totalPts,results,autoSubmit);
+}
+function getExamNote(pts) {
+    if(pts>=36) return{note:1,text:'Sehr gut',       color:'#059669',bg:'#f0fdf4'};
+    if(pts>=30) return{note:2,text:'Gut',            color:'#0d9488',bg:'#f0fdfa'};
+    if(pts>=25) return{note:3,text:'Befriedigend',   color:'#d97706',bg:'#fffbeb'};
+    if(pts>=20) return{note:4,text:'Genügend',       color:'#ea580c',bg:'#fff7ed'};
+    return            {note:5,text:'Nicht genügend', color:'#dc2626',bg:'#fef2f2'};
+}
+function showExamResults(totalPts,results,autoSubmit) {
+    const{note,text,color,bg}=getExamNote(totalPts);
+    const pct=Math.round(totalPts/40*100);
+    const AUFGABEN=[
+        {num:1,title:'RLC-Reihenschaltung',ids:['1a','1b','1c','1d','1e'],max:10},
+        {num:2,title:'RLC-Parallelschaltung',ids:['2a','2b','2c','2d','2e','2f'],max:10},
+        {num:3,title:'Resonanz',ids:['3a','3b','3c'],max:6},
+        {num:4,title:'Kompensation',ids:['4a','4b'],max:8},
+        {num:5,title:'Grundlagen',ids:['5a','5b','5c'],max:6},
+    ];
+    const byId={}; results.forEach(r=>{byId[r.q.id]=r.earned;});
+    let rows='';
+    AUFGABEN.forEach(a=>{
+        const earned=a.ids.reduce((s,id)=>s+(byId[id]||0),0);
+        const cls=earned===a.max?'pts-full':earned===0?'pts-zero':'pts-part';
+        rows+='<tr><td>Aufgabe '+a.num+': '+a.title+'</td><td class="pts-col '+cls+'">'+earned+' / '+a.max+'</td></tr>';
+    });
+    const SCALE=[{note:1,text:'Sehr gut',min:36},{note:2,text:'Gut',min:30},{note:3,text:'Befriedigend',min:25},{note:4,text:'Genügend',min:20},{note:5,text:'Nicht genügend',min:0}];
+    let scaleTr='';
+    SCALE.forEach(s=>{
+        const act=s.note===note?' class="active-grade"':'';
+        scaleTr+='<tr'+act+'><td><strong>'+s.note+'</strong></td><td>'+s.text+'</td><td>ab '+s.min+' P.</td></tr>';
+    });
+    document.getElementById('exam-result-screen').innerHTML=
+        (autoSubmit?'<p class="exam-auto-note">⏱ Zeit abgelaufen — automatisch abgegeben.</p>':'')+
+        '<div class="exam-grade-badge" style="border-color:'+color+';color:'+color+';background:'+bg+'">'+
+            '<span class="g-num">'+note+'</span><span class="g-text">'+text+'</span></div>'+
+        '<div><div class="exam-pts-big">'+totalPts+' von 40 Punkten</div><div class="exam-pts-sub">'+pct+'% erreicht</div></div>'+
+        '<table class="exam-res-table"><thead><tr><th>Aufgabe</th><th style="text-align:right">Punkte</th></tr></thead><tbody>'+rows+'</tbody></table>'+
+        '<div class="exam-grade-scale"><table>'+scaleTr+'</table></div>'+
+        '<div class="exam-res-actions">'+
+            '<button class="btn btn-primary" onclick="startExamMode()">🔄 Nochmal schreiben</button>'+
+            '<button class="btn btn-secondary" onclick="closeExamMode()">✕ Schließen</button>'+
+        '</div>';
+    document.getElementById('exam-body').style.display='none';
+    document.getElementById('exam-submit-btn').style.display='none';
+    document.getElementById('exam-result-screen').style.display='flex';
+}
+
+// ── Keyboard shortcuts
+document.addEventListener('keydown', e => {
+    if (e.key==='Escape'&&lm.active) closeLearningMode();
+    if (e.key==='Enter'&&lm.active&&!lm.revealed) revealAnswer();
+    if (e.key==='ArrowRight'&&lm.active&&lm.revealed) rateCard(true);
+    if (e.key==='ArrowLeft'&&lm.active&&lm.revealed) rateCard(false);
+    if (e.key==='Escape'&&examState.active) closeExamMode();
+});
+</script>
+<script src="../../shared/hub.js"></script>
+</body>
+</html>

@@ -1,0 +1,1968 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AWL — Allgemeines Wirtschaftsrecht</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap">
+    <style>
+        :root {
+            --primary:       #065f46;
+            --primary-light: #059669;
+            --accent:        #10b981;
+            --bg:            #f0fdf4;
+            --card:          #ffffff;
+            --text:          #0f172a;
+            --muted:         #64748b;
+            --border:        #e2e8f0;
+            --success:       #059669;
+            --shadow-xs: 0 1px 2px rgba(15,23,42,0.05);
+            --shadow-sm: 0 2px 8px rgba(6,95,70,0.07), 0 1px 3px rgba(6,95,70,0.04);
+            --shadow-md: 0 6px 24px rgba(6,95,70,0.11), 0 2px 8px rgba(6,95,70,0.05);
+            --shadow-lg: 0 16px 48px rgba(6,95,70,0.14), 0 6px 20px rgba(6,95,70,0.07);
+            --radius:    16px;
+            --radius-sm: 10px;
+            --dur:       0.18s;
+            --ease:      cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        /* ── Dark Mode ──────────────────────────────── */
+        body.dark {
+            --primary:       #34d399;
+            --primary-light: #6ee7b7;
+            --accent:        #10b981;
+            --bg:            #071a12;
+            --card:          #0d2118;
+            --text:          #e2e8f0;
+            --muted:         #94a3b8;
+            --border:        #1a3d28;
+            --success:       #34d399;
+            color-scheme: dark;
+        }
+        body.dark {
+            background-image:
+                radial-gradient(ellipse 70% 50% at 5% -5%, rgba(16,185,129,0.06) 0%, transparent 55%),
+                radial-gradient(ellipse 55% 45% at 95% 105%, rgba(52,211,153,0.05) 0%, transparent 55%),
+                radial-gradient(circle, rgba(26,61,40,0.8) 0.85px, transparent 0.85px);
+            background-size: auto, auto, 22px 22px;
+        }
+        body.dark header { background: linear-gradient(135deg, #030f08 0%, #064e3b 50%, #065f46 100%); }
+        body.dark .awl-nav { background: rgba(7,26,18,0.88); border-bottom-color: #1a3d28; box-shadow: 0 1px 14px rgba(0,0,0,0.4); }
+        body.dark .sum-wrap { background: #0d2118; border-color: #1a3d28; }
+        body.dark .sum-wrap:hover { box-shadow: 0 6px 28px rgba(0,0,0,0.4); }
+        body.dark .sum-header { background: linear-gradient(135deg, #0a2418 0%, #071a12 100%); border-bottom-color: #1a3d28; }
+        body.dark .sum-title  { color: #e2e8f0; }
+        body.dark .sum-note   { background: rgba(16,185,129,0.15); color: #6ee7b7; }
+        body.dark .folder-info { background: #071a12; border-color: #1a3d28; }
+        body.dark .folder-path  { color: #34d399; }
+        body.dark .folder-count { background: #0d2118; color: #34d399; }
+        body.dark .card { background: #0d2118; border-color: #1a3d28; }
+        body.dark .card-head { background: #071a12; border-bottom-color: #1a3d28; }
+        body.dark .btn-secondary { background: #1a3d28; color: #e2e8f0; border-color: #264d38; }
+        body.dark .btn-secondary:hover { background: #264d38; }
+        body.dark .btn-dm { color: #fbbf24; }
+        body.dark .md-out h1,
+        body.dark .md-out h2 { color: #6ee7b7; border-bottom-color: #1a3d28; }
+        body.dark .md-out h3  { color: #34d399; }
+        body.dark .md-out strong { color: #6ee7b7; }
+        body.dark .md-out em     { color: #34d399; }
+        body.dark .md-out code   { background: #1a3d28; color: #e2e8f0; border-color: #264d38; }
+        body.dark .md-out pre    { background: #020a06; border-color: #1a3d28; }
+        body.dark .md-out blockquote { background: #071a12; border-left-color: #059669; color: #94a3b8; }
+        body.dark .md-out th    { background: #0d2118; color: #6ee7b7; border-bottom-color: #1a3d28; }
+        body.dark .md-out tr:nth-child(even) td { background: #0a1e15; }
+        body.dark .md-out td    { border-top-color: #1a3d28; }
+        body.dark .md-out hr    { border-top-color: #1a3d28; }
+        body.dark .formula-box  { background: #0a1e15; border-left-color: #059669; }
+        body.dark .image-card   { border-color: #1a3d28; }
+        body.dark .image-caption { background: #071a12; border-top-color: #1a3d28; }
+        body.dark .sr-hint { background: #451a03; color: #fcd34d; border-color: #78350f; }
+
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+            background: var(--bg);
+            background-image:
+                radial-gradient(ellipse 70% 50% at 5% -5%, rgba(16,185,129,0.07) 0%, transparent 55%),
+                radial-gradient(ellipse 55% 45% at 95% 105%, rgba(16,185,129,0.06) 0%, transparent 55%),
+                radial-gradient(circle, rgba(148,163,184,0.22) 0.85px, transparent 0.85px);
+            background-size: auto, auto, 22px 22px;
+            color: var(--text);
+            min-height: 100vh;
+            font-size: 15px;
+            line-height: 1.57;
+        }
+
+        /* ── Top Reading Progress Bar ── */
+        #top-progress-bar {
+            position: fixed; top: 0; left: 0; height: 3px; width: 0%;
+            background: linear-gradient(90deg, var(--primary-light), var(--accent));
+            z-index: 9999; transition: width 0.1s linear;
+            pointer-events: none;
+        }
+
+        header {
+            background: linear-gradient(135deg, #065f46 0%, #0f766e 50%, #0d9488 100%);
+            color: white;
+            padding: 1.25rem 2.5rem 1.1rem;
+            position: relative;
+            overflow: hidden;
+        }
+        header::before {
+            content: '';
+            position: absolute; inset: 0;
+            background:
+                radial-gradient(ellipse 55% 75% at 0% 50%, rgba(255,255,255,0.04) 0%, transparent 65%),
+                url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.03'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+        }
+        header::after {
+            content: '';
+            position: absolute; bottom: 0; left: 0; right: 0; height: 1px;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.14), transparent);
+        }
+        .h-math {
+            position: absolute; right: 2.5rem; top: 50%;
+            transform: translateY(-50%);
+            font-size: 3.5rem; opacity: 0.07; font-style: italic;
+            letter-spacing: 0.5rem; user-select: none; line-height: 1;
+        }
+        .h-content { position: relative; }
+        .h-motto {
+            font-size: 0.95rem; font-style: italic; color: rgba(255,255,255,0.75);
+            margin-top: 0.4rem; font-weight: 400; line-height: 1.4;
+            max-width: 600px; animation: fadeInMotto 0.6s ease-in 0.2s both;
+        }
+        @keyframes fadeInMotto {
+            from { opacity: 0; transform: translateY(-8px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .h-badge {
+            display: inline-flex; align-items: center; gap: 0.35rem;
+            background: rgba(255,255,255,0.11);
+            border: 1px solid rgba(255,255,255,0.18);
+            backdrop-filter: blur(8px);
+            padding: 0.3rem 0.95rem; border-radius: 999px;
+            font-size: 0.75rem; font-weight: 600; margin-bottom: 0.85rem;
+            letter-spacing: 0.025em;
+        }
+        header h1 { font-size: 2.4rem; font-weight: 800; letter-spacing: -0.75px; margin-bottom: 0.4rem; line-height: 1.15; }
+        header p  { font-size: 0.915rem; opacity: 0.7; font-weight: 400; }
+
+        /* ── Sticky Navigationsleiste ──────────────── */
+        .awl-nav {
+            background: rgba(255,255,255,0.88);
+            backdrop-filter: blur(18px) saturate(1.8);
+            -webkit-backdrop-filter: blur(18px) saturate(1.8);
+            border-bottom: 1px solid rgba(226,232,240,0.8);
+            padding: 0.55rem 1.75rem;
+            display: flex; align-items: center; gap: 0.75rem;
+            position: sticky; top: 0; z-index: 50;
+            box-shadow: 0 1px 14px rgba(6,95,70,0.07);
+        }
+        .nav-label {
+            font-size: 0.72rem; font-weight: 600; text-transform: uppercase;
+            letter-spacing: 0.06em; color: var(--muted); margin-right: 0.25rem;
+        }
+        .btn-dm { margin-left: auto; font-size: 1.1rem; line-height: 1; }
+
+        /* ── Layout ── */
+        main {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 1.75rem 1.25rem 4rem;
+        }
+
+        /* ── Buttons ── */
+        .btn {
+            display: inline-flex; align-items: center; justify-content: center;
+            gap: 0.35rem; padding: 0.5rem 1rem; border-radius: 9px;
+            border: none; font-size: 0.84rem; font-weight: 500;
+            cursor: pointer; transition: all var(--dur) var(--ease);
+            white-space: nowrap; font-family: inherit;
+        }
+        .btn-primary  { background: #10b981; color: white; border: 1px solid #059669; box-shadow: var(--shadow-xs); }
+        .btn-primary:hover { background: #059669; border-color: #047857; }
+        .btn-secondary { background: #f8fafc; color: var(--text); border: 1px solid var(--border); box-shadow: var(--shadow-xs); }
+        .btn-secondary:hover { background: #f1f5f9; }
+        .btn-sm { padding: 0.33rem 0.7rem; font-size: 0.78rem; }
+
+        /* ── Folder Info ── */
+        .folder-info {
+            display: flex; align-items: center; gap: 0.75rem;
+            padding: 0.75rem 1.25rem;
+            background: linear-gradient(135deg, #f0fdf4, #ecfdf5);
+            border: 1px solid #a7f3d0; border-radius: var(--radius-sm);
+            margin-bottom: 1.5rem; font-size: 0.84rem;
+            box-shadow: var(--shadow-xs);
+        }
+        .folder-path { font-family: 'JetBrains Mono', 'Consolas', monospace; font-size: 0.79rem; color: #059669; font-weight: 500; }
+        .folder-count { margin-left: auto; background: #d1fae5; color: #059669; padding: 0.2rem 0.7rem; border-radius: 999px; font-size: 0.73rem; font-weight: 700; }
+
+        /* ── Summary Cards ── */
+        .sum-wrap {
+            background: white; border-radius: var(--radius);
+            border: 1px solid var(--border);
+            box-shadow: var(--shadow-sm);
+            margin-bottom: 1.5rem; overflow: hidden;
+            transition: box-shadow var(--dur) var(--ease), transform var(--dur) var(--ease);
+        }
+        .sum-wrap:hover { box-shadow: var(--shadow-md); transform: translateY(-2px); }
+        .sum-header {
+            display: flex; align-items: center; gap: 0.75rem;
+            padding: 1rem 1.5rem;
+            background: linear-gradient(135deg, #f0fdf4 0%, #ecfdf5 100%);
+            border-bottom: 1px solid #d1fae5;
+            position: relative;
+        }
+        .sum-header::before {
+            content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px;
+            background: linear-gradient(90deg, var(--primary-light), var(--accent));
+            border-radius: var(--radius) var(--radius) 0 0;
+        }
+        .sum-title {
+            flex: 1; font-size: 0.92rem; font-weight: 700; letter-spacing: -0.1px;
+            min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+            margin: 0; padding: 0; line-height: 1.3;
+        }
+        .sum-date { font-size: 0.73rem; color: var(--muted); flex-shrink: 0; }
+        .sum-note {
+            font-size: 0.73rem; color: var(--primary); flex-shrink: 1;
+            background: #ecfdf5; padding: 0.15rem 0.55rem; border-radius: 999px;
+            max-width: 220px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+        }
+        .sum-body { padding: 1.75rem 2rem; }
+
+        /* ── Card ── */
+        .card { background: var(--card); border-radius: 14px; border: 1px solid var(--border); box-shadow: 0 1px 4px rgba(6,95,70,0.07); margin-bottom: 1.25rem; overflow: hidden; }
+        .card-head { padding: 0.875rem 1.25rem; border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 0.6rem; background: #f0fdf4; }
+        .card-title { font-size: 0.9rem; font-weight: 600; flex: 1; }
+        .card-body { padding: 1.25rem; }
+
+        /* ── Markdown Output ── */
+        .md-out h1 { font-size: 1.35rem; font-weight: 700; color: var(--primary); margin: 1.75rem 0 0.75rem; padding-bottom: 0.4rem; border-bottom: 2px solid #d1fae5; }
+        .md-out h2 { font-size: 1.1rem; font-weight: 700; color: var(--primary); margin: 1.5rem 0 0.6rem; padding-bottom: 0.3rem; border-bottom: 1px solid #d1fae5; }
+        .md-out h3 { font-size: 1rem; font-weight: 600; color: #065f46; margin: 1.25rem 0 0.5rem; }
+        .md-out h1:first-child, .md-out h2:first-child { margin-top: 0; }
+        .md-out p  { margin-bottom: 0.7rem; line-height: 1.72; }
+        .md-out ul, .md-out ol { margin: 0.625rem 0 0.625rem 1.5rem; }
+        .md-out li { margin-bottom: 0.35rem; line-height: 1.65; }
+        .md-out strong { color: var(--primary); font-weight: 600; }
+        .md-out em     { color: #047857; }
+        .md-out code   { background: #f1f5f9; padding: 0.18rem 0.45rem; border-radius: 5px; font-family: 'JetBrains Mono', 'Consolas', monospace; font-size: 0.87em; color: #0f172a; border: 1px solid #e2e8f0; }
+        .md-out pre    { background: #0d1424; color: #e2e8f0; padding: 1.1rem 1.4rem; border-radius: 12px; overflow-x: auto; margin: 1rem 0; border: 1px solid rgba(255,255,255,0.06); box-shadow: 0 4px 20px rgba(0,0,0,0.22); }
+        .md-out pre code { background: none; padding: 0; color: inherit; font-size: 0.9rem; border: none; }
+        .md-out blockquote { border-left: 3px solid var(--accent); padding: 0.65rem 0.5rem 0.65rem 1.1rem; margin: 1.1rem 0; color: var(--muted); background: #f0fdf4; border-radius: 0 10px 10px 0; font-style: italic; }
+        .md-out hr { border: none; border-top: 1px solid var(--border); margin: 1.75rem 0; }
+        .md-out table { width: 100%; border-collapse: separate; border-spacing: 0; margin: 1rem 0; font-size: 0.875rem; border-radius: var(--radius-sm); overflow: hidden; border: 1px solid var(--border); box-shadow: var(--shadow-xs); }
+        .md-out th { background: linear-gradient(135deg, #ecfdf5, #f0fdf4); font-weight: 600; padding: 0.6rem 0.9rem; text-align: left; color: var(--primary); font-size: 0.84rem; border-bottom: 2px solid #a7f3d0; }
+        .md-out td { padding: 0.52rem 0.9rem; border-top: 1px solid #f0fdf4; }
+        .md-out tr:nth-child(even) td { background: #fafcff; }
+        .md-out tr:hover td { background: #f0fdf4; transition: background 0.12s; }
+
+        /* ── Formelbox ── */
+        .formula-box {
+            background: #f0fdf4; border-left: 4px solid var(--accent);
+            padding: 1rem 1.1rem; border-radius: var(--radius-sm);
+            margin: 1rem 0; font-family: 'JetBrains Mono', monospace;
+            font-size: 0.875rem; line-height: 1.9; overflow-x: auto; white-space: pre-line;
+        }
+
+        /* ── Bilder ── */
+        .image-card { border: 1px solid var(--border); border-radius: var(--radius-sm); overflow: hidden; margin: 1.25rem 0; box-shadow: var(--shadow-sm); }
+        .image-card img { width: 100%; height: auto; display: block; background: #f8fafc; }
+        .image-caption { padding: 0.75rem 1rem; background: #fafcff; font-size: 0.84rem; color: var(--muted); border-top: 1px solid var(--border); font-style: italic; }
+
+        /* ── Lernfortschritt Leiste im Header ── */
+        #lp-bar-wrap { display: flex; align-items: center; gap: 0.5rem; }
+        #lp-text { font-size: 0.73rem; font-weight: 700; color: #15803d; }
+        body.dark #lp-text { color: #34d399; }
+        #lp-bar { width: 86px; height: 6px; border-radius: 4px; background: rgba(21,128,61,0.15); overflow: hidden; }
+        body.dark #lp-bar { background: #1a3d28; }
+        #lp-fill { height: 100%; width: 0%; background: linear-gradient(90deg, #10b981, #059669); transition: width 0.3s var(--ease); }
+
+        /* ══════════════════════════════
+           LERNMODUS — Karteikarten
+        ══════════════════════════════ */
+        #learn-overlay {
+            display: none; position: fixed; inset: 0;
+            background: rgba(0,0,0,0.55); backdrop-filter: blur(5px);
+            z-index: 9000; animation: fadeIn 0.2s ease;
+        }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        @keyframes slideUp {
+            from { opacity: 0; transform: translate(-50%,-48%) scale(0.97); }
+            to   { opacity: 1; transform: translate(-50%,-50%) scale(1); }
+        }
+        @keyframes cardFlip {
+            0%   { transform: rotateY(0deg); }
+            50%  { transform: rotateY(90deg); }
+            51%  { transform: rotateY(-90deg); }
+            100% { transform: rotateY(0deg); }
+        }
+        #learn-modal {
+            display: none; position: fixed;
+            top: 50%; left: 50%; transform: translate(-50%,-50%);
+            width: 92%; max-width: 600px; max-height: 92vh;
+            background: var(--card); border-radius: 20px;
+            box-shadow: 0 24px 64px rgba(0,0,0,0.28);
+            z-index: 9001; overflow: hidden;
+            animation: slideUp 0.28s var(--ease);
+            display: none; flex-direction: column;
+        }
+        body.dark #learn-modal { background: #0d2118; }
+        .lm-head {
+            padding: 1rem 1.5rem; display: flex; align-items: center; gap: 0.75rem;
+            background: linear-gradient(135deg, #f0fdf4, #ecfdf5);
+            border-bottom: 1px solid #d1fae5;
+        }
+        body.dark .lm-head { background: linear-gradient(135deg, #0a2418, #071a12); border-bottom-color: #1a3d28; }
+        .lm-title { flex: 1; font-size: 1rem; font-weight: 700; color: var(--primary); }
+        .lm-counter { font-size: 0.82rem; font-weight: 600; color: var(--muted); }
+        .lm-close-btn {
+            width: 32px; height: 32px; border: none; border-radius: 8px;
+            background: #f1f5f9; cursor: pointer; font-size: 16px;
+            display: flex; align-items: center; justify-content: center;
+            transition: background var(--dur) var(--ease); color: var(--text);
+        }
+        .lm-close-btn:hover { background: #e2e8f0; }
+        body.dark .lm-close-btn { background: #1a3d28; }
+        body.dark .lm-close-btn:hover { background: #264d38; }
+
+        /* Fortschrittsbalken */
+        .lm-progress-track { height: 4px; background: #e2e8f0; overflow: hidden; }
+        body.dark .lm-progress-track { background: #1a3d28; }
+        .lm-progress-fill { height: 100%; background: linear-gradient(90deg, #10b981, #059669); transition: width 0.3s var(--ease); }
+
+        /* Karteikarte */
+        .lm-card-area { padding: 1.75rem 2rem; flex: 1; overflow-y: auto; }
+        .lm-phase-badge {
+            display: inline-flex; align-items: center; gap: 0.3rem;
+            font-size: 0.7rem; font-weight: 700; padding: 0.2rem 0.6rem;
+            border-radius: 999px; background: #d1fae5; color: #065f46;
+            margin-bottom: 1rem; text-transform: uppercase; letter-spacing: 0.04em;
+        }
+        body.dark .lm-phase-badge { background: #0d2118; color: #34d399; border: 1px solid #1a3d28; }
+        .lm-question {
+            font-size: 1.15rem; font-weight: 700; line-height: 1.5;
+            color: var(--text); margin-bottom: 1.5rem;
+        }
+        .lm-flip-btn {
+            width: 100%; padding: 0.85rem; border-radius: 10px;
+            background: linear-gradient(135deg, #f0fdf4, #ecfdf5);
+            border: 2px dashed #a7f3d0; color: var(--primary);
+            font-size: 0.9rem; font-weight: 600; cursor: pointer;
+            transition: all var(--dur) var(--ease);
+            font-family: inherit;
+        }
+        .lm-flip-btn:hover { background: #d1fae5; border-color: #059669; }
+        body.dark .lm-flip-btn { background: #0a1e15; border-color: #1a3d28; }
+        body.dark .lm-flip-btn:hover { background: #0d2118; border-color: #264d38; }
+        .lm-answer {
+            display: none; margin-top: 1.25rem;
+            padding: 1.1rem 1.25rem;
+            background: linear-gradient(135deg, #f0fdf4, #ecfdf5);
+            border-radius: 10px; border-left: 4px solid #10b981;
+            font-size: 0.9rem; line-height: 1.75; color: var(--text);
+            animation: answerReveal 0.22s var(--ease);
+        }
+        @keyframes answerReveal { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
+        body.dark .lm-answer { background: #0a1e15; border-left-color: #059669; }
+
+        /* Bewertungsbuttons */
+        .lm-actions { display: flex; gap: 0.75rem; padding: 1.25rem 2rem; border-top: 1px solid var(--border); }
+        body.dark .lm-actions { border-top-color: #1a3d28; }
+        .lm-btn-wrong {
+            flex: 1; padding: 0.75rem; border-radius: 9px; border: none;
+            background: #fee2e2; color: #dc2626; font-size: 0.875rem; font-weight: 600;
+            cursor: pointer; font-family: inherit;
+            transition: all var(--dur) var(--ease);
+        }
+        .lm-btn-wrong:hover { background: #fecaca; }
+        body.dark .lm-btn-wrong { background: #450a0a; color: #fca5a5; }
+        body.dark .lm-btn-wrong:hover { background: #581414; }
+        .lm-btn-right {
+            flex: 1; padding: 0.75rem; border-radius: 9px; border: none;
+            background: #d1fae5; color: #065f46; font-size: 0.875rem; font-weight: 600;
+            cursor: pointer; font-family: inherit;
+            transition: all var(--dur) var(--ease);
+        }
+        .lm-btn-right:hover { background: #a7f3d0; }
+        body.dark .lm-btn-right { background: #0d2118; color: #34d399; border: 1px solid #1a3d28; }
+        body.dark .lm-btn-right:hover { background: #1a3d28; }
+        .lm-actions.hidden { display: none; }
+
+        /* Ergebnis-Anzeige */
+        .lm-result {
+            display: none; padding: 2rem; text-align: center; flex: 1;
+        }
+        .lm-result-score { font-size: 3.5rem; font-weight: 800; color: var(--primary); }
+        .lm-result-text { font-size: 1.05rem; font-weight: 600; color: var(--text); margin: 0.5rem 0 1.5rem; }
+        .lm-result-bar-wrap { height: 10px; background: #e2e8f0; border-radius: 5px; margin: 1rem 0; overflow: hidden; }
+        body.dark .lm-result-bar-wrap { background: #1a3d28; }
+        .lm-result-bar { height: 100%; background: linear-gradient(90deg, #10b981, #059669); border-radius: 5px; }
+        .lm-restart-btn {
+            padding: 0.75rem 1.75rem; border-radius: 9px; border: none;
+            background: #10b981; color: white; font-size: 0.9rem; font-weight: 600;
+            cursor: pointer; font-family: inherit; margin-top: 1rem;
+            transition: background var(--dur) var(--ease);
+        }
+        .lm-restart-btn:hover { background: #059669; }
+
+        /* Toasts */
+        #toasts { position: fixed; top: 1rem; right: 1rem; z-index: 999; display: flex; flex-direction: column; gap: 0.5rem; pointer-events: none; }
+        .toast { padding: 0.72rem 1.15rem; border-radius: 11px; color: white; font-size: 0.84rem; font-weight: 500; box-shadow: 0 6px 24px rgba(0,0,0,0.18); animation: fadeUp 0.22s var(--ease); }
+        .t-success { background: #059669; }
+        @keyframes fadeUp { from { opacity: 0; transform: translateY(8px) scale(0.96); } to { opacity: 1; transform: translateY(0) scale(1); } }
+
+        /* ── Lehrbuch-Blöcke (ersetzt Bilder) ──────── */
+        .textbook-block {
+            border: 1px solid var(--border); border-radius: var(--radius-sm);
+            overflow: hidden; margin: 1.25rem 0; background: var(--card);
+            box-shadow: var(--shadow-sm);
+        }
+        .textbook-head {
+            padding: 0.55rem 1rem;
+            background: linear-gradient(135deg, #f0fdf4, #ecfdf5);
+            border-bottom: 1px solid var(--border);
+            font-size: 0.71rem; font-weight: 700; text-transform: uppercase;
+            letter-spacing: 0.06em; color: var(--primary);
+            display: flex; align-items: center; gap: 0.5rem;
+        }
+        body.dark .textbook-head { background: #0a1e15; }
+        .textbook-content { padding: 1.25rem 1.5rem; }
+
+        .def-row { display: flex; gap: 0.75rem; margin: 0.85rem 0; flex-wrap: wrap; }
+        .def-box {
+            flex: 1; min-width: 200px; padding: 0.85rem;
+            border-radius: 8px; background: #f0fdf4;
+            border: 1px solid #a7f3d0; font-size: 0.875rem; line-height: 1.6;
+        }
+        body.dark .def-box { background: #0a1e15; border-color: #1a3d28; }
+        .def-box strong { display: block; margin-bottom: 0.4rem; color: var(--primary); }
+
+        .formula-chain {
+            display: flex; flex-wrap: wrap; align-items: center; gap: 0.4rem;
+            padding: 0.75rem 1rem; background: #f0fdf4; border-radius: 8px; margin: 0.85rem 0;
+        }
+        body.dark .formula-chain { background: #071a12; }
+        .fc-item {
+            padding: 0.35rem 0.65rem; background: white;
+            border: 1px solid #a7f3d0; border-radius: 6px;
+            font-size: 0.8rem; text-align: center; line-height: 1.35;
+        }
+        body.dark .fc-item { background: #0d2118; border-color: #1a3d28; }
+        .fc-op { font-weight: 800; color: var(--primary); font-size: 1.05rem; padding: 0 0.1rem; }
+        .fc-result {
+            background: linear-gradient(135deg, #d1fae5, #a7f3d0);
+            border-color: #059669; font-weight: 700; color: #065f46;
+        }
+        body.dark .fc-result { background: #0d2118; border-color: #059669; color: #34d399; }
+
+        .def-list { display: flex; flex-direction: column; gap: 0.5rem; margin: 0.75rem 0; }
+        .def-item {
+            display: flex; gap: 0.75rem; align-items: flex-start;
+            padding: 0.6rem 0.85rem; background: #f8fafc;
+            border-radius: 7px; border-left: 3px solid #a7f3d0; font-size: 0.875rem;
+        }
+        body.dark .def-item { background: #0a1e15; border-left-color: #1a3d28; }
+        .def-item-key { font-weight: 700; color: var(--primary); min-width: 130px; flex-shrink: 0; }
+
+        .mangel-table { width: 100%; border-collapse: collapse; margin: 0.75rem 0; font-size: 0.85rem; }
+        .mangel-table th { background: #ecfdf5; color: var(--primary); padding: 0.5rem 0.8rem; text-align: left; border-bottom: 2px solid #a7f3d0; font-weight: 700; }
+        body.dark .mangel-table th { background: #0a1e15; }
+        .mangel-table td { padding: 0.45rem 0.8rem; border-top: 1px solid #f0fdf4; vertical-align: top; }
+        body.dark .mangel-table td { border-top-color: #1a3d28; }
+        .mangel-table tr:nth-child(even) td { background: #f7fef9; }
+        body.dark .mangel-table tr:nth-child(even) td { background: #081510; }
+
+        .kvur-flow { display: flex; align-items: center; justify-content: center; gap: 0; flex-wrap: wrap; margin: 1rem 0; }
+        .kv-event {
+            display: flex; flex-direction: column; align-items: center; gap: 0.2rem;
+            padding: 0.6rem 0.8rem; border: 2px solid #a7f3d0; border-radius: 8px;
+            background: #f0fdf4; min-width: 90px; text-align: center; font-size: 0.8rem;
+        }
+        body.dark .kv-event { background: #0a1e15; border-color: #1a3d28; }
+        .kv-event .kv-icon { font-size: 1.2rem; }
+        .kv-event .kv-label { font-weight: 600; color: var(--primary); font-size: 0.78rem; line-height: 1.2; }
+        .kv-event .kv-timing { font-size: 0.68rem; color: var(--muted); margin-top: 0.1rem; }
+        .kv-arrow { font-size: 1.2rem; color: var(--muted); padding: 0 0.25rem; }
+        .kv-highlight { border-color: #059669; background: #d1fae5; }
+        body.dark .kv-highlight { background: #0d2118; border-color: #059669; }
+        .kv-highlight .kv-label { color: #065f46; }
+        body.dark .kv-highlight .kv-label { color: #34d399; }
+
+        .notice-box {
+            padding: 0.7rem 1rem; border-radius: 7px;
+            background: #fffbeb; border-left: 3px solid #f59e0b;
+            font-size: 0.85rem; margin: 0.75rem 0; line-height: 1.6;
+        }
+        body.dark .notice-box { background: #1c1505; border-left-color: #d97706; }
+        .notice-box strong { color: #92400e; }
+        body.dark .notice-box strong { color: #fbbf24; }
+
+        .calc-block {
+            background: #f8fafc; border: 1px solid var(--border); border-radius: 8px;
+            padding: 0.9rem 1.1rem; font-family: 'JetBrains Mono', monospace;
+            font-size: 0.83rem; line-height: 2; margin: 0.75rem 0;
+        }
+        body.dark .calc-block { background: #071a12; }
+        .calc-row { display: flex; justify-content: space-between; gap: 1rem; }
+        .calc-row.result { font-weight: 700; color: var(--primary); border-top: 1px solid var(--border); padding-top: 0.2rem; margin-top: 0.1rem; }
+        body.dark .calc-row.result { border-top-color: #1a3d28; }
+
+        /* ── Probeschularbeit ─────────────────────────────────────────── */
+        #exam-overlay {
+            display: none; position: fixed; inset: 0;
+            background: rgba(2,10,6,0.75); backdrop-filter: blur(4px); z-index: 200;
+        }
+        #exam-modal {
+            display: none; position: fixed; inset: 0; z-index: 201;
+            flex-direction: column; background: var(--bg);
+        }
+        .exam-head {
+            display: flex; align-items: center; gap: 0.65rem; padding: 0.6rem 1.25rem;
+            flex-shrink: 0;
+            background: linear-gradient(135deg, #065f46 0%, #0f766e 100%);
+            color: white;
+        }
+        body.dark .exam-head { background: linear-gradient(135deg, #022c22 0%, #064e3b 100%); }
+        .exam-title { font-weight: 700; font-size: 0.92rem; flex: 1; }
+        .exam-timer {
+            font-family: 'JetBrains Mono', monospace; font-size: 0.97rem; font-weight: 700;
+            background: rgba(255,255,255,0.15); border: 1px solid rgba(255,255,255,0.25);
+            padding: 0.25rem 0.7rem; border-radius: 7px; letter-spacing: 0.05em;
+            min-width: 64px; text-align: center;
+        }
+        .exam-timer.warning { background: rgba(220,38,38,0.35); border-color: rgba(239,68,68,0.6); animation: pulse-warn 1s infinite; }
+        @keyframes pulse-warn { 0%,100%{ opacity:1; } 50%{ opacity:0.5; } }
+        .exam-submit-btn {
+            background: #10b981; color: white; border: 1px solid #059669;
+            padding: 0.32rem 0.85rem; border-radius: 7px; font-size: 0.8rem; font-weight: 600;
+            cursor: pointer; font-family: inherit; transition: background 0.15s;
+        }
+        .exam-submit-btn:hover { background: #059669; }
+        .exam-close-btn {
+            background: rgba(255,255,255,0.12); color: white; border: 1px solid rgba(255,255,255,0.25);
+            border-radius: 7px; width: 1.9rem; height: 1.9rem; cursor: pointer; font-size: 0.9rem;
+            display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+            transition: background 0.12s;
+        }
+        .exam-close-btn:hover { background: rgba(255,255,255,0.22); }
+        .exam-meta-bar {
+            display: flex; align-items: center; gap: 0.6rem; padding: 0.35rem 1.25rem;
+            background: var(--card); border-bottom: 1px solid var(--border);
+            font-size: 0.74rem; color: var(--muted); flex-shrink: 0;
+        }
+        #exam-answered { margin-left: auto; color: var(--primary); font-weight: 600; }
+        .exam-body {
+            flex: 1; overflow-y: auto; padding: 1rem 1.25rem;
+            display: flex; flex-direction: column; gap: 1rem;
+        }
+        .exam-result-screen {
+            flex: 1; overflow-y: auto; padding: 2rem 1.5rem;
+            display: flex; flex-direction: column; align-items: center; gap: 1.25rem; text-align: center;
+        }
+        .aufgabe {
+            background: var(--card); border: 1px solid var(--border);
+            border-radius: var(--radius-sm); overflow: hidden; box-shadow: var(--shadow-sm);
+        }
+        .aufgabe-head {
+            display: flex; align-items: center; gap: 0.55rem; padding: 0.5rem 0.9rem;
+            background: linear-gradient(135deg, #f0fdf4, #ecfdf5); border-bottom: 1px solid var(--border);
+        }
+        body.dark .aufgabe-head { background: #071a12; }
+        .aufgabe-num {
+            font-size: 0.66rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.07em;
+            color: var(--muted); background: var(--card); padding: 0.15rem 0.45rem;
+            border-radius: 4px; border: 1px solid var(--border); flex-shrink: 0;
+        }
+        .aufgabe-title { font-weight: 700; font-size: 0.875rem; flex: 1; }
+        .aufgabe-pts {
+            font-size: 0.7rem; font-weight: 700; color: var(--primary);
+            background: rgba(16,185,129,0.1); border: 1px solid rgba(16,185,129,0.3);
+            padding: 0.13rem 0.5rem; border-radius: 999px; flex-shrink: 0;
+        }
+        .aufgabe-body { padding: 0.85rem 0.9rem; display: flex; flex-direction: column; gap: 0.6rem; }
+        .exam-text-box {
+            background: #f8fafc; border: 1px solid var(--border); border-radius: 7px;
+            padding: 0.7rem 0.85rem; font-size: 0.84rem;
+        }
+        body.dark .exam-text-box { background: #071a12; }
+        .exam-text-box p { margin-bottom: 0.25rem; }
+        .exam-text-box ul { margin: 0.2rem 0 0 1.1rem; }
+        .exam-text-box li { margin: 0.12rem 0; }
+        .exam-q { display: flex; align-items: baseline; gap: 0.4rem; font-size: 0.875rem; }
+        .exam-q-label { font-weight: 700; color: var(--primary); min-width: 24px; flex-shrink: 0; }
+        .exam-q-text { flex: 1; }
+        .exam-q-pts { font-size: 0.7rem; color: var(--muted); flex-shrink: 0; }
+        .exam-hint {
+            font-size: 0.765rem; color: var(--muted); font-style: italic;
+            background: #fefce8; border: 1px dashed #fde047;
+            border-radius: 6px; padding: 0.38rem 0.65rem;
+        }
+        body.dark .exam-hint { background: #1c1505; border-color: #854d0e; color: #d97706; }
+        .exam-ci-wrap { display: flex; align-items: center; gap: 0.45rem; }
+        input.exam-ci {
+            background: var(--bg); border: 2px solid var(--border); border-radius: 7px;
+            padding: 0.38rem 0.6rem; font-family: 'JetBrains Mono', monospace;
+            font-size: 0.9rem; color: var(--text); width: 145px; outline: none;
+            transition: border-color 0.15s;
+        }
+        input.exam-ci:focus { border-color: var(--primary); }
+        input.exam-ci.correct { border-color: #059669 !important; background: #f0fdf4; }
+        input.exam-ci.wrong   { border-color: #dc2626 !important; background: #fef2f2; }
+        body.dark input.exam-ci.correct { background: #031b0f; }
+        body.dark input.exam-ci.wrong   { background: #1f0707; }
+        .exam-ci-unit { font-size: 0.82rem; color: var(--muted); font-weight: 600; }
+        .exam-ci-fb { font-size: 0.76rem; font-weight: 600; }
+        .exam-ci-fb.ok  { color: #059669; }
+        .exam-ci-fb.err { color: #dc2626; }
+        .exam-instruct { font-size: 0.82rem; color: var(--muted); font-style: italic; }
+        .exam-q-mc { padding: 0.1rem 0; }
+        .exam-q-mc-text { font-size: 0.875rem; margin-bottom: 0.3rem; }
+        .exam-mc-opts { display: flex; flex-direction: column; gap: 0.22rem; padding-left: 0.4rem; }
+        .exam-mc-opt {
+            display: flex; align-items: center; gap: 0.45rem; font-size: 0.83rem;
+            cursor: pointer; padding: 0.28rem 0.55rem; border-radius: 6px;
+            border: 1px solid transparent; transition: background 0.1s, border-color 0.1s;
+        }
+        .exam-mc-opt:hover { background: #f0fdf4; border-color: #a7f3d0; }
+        body.dark .exam-mc-opt:hover { background: #0a1e15; border-color: #1a3d28; }
+        .exam-mc-opt input[type=radio] { accent-color: var(--primary); flex-shrink: 0; }
+        .exam-mc-opt.correct      { background: #f0fdf4; border-color: #059669; }
+        .exam-mc-opt.wrong        { background: #fef2f2; border-color: #dc2626; }
+        .exam-mc-opt.show-correct { background: #f0fdf4; border-color: #059669; font-weight: 600; }
+        body.dark .exam-mc-opt.correct      { background: #031b0f; border-color: #059669; }
+        body.dark .exam-mc-opt.wrong        { background: #1f0707; border-color: #dc2626; }
+        body.dark .exam-mc-opt.show-correct { background: #031b0f; border-color: #34d399; font-weight: 600; }
+        /* Results */
+        .exam-grade-badge {
+            width: 108px; height: 108px; border-radius: 50%; display: flex;
+            flex-direction: column; align-items: center; justify-content: center; border: 4px solid;
+            box-shadow: 0 6px 24px rgba(0,0,0,0.12);
+        }
+        .exam-grade-badge .g-num  { font-size: 2.7rem; font-weight: 800; line-height: 1; }
+        .exam-grade-badge .g-text { font-size: 0.68rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; margin-top: 0.15rem; }
+        .exam-pts-big { font-size: 1.4rem; font-weight: 700; color: var(--primary); }
+        .exam-pts-sub { font-size: 0.82rem; color: var(--muted); margin-top: 0.2rem; }
+        .exam-res-table { width: 100%; max-width: 400px; border-collapse: collapse; font-size: 0.84rem; text-align: left; }
+        .exam-res-table th { padding: 0.38rem 0.65rem; color: var(--muted); font-weight: 600; border-bottom: 2px solid var(--border); }
+        .exam-res-table td { padding: 0.35rem 0.65rem; border-bottom: 1px solid var(--border); }
+        .exam-res-table .pts-col { font-weight: 700; text-align: right; white-space: nowrap; }
+        .pts-full { color: #059669; }
+        .pts-part { color: #d97706; }
+        .pts-zero { color: #dc2626; }
+        .exam-res-actions { display: flex; gap: 0.75rem; flex-wrap: wrap; justify-content: center; margin-top: 0.5rem; }
+        .exam-grade-scale { font-size: 0.76rem; color: var(--muted); max-width: 360px; }
+        .exam-grade-scale table { width: 100%; border-collapse: collapse; }
+        .exam-grade-scale td { padding: 0.2rem 0.5rem; border: 1px solid var(--border); text-align: center; }
+        .exam-grade-scale tr.active-grade td { background: rgba(16,185,129,0.1); font-weight: 700; color: var(--primary); }
+        .exam-auto-note { font-size: 0.78rem; color: #d97706; }
+
+        /* ── Druck-Layout ── */
+        /* ── Formelblatt Modal */
+        .fml-overlay { display:none; position:fixed; inset:0; background:rgba(2,15,9,0.72); z-index:600; align-items:flex-start; justify-content:center; padding:2rem 1rem; backdrop-filter:blur(6px); }
+        .fml-overlay.open { display:flex; }
+        .fml-modal { background:#fff; border-radius:20px; max-width:720px; width:100%; max-height:88vh; overflow:hidden; display:flex; flex-direction:column; box-shadow:0 32px 80px rgba(0,0,0,0.25); animation:fml-in 0.22s var(--ease); border:1px solid rgba(255,255,255,0.5); }
+        @keyframes fml-in { from{opacity:0;transform:translateY(-14px) scale(0.97)} to{opacity:1;transform:translateY(0) scale(1)} }
+        .fml-head { padding:1rem 1.5rem; border-bottom:1px solid var(--border); display:flex; align-items:center; gap:0.75rem; background:linear-gradient(135deg,#ecfdf5,#d1fae5); }
+        .fml-title { flex:1; font-size:1.05rem; font-weight:700; color:var(--primary); }
+        .fml-body { overflow-y:auto; padding:1.25rem 1.5rem; display:flex; flex-direction:column; gap:1.25rem; }
+        .fml-section-head { font-size:0.71rem; font-weight:700; text-transform:uppercase; color:var(--muted); letter-spacing:0.07em; margin-bottom:0.5rem; padding-bottom:0.3rem; border-bottom:1px solid var(--border); }
+        .fml-list { display:flex; flex-direction:column; gap:0.3rem; }
+        .fml-item { background:#f0fdf4; border:1px solid #a7f3d0; border-radius:8px; padding:0.42rem 0.9rem; font-family:'JetBrains Mono','Consolas',monospace; font-size:0.875rem; color:#0f172a; white-space:pre-wrap; line-height:1.5; transition:background var(--dur) var(--ease),border-color var(--dur) var(--ease); }
+        .fml-item:hover { background:#d1fae5; border-color:#6ee7b7; }
+        body.dark .fml-modal { background:#0d2118; }
+        body.dark .fml-head { background:linear-gradient(135deg,#071a12,#0d2118); border-bottom-color:#1a3d28; }
+        body.dark .fml-title { color:#34d399; }
+        body.dark .fml-section-head { color:#4b7a62; border-bottom-color:#1a3d28; }
+        body.dark .fml-item { background:#071a12; border-color:#1a4d30; color:#e2e8f0; }
+        body.dark .fml-item:hover { background:#0d2820; border-color:#059669; }
+        @media(max-width:600px){ .fml-modal{ border-radius:14px; } .fml-body{ padding:1rem; } }
+
+        @media print {
+            .awl-nav, #learn-overlay, #learn-modal, #exam-overlay, #exam-modal, #toasts, #top-progress-bar { display: none !important; }
+            body { background: white !important; }
+            header { background: none !important; color: black !important; }
+            header h1 { color: black !important; font-size: 1.6rem; }
+            .h-badge, .h-math, .h-motto { display: none !important; }
+            .sum-wrap { box-shadow: none !important; transform: none !important; border: 1px solid #ccc; break-inside: avoid-page; }
+            .sum-header { background: #f5f5f5 !important; }
+        }
+
+        @media (max-width: 820px) {
+            header { padding: 0.85rem 1rem 0.75rem; }
+            header h1 { font-size: 1.5rem; }
+            .h-math { display: none; }
+            .awl-nav { padding: 0.4rem 0.75rem; gap: 0.4rem; }
+            main { padding: 1.5rem 1rem; }
+            .sum-body { padding: 1.25rem 1.5rem; }
+            .lm-card-area { padding: 1.25rem; }
+            .lm-actions { padding: 1rem 1.25rem; }
+            #learn-modal { max-width: 98vw; }
+        }
+    </style>
+</head>
+<body>
+    <div id="top-progress-bar"></div>
+    <div id="toasts"></div>
+
+    <header>
+        <div class="h-content">
+            <div class="h-badge">📚 Schularbeitenstoff</div>
+            <h1>AWL — Allgemeines Wirtschaftsrecht</h1>
+            <p class="h-motto">Verträge, Zahlungsbedingungen und kaufrechtliche Grundlagen für die Schularbeit</p>
+        </div>
+        <div class="h-math">§</div>
+    </header>
+
+    <!-- Sticky Navigationsleiste -->
+    <nav class="awl-nav">
+        <span class="nav-label">AWL Lernhilfen</span>
+        <div id="lp-bar-wrap">
+            <span id="lp-text"></span>
+            <div id="lp-bar"><div id="lp-fill"></div></div>
+        </div>
+        <button class="btn btn-primary btn-sm" id="learn-btn" onclick="startLearningMode()">🎓 Lernmodus</button>
+        <button class="btn btn-secondary btn-sm" id="exam-btn" onclick="startExamMode()" style="border-color:#d97706;color:#92400e;background:#fefce8" title="Probeschularbeit starten">📝 Probeschularbeit</button>
+        <button class="btn btn-secondary btn-sm" id="formula-btn" title="Formelübersicht" style="border-color:#065f46;color:#065f46;background:#ecfdf5">📐 Formeln</button>
+        <button class="btn btn-secondary btn-sm btn-dm" id="dm-toggle" title="Dunkles Design">🌙</button>
+    </nav>
+
+    <!-- Probeschularbeit Modal -->
+    <div id="exam-overlay"></div>
+    <div id="exam-modal" role="dialog" aria-modal="true" aria-label="Probeschularbeit">
+        <div class="exam-head">
+            <span class="exam-title">📝 Probeschularbeit AWL</span>
+            <div class="exam-timer" id="exam-timer">45:00</div>
+            <button class="exam-submit-btn" id="exam-submit-btn" onclick="submitExam(false)">Abgeben ✓</button>
+            <button class="exam-close-btn" onclick="closeExamMode()" title="Schließen">✕</button>
+        </div>
+        <div class="exam-meta-bar">
+            <span>40 Punkte · 5 Aufgaben</span>
+            <span id="exam-answered">0 / 16 beantwortet</span>
+        </div>
+
+        <!-- Questions -->
+        <div class="exam-body" id="exam-body">
+
+            <!-- Aufgabe 1: Leasing -->
+            <div class="aufgabe">
+                <div class="aufgabe-head">
+                    <span class="aufgabe-num">Aufgabe 1</span>
+                    <span class="aufgabe-title">Leasing berechnen</span>
+                    <span class="aufgabe-pts">10 Punkte</span>
+                </div>
+                <div class="aufgabe-body">
+                    <div class="exam-text-box">
+                        <p>Ein PKW hat einen Barkaufpreis von <strong>€ 18.000</strong>. Er wird zu folgenden Bedingungen geleast:</p>
+                        <ul>
+                            <li>Anzahlung: <strong>€ 3.000</strong></li>
+                            <li>Monatliche Leasingrate: <strong>€ 280</strong></li>
+                            <li>Laufzeit: <strong>48 Monate</strong></li>
+                            <li>Restwert: <strong>€ 4.500</strong></li>
+                        </ul>
+                    </div>
+                    <div class="exam-q">
+                        <span class="exam-q-label">1a)</span>
+                        <span class="exam-q-text">Berechne die <strong>gesamten Leasingkosten</strong>.</span>
+                        <span class="exam-q-pts">(3 P.)</span>
+                    </div>
+                    <div class="exam-ci-wrap">
+                        <input type="text" class="exam-ci" id="ans-1a" placeholder="z.B. 20940" inputmode="decimal" autocomplete="off">
+                        <span class="exam-ci-unit">€</span>
+                        <span class="exam-ci-fb" id="fb-1a"></span>
+                    </div>
+                    <div class="exam-q">
+                        <span class="exam-q-label">1b)</span>
+                        <span class="exam-q-text">Berechne die <strong>Mehrkosten</strong> gegenüber dem Barkauf.</span>
+                        <span class="exam-q-pts">(2 P.)</span>
+                    </div>
+                    <div class="exam-ci-wrap">
+                        <input type="text" class="exam-ci" id="ans-1b" placeholder="z.B. 2940" inputmode="decimal" autocomplete="off">
+                        <span class="exam-ci-unit">€</span>
+                        <span class="exam-ci-fb" id="fb-1b"></span>
+                    </div>
+                    <div class="exam-q">
+                        <span class="exam-q-label">1c)</span>
+                        <span class="exam-q-text">Berechne den <strong>Effektiven Jahreszinssatz</strong> (Näherungsformel).</span>
+                        <span class="exam-q-pts">(5 P.)</span>
+                    </div>
+                    <div class="exam-hint">p = (2 × Mehrkosten × 12) / (Kreditbetrag × (n+1)) · <em>Kreditbetrag = Kaufpreis − Anzahlung</em></div>
+                    <div class="exam-ci-wrap">
+                        <input type="text" class="exam-ci" id="ans-1c" placeholder="z.B. 9,60" inputmode="decimal" autocomplete="off">
+                        <span class="exam-ci-unit">%</span>
+                        <span class="exam-ci-fb" id="fb-1c"></span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Aufgabe 2: Ratengeschäft -->
+            <div class="aufgabe">
+                <div class="aufgabe-head">
+                    <span class="aufgabe-num">Aufgabe 2</span>
+                    <span class="aufgabe-title">Ratengeschäft berechnen</span>
+                    <span class="aufgabe-pts">10 Punkte</span>
+                </div>
+                <div class="aufgabe-body">
+                    <div class="exam-text-box">
+                        <p>Ein Kühlschrank kostet bei Barzahlung <strong>€ 900</strong>. Er wird auf Raten gekauft:</p>
+                        <ul>
+                            <li>Anzahlung: <strong>€ 150</strong></li>
+                            <li>15 monatliche Raten à <strong>€ 52</strong></li>
+                        </ul>
+                    </div>
+                    <div class="exam-q">
+                        <span class="exam-q-label">2a)</span>
+                        <span class="exam-q-text">Berechne den <strong>Gesamtpreis auf Raten</strong>.</span>
+                        <span class="exam-q-pts">(3 P.)</span>
+                    </div>
+                    <div class="exam-ci-wrap">
+                        <input type="text" class="exam-ci" id="ans-2a" placeholder="z.B. 930" inputmode="decimal" autocomplete="off">
+                        <span class="exam-ci-unit">€</span>
+                        <span class="exam-ci-fb" id="fb-2a"></span>
+                    </div>
+                    <div class="exam-q">
+                        <span class="exam-q-label">2b)</span>
+                        <span class="exam-q-text">Berechne die <strong>Mehrkosten</strong> (Zinsen).</span>
+                        <span class="exam-q-pts">(2 P.)</span>
+                    </div>
+                    <div class="exam-ci-wrap">
+                        <input type="text" class="exam-ci" id="ans-2b" placeholder="z.B. 30" inputmode="decimal" autocomplete="off">
+                        <span class="exam-ci-unit">€</span>
+                        <span class="exam-ci-fb" id="fb-2b"></span>
+                    </div>
+                    <div class="exam-q">
+                        <span class="exam-q-label">2c)</span>
+                        <span class="exam-q-text">Berechne den <strong>Jahreszinsfuß</strong>.</span>
+                        <span class="exam-q-pts">(5 P.)</span>
+                    </div>
+                    <div class="exam-hint">p = (2 × Zinsen × 12) / (Kreditbetrag × (n+1)) · <em>Kreditbetrag = Barpreis − Anzahlung</em></div>
+                    <div class="exam-ci-wrap">
+                        <input type="text" class="exam-ci" id="ans-2c" placeholder="z.B. 6,00" inputmode="decimal" autocomplete="off">
+                        <span class="exam-ci-unit">%</span>
+                        <span class="exam-ci-fb" id="fb-2c"></span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Aufgabe 3: KVur -->
+            <div class="aufgabe">
+                <div class="aufgabe-head">
+                    <span class="aufgabe-num">Aufgabe 3</span>
+                    <span class="aufgabe-title">Kaufvertragsformen (KVur)</span>
+                    <span class="aufgabe-pts">6 Punkte</span>
+                </div>
+                <div class="aufgabe-body">
+                    <p class="exam-instruct">Ordne jeder Beschreibung die passende KVur-Form zu. <em>(je 2 Punkte)</em></p>
+                    <div class="exam-q-mc">
+                        <div class="exam-q-mc-text"><strong>3a)</strong> „Der Käufer überweist den Kaufpreis, bevor die Ware versendet wird."</div>
+                        <div class="exam-mc-opts" id="mc-3a">
+                            <label class="exam-mc-opt"><input type="radio" name="q3a" value="1"> KVur 1 – Barzahlung</label>
+                            <label class="exam-mc-opt"><input type="radio" name="q3a" value="2"> KVur 2 – Vorauszahlung</label>
+                            <label class="exam-mc-opt"><input type="radio" name="q3a" value="3"> KVur 3 – Kauf auf Ziel</label>
+                            <label class="exam-mc-opt"><input type="radio" name="q3a" value="4"> KVur 4 – Eigentumsvorbehalt</label>
+                        </div>
+                    </div>
+                    <div class="exam-q-mc">
+                        <div class="exam-q-mc-text"><strong>3b)</strong> „Lieferung und Eigentumsübergang erfolgen sofort — die Zahlung erst nach 30 Tagen."</div>
+                        <div class="exam-mc-opts" id="mc-3b">
+                            <label class="exam-mc-opt"><input type="radio" name="q3b" value="1"> KVur 1 – Barzahlung</label>
+                            <label class="exam-mc-opt"><input type="radio" name="q3b" value="2"> KVur 2 – Vorauszahlung</label>
+                            <label class="exam-mc-opt"><input type="radio" name="q3b" value="3"> KVur 3 – Kauf auf Ziel</label>
+                            <label class="exam-mc-opt"><input type="radio" name="q3b" value="4"> KVur 4 – Eigentumsvorbehalt</label>
+                        </div>
+                    </div>
+                    <div class="exam-q-mc">
+                        <div class="exam-q-mc-text"><strong>3c)</strong> „Der Käufer erhält die Ware und darf sie nutzen, aber das Eigentum geht erst nach vollständiger Zahlung über."</div>
+                        <div class="exam-mc-opts" id="mc-3c">
+                            <label class="exam-mc-opt"><input type="radio" name="q3c" value="1"> KVur 1 – Barzahlung</label>
+                            <label class="exam-mc-opt"><input type="radio" name="q3c" value="2"> KVur 2 – Vorauszahlung</label>
+                            <label class="exam-mc-opt"><input type="radio" name="q3c" value="3"> KVur 3 – Kauf auf Ziel</label>
+                            <label class="exam-mc-opt"><input type="radio" name="q3c" value="4"> KVur 4 – Eigentumsvorbehalt</label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Aufgabe 4: Verzüge -->
+            <div class="aufgabe">
+                <div class="aufgabe-head">
+                    <span class="aufgabe-num">Aufgabe 4</span>
+                    <span class="aufgabe-title">Verzüge im Kaufvertrag</span>
+                    <span class="aufgabe-pts">8 Punkte</span>
+                </div>
+                <div class="aufgabe-body">
+                    <div class="exam-q-mc">
+                        <div class="exam-q-mc-text"><strong>4a)</strong> „Ein Käufer nimmt die ordnungsgemäß angebotene Ware nicht an." — Welcher Verzug liegt vor? <em>(2 P.)</em></div>
+                        <div class="exam-mc-opts" id="mc-4a">
+                            <label class="exam-mc-opt"><input type="radio" name="q4a" value="1"> Lieferverzug</label>
+                            <label class="exam-mc-opt"><input type="radio" name="q4a" value="2"> Annahmeverzug</label>
+                            <label class="exam-mc-opt"><input type="radio" name="q4a" value="3"> Zahlungsverzug</label>
+                        </div>
+                    </div>
+                    <div class="exam-q-mc">
+                        <div class="exam-q-mc-text"><strong>4b)</strong> „Ein Verkäufer liefert die Bestellung 3 Wochen nach dem vereinbarten Termin." — Welcher Verzug? <em>(2 P.)</em></div>
+                        <div class="exam-mc-opts" id="mc-4b">
+                            <label class="exam-mc-opt"><input type="radio" name="q4b" value="1"> Annahmeverzug</label>
+                            <label class="exam-mc-opt"><input type="radio" name="q4b" value="2"> Zahlungsverzug</label>
+                            <label class="exam-mc-opt"><input type="radio" name="q4b" value="3"> Lieferverzug</label>
+                        </div>
+                    </div>
+                    <div class="exam-q-mc">
+                        <div class="exam-q-mc-text"><strong>4c)</strong> Wie hoch sind die <strong>Verzugszinsen bei unternehmerischen Geschäften</strong>? <em>(2 P.)</em></div>
+                        <div class="exam-mc-opts" id="mc-4c">
+                            <label class="exam-mc-opt"><input type="radio" name="q4c" value="1"> 3 % p.a.</label>
+                            <label class="exam-mc-opt"><input type="radio" name="q4c" value="2"> 5 % p.a.</label>
+                            <label class="exam-mc-opt"><input type="radio" name="q4c" value="3"> 8 % p.a.</label>
+                        </div>
+                    </div>
+                    <div class="exam-q-mc">
+                        <div class="exam-q-mc-text"><strong>4d)</strong> Bei einem Ratengeschäft tritt „Terminverlust" ein, wenn der Käufer mindestens <strong>wie viele Wochen</strong> in Rückstand ist? <em>(2 P.)</em></div>
+                        <div class="exam-mc-opts" id="mc-4d">
+                            <label class="exam-mc-opt"><input type="radio" name="q4d" value="1"> 3 Wochen</label>
+                            <label class="exam-mc-opt"><input type="radio" name="q4d" value="2"> 6 Wochen</label>
+                            <label class="exam-mc-opt"><input type="radio" name="q4d" value="3"> 8 Wochen</label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Aufgabe 5: Garantie/Gewährleistung -->
+            <div class="aufgabe">
+                <div class="aufgabe-head">
+                    <span class="aufgabe-num">Aufgabe 5</span>
+                    <span class="aufgabe-title">Garantie, Gewährleistung &amp; Mängelarten</span>
+                    <span class="aufgabe-pts">6 Punkte</span>
+                </div>
+                <div class="aufgabe-body">
+                    <div class="exam-q-mc">
+                        <div class="exam-q-mc-text"><strong>5a)</strong> Was ist die <strong>gesetzliche Pflicht des Verkäufers</strong> für Mängel an der Kaufsache? <em>(2 P.)</em></div>
+                        <div class="exam-mc-opts" id="mc-5a">
+                            <label class="exam-mc-opt"><input type="radio" name="q5a" value="1"> Garantie</label>
+                            <label class="exam-mc-opt"><input type="radio" name="q5a" value="2"> Gewährleistung</label>
+                            <label class="exam-mc-opt"><input type="radio" name="q5a" value="3"> Kulanz</label>
+                        </div>
+                    </div>
+                    <div class="exam-q-mc">
+                        <div class="exam-q-mc-text"><strong>5b)</strong> Ein Mangel, der sich erst beim Gebrauch der Ware zeigt, wird als ... bezeichnet. <em>(2 P.)</em></div>
+                        <div class="exam-mc-opts" id="mc-5b">
+                            <label class="exam-mc-opt"><input type="radio" name="q5b" value="1"> Offener Mangel</label>
+                            <label class="exam-mc-opt"><input type="radio" name="q5b" value="2"> Versteckter Mangel</label>
+                            <label class="exam-mc-opt"><input type="radio" name="q5b" value="3"> Arglistig verschwiegener Mangel</label>
+                        </div>
+                    </div>
+                    <div class="exam-q-mc">
+                        <div class="exam-q-mc-text"><strong>5c)</strong> Wie lange beträgt die Gewährleistungsfrist für <strong>arglistig verschwiegene Mängel</strong>? <em>(2 P.)</em></div>
+                        <div class="exam-mc-opts" id="mc-5c">
+                            <label class="exam-mc-opt"><input type="radio" name="q5c" value="1"> 2 Jahre</label>
+                            <label class="exam-mc-opt"><input type="radio" name="q5c" value="2"> 10 Jahre</label>
+                            <label class="exam-mc-opt"><input type="radio" name="q5c" value="3"> 30 Jahre</label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div><!-- /exam-body -->
+
+        <!-- Results (shown after submission) -->
+        <div class="exam-result-screen" id="exam-result-screen" style="display:none;"></div>
+
+    </div><!-- /exam-modal -->
+
+    <!-- Lernmodus Modal -->
+    <div id="learn-overlay" onclick="if(event.target===this) closeLearningMode()"></div>
+    <div id="learn-modal" role="dialog" aria-modal="true" aria-label="Lernmodus">
+        <div class="lm-head">
+            <span class="lm-title">🎓 Karteikarten-Lernmodus</span>
+            <span class="lm-counter" id="lm-counter">1 / 14</span>
+            <button class="lm-close-btn" onclick="closeLearningMode()" title="Schließen">✕</button>
+        </div>
+        <div class="lm-progress-track">
+            <div class="lm-progress-fill" id="lm-progress" style="width:0%"></div>
+        </div>
+        <div class="lm-card-area" id="lm-card-area">
+            <div id="lm-phase-badge" class="lm-phase-badge"></div>
+            <div id="lm-question" class="lm-question"></div>
+            <button class="lm-flip-btn" id="lm-flip-btn" onclick="revealAnswer()">👁 Antwort anzeigen</button>
+            <div id="lm-answer" class="lm-answer"></div>
+        </div>
+        <div class="lm-result" id="lm-result">
+            <div id="lm-score" class="lm-result-score"></div>
+            <div id="lm-result-text" class="lm-result-text"></div>
+            <div class="lm-result-bar-wrap"><div class="lm-result-bar" id="lm-result-bar" style="width:0%"></div></div>
+            <div id="lm-wrong-list" style="text-align:left;font-size:0.85rem;margin-top:1rem;"></div>
+            <button class="lm-restart-btn" onclick="restartLearningMode()">🔄 Nochmal üben</button>
+        </div>
+        <div class="lm-actions hidden" id="lm-actions">
+            <button class="lm-btn-wrong" id="lm-btn-wrong" onclick="rateCard(false)">↺ Nochmal</button>
+            <button class="lm-btn-right" id="lm-btn-right" onclick="rateCard(true)">✓ Gewusst</button>
+        </div>
+    </div>
+
+    <!-- Formelblatt Modal -->
+    <div class="fml-overlay" id="fml-overlay">
+        <div class="fml-modal">
+            <div class="fml-head">
+                <span style="font-size:1.3rem">📐</span>
+                <span class="fml-title">Formelübersicht — Leasing &amp; Ratengeschäft</span>
+                <button class="btn btn-secondary btn-sm" id="fml-close">✕ Schließen</button>
+            </div>
+            <div class="fml-body" id="fml-body"></div>
+        </div>
+    </div>
+
+    <main>
+        <div class="folder-info">
+            <span>📂</span>
+            <span class="folder-path">AWL Schularbeitenstoff</span>
+            <span class="folder-count">4 Themen</span>
+        </div>
+
+        <div class="sum-wrap">
+            <div class="sum-header">
+                <div class="sum-title">💰 Leasing berechnen</div>
+                <span class="sum-note">Besonderheiten</span>
+            </div>
+            <div class="sum-body md-out">
+                <h3>Was ist Leasing?</h3>
+                <p>Leasing ist eine Mietform für längerfristige Mieten von Wirtschaftsgütern (z.B. Fahrzeuge, Maschinen, Immobilien). Der <strong>Leasingnehmer</strong> nutzt das Gut, zahlt aber nicht den Kaufpreis, sondern <strong>monatliche oder jährliche Leasingraten</strong>.</p>
+
+                <h3>Arten von Leasing</h3>
+                <ul>
+                    <li><strong>Fahrzeugleasing:</strong> Auto, Lkw, Maschinen</li>
+                    <li><strong>Immobilienleasing:</strong> Wohn- und Geschäftsräume</li>
+                    <li><strong>Operatives Leasing:</strong> Kurzfristiger Mietvertrag, kein Eigentumserwerb</li>
+                    <li><strong>Finanzleasing:</strong> Langfristig, oft mit Kaufoption am Ende</li>
+                </ul>
+
+                <h3>Berechnung der Leasingkosten</h3>
+                <div class="formula-box">Gesamtkosten = (monatliche Rate × Anzahl der Monate) + Restwert (falls vorhanden)</div>
+
+                <h3>Beispiel zur Schularbeit</h3>
+                <p><strong>Aufgabe:</strong> Ein Auto wird für 36 Monate geleast. Die Leasingrate beträgt €350/Monat. Am Ende kann es um €3.000 erworben werden.</p>
+                <p><strong>Lösung:</strong></p>
+                <ul>
+                    <li>Leasingraten: 350 € × 36 = 12.600 €</li>
+                    <li>Restwert (Kaufoption): 3.000 €</li>
+                    <li><strong>Gesamtkosten: 12.600 € + 3.000 € = 15.600 €</strong></li>
+                </ul>
+
+                <h3>Wichtige Punkte für die Schularbeit</h3>
+                <ul>
+                    <li>Leasingraten sind <strong>Betriebsausgaben</strong>, nicht Anschaffungskosten</li>
+                    <li>Das Leasinggut bleibt <strong>Eigentum des Leasinggebers</strong></li>
+                    <li>Versicherung und Wartung können im Vertrag enthalten sein</li>
+                    <li>Beim Finanzleasing ist am Ende eine Kaufoption üblich</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="textbook-block">
+            <div class="textbook-head">📖 Lehrbuch S. 79 — 6.3.1 Leasingkosten &amp; Effektiver Zinssatz</div>
+            <div class="textbook-content md-out">
+                <div class="def-row">
+                    <div class="def-box">
+                        <strong>Vollamortisation</strong>
+                        In der vereinbarten Laufzeit werden die Anschaffungskosten und die Zinsen <em>vollständig</em> vom Leasingnehmer bezahlt. Es bleibt nur ein geringer Restbuchwert.
+                    </div>
+                    <div class="def-box">
+                        <strong>Teilamortisation</strong>
+                        Während der Laufzeit werden nur <em>ein Teil</em> der Anschaffungskosten und Zinsen bezahlt. Es bleibt ein hoher Restwert, zu dem der Leasinggegenstand erworben werden kann.
+                    </div>
+                </div>
+                <h3>Zusammensetzung der Leasingkosten</h3>
+                <div class="formula-chain">
+                    <span class="fc-item">Anzahlung /<br>Mietvoraus­zahlung</span>
+                    <span class="fc-op">+</span>
+                    <span class="fc-item">Bearbeitungs­gebühr<br>&amp; Spesen</span>
+                    <span class="fc-op">+</span>
+                    <span class="fc-item">Monatliche<br>Raten</span>
+                    <span class="fc-op">+</span>
+                    <span class="fc-item">Staatliche Gebühr<br>1 % des Entgeltes</span>
+                    <span class="fc-op">=</span>
+                    <span class="fc-item fc-result">Gesamtkosten<br>des Leasings</span>
+                </div>
+                <h3>Effektiver Zinssatz</h3>
+                <div class="formula-box">Eff. Zinssatz = (Mehrkosten × 1.200) ÷ ((Listenpreis − Anzahlung) × Mittlere Fälligkeit)
+Mittlere Fälligkeit = (1 + Laufzeit in Monaten) ÷ 2</div>
+                <p><strong>Rechenbeispiel:</strong> Listenpreis € 12.800 (inkl. USt &amp; NoVA) · Rate € 129,99/Monat · 48 Monate · Anzahlung € 2.500 · Restwert € 6.000</p>
+                <div class="calc-block">
+                    <div class="calc-row"><span>Leasingraten (129,99 × 48)</span><span>€ 6.239,52</span></div>
+                    <div class="calc-row"><span>+ Anzahlung</span><span>€ 2.500,00</span></div>
+                    <div class="calc-row"><span>+ Restwert</span><span>€ 6.000,00</span></div>
+                    <div class="calc-row result"><span>= Leasingkosten gesamt</span><span>€ 14.739,52</span></div>
+                    <div class="calc-row"><span>− Listenpreis</span><span>€ 12.800,00</span></div>
+                    <div class="calc-row result"><span>= Mehrkosten</span><span>€ 1.939,52</span></div>
+                </div>
+                <div class="formula-box">Mittlere Fälligkeit = (1 + 48) ÷ 2 = 24,5 Monate
+Eff. Zinssatz = (1.939,52 × 1.200) ÷ ((12.800 − 2.500) × 24,5) = 9,22 %</div>
+            </div>
+        </div>
+
+        <div class="sum-wrap">
+            <div class="sum-header">
+                <div class="sum-title">📋 Ratengeschäft berechnen</div>
+                <span class="sum-note">Kauf auf Raten</span>
+            </div>
+            <div class="sum-body md-out">
+                <h3>Was ist ein Ratengeschäft?</h3>
+                <p>Ein <strong>Ratengeschäft</strong> (oder Kauf auf Raten) ist ein Kaufvertrag, bei dem der Kaufpreis nicht auf einmal, sondern in mehreren <strong>gleichmäßigen Teilzahlungen</strong> bezahlt wird. Der Käufer erhält die Ware sofort, zahlt aber später in Raten.</p>
+
+                <h3>Besonderheiten des Ratengeschäfts</h3>
+                <ul>
+                    <li>Der <strong>Käufer wird Eigentümer</strong> nach Zahlung der ersten Rate (oder gemäß Vertrag)</li>
+                    <li>Der <strong>Verkäufer erhält Zinsen</strong> für die Raten</li>
+                    <li>Es fallen oft <strong>Bearbeitungsgebühren</strong> an</li>
+                    <li>Der <strong>Jahreszinsfuß</strong> ist der wichtigste Vergleichsfaktor</li>
+                </ul>
+
+                <h3>Berechnung der Ratengeschäfte</h3>
+                <div class="formula-box">Gesamtpreis = Kaufpreis + Zinsen + Gebühren
+Ratenhöhe = Gesamtpreis ÷ Anzahl der Raten
+Jahreszinsfuß = (Zinsen × 100 × 12) ÷ (Kaufpreis × Monate)</div>
+
+                <h3>Beispiel zur Schularbeit</h3>
+                <p><strong>Aufgabe:</strong> Ein Fahrrad kostet €500. Es wird auf 10 Monatsraten à €52 verkauft. Wie hoch ist der Jahreszinsfuß?</p>
+                <p><strong>Lösung Schritt 1: Gesamtpreis und Zinsen</strong></p>
+                <ul>
+                    <li>Gesamtpreis = 10 × 52 € = 520 €</li>
+                    <li>Zinsen = 520 € - 500 € = 20 €</li>
+                </ul>
+                <p><strong>Lösung Schritt 2: Jahreszinsfuß berechnen</strong></p>
+                <ul>
+                    <li>Jahreszinsfuß = (20 € × 100 × 12) ÷ (500 € × 10)</li>
+                    <li>Jahreszinsfuß = 24.000 ÷ 5.000 = <strong>4,8% pro Jahr</strong></li>
+                </ul>
+
+                <h3>Wichtige Punkte für die Schularbeit</h3>
+                <ul>
+                    <li>Immer die Anzahl der Monate beachten (nicht Jahre)</li>
+                    <li>Der Jahreszinsfuß macht Ratengeschäfte vergleichbar</li>
+                    <li>Ein <strong>Rückgaberecht</strong> ist im Gesetz verankert (bei Verbraucherkrediten)</li>
+                    <li>Bei Zahlungsverzug fallen oft <strong>Verzugszinsen</strong> an</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="textbook-block">
+            <div class="textbook-head">📖 Lehrbuch — 6.2.7 Ratengeschäft: Rechtliches &amp; Rechenbeispiel</div>
+            <div class="textbook-content md-out">
+                <div class="def-list">
+                    <div class="def-item"><span class="def-item-key">Anzahlung</span><span>Üblich sind <strong>10 % bis 20 %</strong> des Kaufpreises.</span></div>
+                    <div class="def-item"><span class="def-item-key">Schriftform</span><span>Es muss eine schriftliche Vereinbarung mit genauen gesetzlichen Mindestinhalt abgeschlossen werden.</span></div>
+                    <div class="def-item"><span class="def-item-key">Terminverlust</span><span>Tritt ein, wenn der Konsument seit mindestens <strong>6 Wochen</strong> mit einer Rate im Rückstand ist. Nach Mahnung und Nachfrist von 2 Wochen kann die gesamte offene Schuld (inkl. Zinsen &amp; Spesen) eingefordert werden.</span></div>
+                    <div class="def-item"><span class="def-item-key">0 %-Finanzierung</span><span>Zwar werden keine Zinsen verrechnet, wohl aber <strong>Gebühren und Spesen</strong>.</span></div>
+                    <div class="def-item"><span class="def-item-key">Rücktrittsrecht</span><span>Rücktritt innerhalb von <strong>14 Tagen</strong> ohne Angabe von Gründen möglich.</span></div>
+                </div>
+                <h3>Rechenbeispiel — Effektiver Zinssatz</h3>
+                <p><strong>Aufgabe:</strong> Moped: Barpreis € 1.599 <em>oder</em> 30 Raten à € 45, Anzahlung € 426,50. Berechne: a) Gesamtkosten · b) Mehrkosten · c) Effektiven Zinssatz.</p>
+                <div class="calc-block">
+                    <div class="calc-row"><span>Anzahlung</span><span>€ 426,50</span></div>
+                    <div class="calc-row"><span>+ 30 Raten (30 × 45,00)</span><span>€ 1.350,00</span></div>
+                    <div class="calc-row result"><span>a) = Gesamtkosten</span><span>€ 1.776,50</span></div>
+                    <div class="calc-row"><span>− Barpreis</span><span>€ 1.599,00</span></div>
+                    <div class="calc-row result"><span>b) = Mehrkosten</span><span>€ 177,50</span></div>
+                </div>
+                <div class="formula-box">Mittlere Fälligkeit = (erste + letzte Rate) ÷ 2 = (1 + 30) ÷ 2 = 15,5 Monate
+c) Eff. Zinssatz = (Mehrkosten × 1.200) ÷ ((Kaufpreis − Anzahlung) × Mittlere Fälligkeit)
+   = (177,50 × 1.200) ÷ ((1.599,00 − 426,50) × 15,5) = 11,72 %</div>
+            </div>
+        </div>
+
+        <div class="sum-wrap">
+            <div class="sum-header">
+                <div class="sum-title">📈 KVur — Kurvenverlauf im Kaufvertrag</div>
+                <span class="sum-note">Grafische Darstellung</span>
+            </div>
+            <div class="sum-body md-out">
+                <h3>Was sind KVur Kurven?</h3>
+                <p><strong>KVur</strong> steht für <strong>Kurvenverlauf</strong> und zeigt <strong>grafisch</strong>, wie sich verschiedene Größen im Kaufvertrag entwickeln:</p>
+                <ul>
+                    <li>Zahlungsverpflichtung des Käufers</li>
+                    <li>Eigentumsübergang</li>
+                    <li>Besitzübergang</li>
+                    <li>Gefahrverlauf</li>
+                </ul>
+
+                <h3>Die vier Hauptkurven</h3>
+                <p><strong>KVur 1 — Einfacher Kauf (Barzahlung):</strong></p>
+                <ul>
+                    <li>Lieferung, Zahlung und Eigentumsübergang finden gleichzeitig statt</li>
+                    <li>Die Kurven treffen sich am selben Punkt</li>
+                </ul>
+                <p><strong>KVur 2 — Kauf mit Vorauszahlung:</strong></p>
+                <ul>
+                    <li>Käufer zahlt zuerst</li>
+                    <li>Dann erfolgt Lieferung und Eigentumsübergang</li>
+                </ul>
+                <p><strong>KVur 3 — Kauf auf Ziel (auf Rechnung):</strong></p>
+                <ul>
+                    <li>Lieferung und Eigentumsübergang erfolgen zuerst</li>
+                    <li>Zahlung erfolgt später (z.B. 14 oder 30 Tage nach Lieferung)</li>
+                </ul>
+                <p><strong>KVur 4 — Kauf mit Eigentumsvorbehalt:</strong></p>
+                <ul>
+                    <li>Lieferung und Besitz gehen sofort an den Käufer</li>
+                    <li>Eigentumsübergang erfolgt erst nach vollständiger Zahlung</li>
+                    <li>Der Verkäufer bleibt Eigentümer als Sicherheit</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- KVur 1 & 2 -->
+        <div class="textbook-block">
+            <div class="textbook-head">📖 KVur 1 &amp; 2 — Regelmäßiger Ablauf: Barzahlung &amp; Vorauszahlung</div>
+            <div class="textbook-content md-out">
+                <h3>KVur 1 — Barzahlung (gleichzeitig)</h3>
+                <div class="kvur-flow">
+                    <div class="kv-event kv-highlight"><span class="kv-icon">📦</span><span class="kv-label">Lieferung</span><span class="kv-timing">Zeitpunkt T</span></div>
+                    <span class="kv-arrow">⟶</span>
+                    <div class="kv-event kv-highlight"><span class="kv-icon">💶</span><span class="kv-label">Zahlung</span><span class="kv-timing">Zeitpunkt T</span></div>
+                    <span class="kv-arrow">⟶</span>
+                    <div class="kv-event kv-highlight"><span class="kv-icon">🏷️</span><span class="kv-label">Eigentums­übergang</span><span class="kv-timing">Zeitpunkt T</span></div>
+                </div>
+                <p>Alle drei Ereignisse fallen <strong>gleichzeitig</strong> auf denselben Zeitpunkt T. Der einfachste und häufigste Fall (z.B. Supermarkt-Kauf).</p>
+                <h3>KVur 2 — Vorauszahlung (Zahlung vor Lieferung)</h3>
+                <div class="kvur-flow">
+                    <div class="kv-event kv-highlight"><span class="kv-icon">💶</span><span class="kv-label">Zahlung</span><span class="kv-timing">T₁ (zuerst)</span></div>
+                    <span class="kv-arrow">⟶</span>
+                    <div class="kv-event"><span class="kv-icon">📦</span><span class="kv-label">Lieferung</span><span class="kv-timing">T₂ (danach)</span></div>
+                    <span class="kv-arrow">⟶</span>
+                    <div class="kv-event"><span class="kv-icon">🏷️</span><span class="kv-label">Eigentums­übergang</span><span class="kv-timing">T₂ (mit Lieferung)</span></div>
+                </div>
+                <p>Der Käufer zahlt <strong>zuerst</strong>, bevor er die Ware erhält (z.B. Onlinebestellung mit Vorkasse). Risiko trägt zunächst der Käufer.</p>
+            </div>
+        </div>
+
+        <!-- KVur 3 & 4 -->
+        <div class="textbook-block">
+            <div class="textbook-head">📖 KVur 3 &amp; 4 — Kauf auf Ziel &amp; Eigentumsvorbehalt</div>
+            <div class="textbook-content md-out">
+                <h3>KVur 3 — Kauf auf Ziel (Zahlung nach Lieferung)</h3>
+                <div class="kvur-flow">
+                    <div class="kv-event kv-highlight"><span class="kv-icon">📦</span><span class="kv-label">Lieferung</span><span class="kv-timing">T₁ (zuerst)</span></div>
+                    <span class="kv-arrow">⟶</span>
+                    <div class="kv-event kv-highlight"><span class="kv-icon">🏷️</span><span class="kv-label">Eigentums­übergang</span><span class="kv-timing">T₁ (mit Lieferung)</span></div>
+                    <span class="kv-arrow">⟶</span>
+                    <div class="kv-event"><span class="kv-icon">💶</span><span class="kv-label">Zahlung</span><span class="kv-timing">T₂ (z.B. +30 Tage)</span></div>
+                </div>
+                <p>Lieferung <strong>und</strong> Eigentumsübergang erfolgen sofort. Zahlung erst später nach Vereinbarung (z.B. 14 oder 30 Tage — typisch im B2B-Handel).</p>
+                <h3>KVur 4 — Eigentumsvorbehalt (Eigentumsübergang zuletzt)</h3>
+                <div class="kvur-flow">
+                    <div class="kv-event kv-highlight"><span class="kv-icon">📦</span><span class="kv-label">Lieferung<br>(Besitz)</span><span class="kv-timing">T₁ (sofort)</span></div>
+                    <span class="kv-arrow">⟶</span>
+                    <div class="kv-event"><span class="kv-icon">💶</span><span class="kv-label">Zahlung</span><span class="kv-timing">T₂</span></div>
+                    <span class="kv-arrow">⟶</span>
+                    <div class="kv-event kv-highlight"><span class="kv-icon">🏷️</span><span class="kv-label">Eigentums­übergang</span><span class="kv-timing">T₃ (erst nach Zahlung)</span></div>
+                </div>
+                <p>Der Käufer erhält sofort <strong>Besitz</strong>, aber das <strong>Eigentum</strong> bleibt beim Verkäufer, bis der Kaufpreis vollständig bezahlt ist. Sicherheit für den Verkäufer.</p>
+                <div class="notice-box"><strong>Wichtiger Unterschied:</strong> Bei KVur 3 geht das Eigentum mit der Lieferung über. Bei KVur 4 erst nach vollständiger Zahlung. Bis dahin bleibt der Verkäufer rechtlicher Eigentümer.</div>
+            </div>
+        </div>
+
+        <!-- Kaufvertrag unregelmäßiger Ablauf + Mängelarten -->
+        <div class="textbook-block">
+            <div class="textbook-head">📖 Lehrbuch — 9.3 Kaufvertrag: Unregelmäßiger Ablauf &amp; Mängelarten</div>
+            <div class="textbook-content md-out">
+                <p>Ein Kaufvertrag wird durch die Erfüllung beendet. Bei dieser Erfüllung können jedoch Unzulänglichkeiten vorkommen, aus denen jenem Vertragspartner, der geschädigt wurde, Rechtsansprüche erwachsen.</p>
+                <p>Der unregelmäßige Verlauf eines Kaufvertrags kann folgende Formen annehmen:</p>
+                <div class="def-row">
+                    <div class="def-box"><strong>1. Mangelhafte Lieferung</strong>Ware ist beim Käufer mit Mängeln angekommen → Gewährleistungsansprüche</div>
+                    <div class="def-box"><strong>2. Lieferverzug</strong>Ware wird nicht rechtzeitig geliefert → Fristsetzung, Schadensersatz, Rücktritt</div>
+                    <div class="def-box"><strong>3. Annahmeverzug</strong>Käufer nimmt ordnungsgemäß gelieferte Ware nicht an → Lagerkosten, Zinsen</div>
+                    <div class="def-box"><strong>4. Zahlungsverzug</strong>Schlüsselfaktor für Verkäufer → Verzugszinsen, Kündigung</div>
+                </div>
+                <h3>9.3.1 Mangelhafte Lieferung — Arten von Mängeln</h3>
+                <table class="mangel-table">
+                    <thead><tr><th>Mängelart</th><th>Erkennbarkeit</th><th>Verjährungsfrist</th></tr></thead>
+                    <tbody>
+                        <tr><td><strong>Offene Mängel</strong></td><td>Sofort erkennbar (z.B. Emailschäden, Risse, Farbfehler)</td><td>Unverzüglich reklamieren!</td></tr>
+                        <tr><td><strong>Versteckte Mängel</strong></td><td>Stellen sich erst beim Gebrauch der Ware heraus</td><td><strong>2 Jahre</strong> bei beweglichen, <strong>3 Jahre</strong> bei unbeweglichen Gütern</td></tr>
+                        <tr><td><strong>Arglistig verschwiegene Mängel</strong></td><td>Verkäufer hat Mangel bewusst verschwiegen</td><td>Erst nach <strong>30 Jahren</strong></td></tr>
+                    </tbody>
+                </table>
+                <div class="notice-box"><strong>Beweislastumkehr:</strong> Tritt ein Mangel innerhalb der ersten 6 Monate auf, wird davon ausgegangen, dass er bereits bei Übergabe vorhanden war — der Verkäufer muss das Gegenteil beweisen.<br><br><strong>Ausnahme:</strong> Bei gebrauchten beweglichen Sachen kann die Gewährleistungsfrist auf <strong>1 Jahr</strong> verkürzt werden. Kraftfahrzeuge müssen laut Zulassungsschein älter als ein Jahr sein.</div>
+            </div>
+        </div>
+
+        <!-- Annahmeverzug + Zahlungsverzug Details -->
+        <div class="textbook-block">
+            <div class="textbook-head">📖 Lehrbuch — 9.3.2–9.3.3 Annahmeverzug &amp; Zahlungsverzug im Detail</div>
+            <div class="textbook-content md-out">
+                <h3>9.3.2 Annahmeverzug</h3>
+                <p>Der Annahmeverzug liegt vor, wenn der Verkäufer die Ware ordnungsgemäß zur Verfügung stellt, der Käufer sie jedoch <strong>nicht annimmt</strong>.</p>
+                <div class="def-list">
+                    <div class="def-item"><span class="def-item-key">Voraussetzung</span><span>Ware muss tatsächlich und vertragsgemäß angeboten worden sein.</span></div>
+                    <div class="def-item"><span class="def-item-key">Folgen</span><span>Lagerungskosten und Zinsen gehen auf den Käufer über. Verkäufer kann hinterlegte Ware auf Kosten des Käufers einlagern.</span></div>
+                    <div class="def-item"><span class="def-item-key">Kündigung</span><span>Der Verkäufer kann nach Fristsetzung vom Vertrag zurücktreten und Schadensersatz verlangen.</span></div>
+                </div>
+                <h3>9.3.3 Zahlungsverzug</h3>
+                <p>Der Zahlungsverzug tritt ein, wenn der Käufer trotz Fälligkeit <strong>nicht zahlt</strong>.</p>
+                <div class="def-list">
+                    <div class="def-item"><span class="def-item-key">Mahnung</span><span>Nach (meist) 30 Tagen Zahlungsverzug: schriftliche Mahnung mit Nachfrist. Mahnung muss Betrag, Fälligkeitsdatum und Konsequenzen enthalten.</span></div>
+                    <div class="def-item"><span class="def-item-key">Verzugszinsen</span><span><strong>5 % p.a.</strong> (Privatpersonen) · <strong>8 % p.a.</strong> (unternehmerische Geschäfte) über dem Basiszinssatz.</span></div>
+                    <div class="def-item"><span class="def-item-key">Terminverlust</span><span>Bei Ratengeschäften: 6 Wochen Rückstand + Mahnung + 2 Wochen Nachfrist → gesamte Restschuld fällig.</span></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Besondere Kaufvertragsformen -->
+        <div class="textbook-block">
+            <div class="textbook-head">📖 Lehrbuch — Besondere Kaufvertragsformen &amp; Eigentumsvorbehalt</div>
+            <div class="textbook-content md-out">
+                <h3>Eigentumsvorbehalt (Vorbehaltseigentum)</h3>
+                <p>Beim Kauf mit <strong>Eigentumsvorbehalt</strong> bleibt die Ware bis zur vollständigen Bezahlung Eigentum des Verkäufers. Der Käufer erhält nur den <em>Besitz</em>, nicht das <em>Eigentum</em>.</p>
+                <div class="def-row">
+                    <div class="def-box"><strong>Zweck für den Verkäufer</strong>Sicherheit gegen Zahlungsausfall: Ware kann bei Nichtzahlung zurückgefordert werden (Herausgabeanspruch).</div>
+                    <div class="def-box"><strong>Rechte des Käufers</strong>Käufer darf die Ware nutzen, aber nicht weiterverkaufen oder verpfänden, solange der Eigentumsvorbehalt besteht.</div>
+                </div>
+                <h3>Kauf auf Probe &amp; Kauf nach Muster</h3>
+                <div class="def-list">
+                    <div class="def-item"><span class="def-item-key">Kauf auf Probe</span><span>Käufer kann die Ware vor dem endgültigen Kauf testen. Vertrag kommt erst durch ausdrückliche Annahme zustande.</span></div>
+                    <div class="def-item"><span class="def-item-key">Kauf nach Muster</span><span>Käufer hat nur ein Muster/Probe der Ware gesehen. Die Lieferware muss der Musterware qualitativ entsprechen.</span></div>
+                    <div class="def-item"><span class="def-item-key">Kauf auf Abruf</span><span>Menge und/oder Zeitpunkt der Lieferung werden erst später bestimmt. Preis ist bereits festgelegt.</span></div>
+                </div>
+                <div class="notice-box"><strong>Merke:</strong> Der Eigentumsvorbehalt muss ausdrücklich <strong>vereinbart</strong> werden — er entsteht nicht automatisch. Üblicherweise wird er im Kaufvertrag oder in den AGB (Allgemeinen Geschäftsbedingungen) verankert.</div>
+            </div>
+        </div>
+
+        <div class="sum-wrap">
+            <div class="sum-header">
+                <div class="sum-title">⚖️ Besonderheiten im Kaufvertrag</div>
+                <span class="sum-note">Verzüge und Verzögerungen</span>
+            </div>
+            <div class="sum-body md-out">
+                <h3>Unregelmäßiger Verlauf — Wenn etwas schiefgeht</h3>
+                <p>Im idealen Fall läuft alles nach Plan. Aber in der Realität treten oft Probleme auf. Diese verändern den Kurvenverlauf grundlegend.</p>
+
+                <h3>Garantie und Gewährleistung</h3>
+                <p><strong>Unterschied:</strong></p>
+                <ul>
+                    <li><strong>Gewährleistung:</strong> Gesetzlicher Anspruch (2 Jahre für bewegliche, 3 Jahre für unbewegliche Güter). Der Käufer kann die Ware reklamieren, wenn sie fehlerhaft ist.</li>
+                    <li><strong>Garantie:</strong> Freiwilliges Versprechen des Herstellers/Verkäufers (z.B. 5 Jahre auf Geräte).</li>
+                </ul>
+
+                <h3>Annahmeverzug (Käufer schuld)</h3>
+                <p>Der <strong>Käufer nimmt die Ware nicht an</strong>, obwohl sie bereit zur Lieferung ist.</p>
+                <p><strong>Was passiert?</strong></p>
+                <ul>
+                    <li>Der Verkäufer kann sich vom Vertrag befreien</li>
+                    <li>Der Käufer muss den <strong>Kaufpreis</strong> zahlen</li>
+                    <li>Der Käufer trägt <strong>Lagerungskosten</strong> und <strong>Zinsen</strong></li>
+                </ul>
+
+                <h3>Zahlungsverzug (Käufer säumig)</h3>
+                <p>Der <strong>Käufer zahlt nicht pünktlich</strong>.</p>
+                <p><strong>Was passiert?</strong></p>
+                <ul>
+                    <li>Nach (meist) 30 Tagen Verzögerung wird eine <strong>Mahnung</strong> fällig</li>
+                    <li><strong>Verzugszinsen</strong> fallen an (5% p.a., geschäftlich 8% p.a.)</li>
+                    <li>Der Verkäufer kann den Vertrag kündigen</li>
+                </ul>
+
+                <h3>Lieferverzug (Verkäufer schuld)</h3>
+                <p>Der <strong>Verkäufer liefert nicht pünktlich</strong>.</p>
+                <p><strong>Was passiert?</strong></p>
+                <ul>
+                    <li>Der Käufer kann eine <strong>Fristsetzung</strong> verlangen</li>
+                    <li>Nach Ablauf der Frist kann der Käufer <strong>Schadensersatz</strong> fordern</li>
+                    <li>Der Käufer kann vom Vertrag <strong>zurücktreten</strong></li>
+                </ul>
+
+                <h3>Zusammenfassung für die Schularbeit</h3>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Verzugsart</th>
+                            <th>Wer ist schuld?</th>
+                            <th>Folge</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>Annahmeverzug</strong></td>
+                            <td>Käufer</td>
+                            <td>Lagerungskosten, Zinsen, Kündigung</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Zahlungsverzug</strong></td>
+                            <td>Käufer</td>
+                            <td>Verzugszinsen, Mahnung, Kündigung</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Lieferverzug</strong></td>
+                            <td>Verkäufer</td>
+                            <td>Schadensersatz, Rücktritt vom Vertrag</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-head">
+                <span>📝</span>
+                <span class="card-title">Schularbeit Checkliste</span>
+            </div>
+            <div class="card-body md-out">
+                <ul>
+                    <li>✅ Leasing berechnen können (Raten × Monate + Restwert)</li>
+                    <li>✅ Ratengeschäfte und Jahreszinsfuß verstehen</li>
+                    <li>✅ Unterschied zwischen den 4 KVur-Kurven kennen</li>
+                    <li>✅ Annahmeverzug, Zahlungsverzug und Lieferverzug unterscheiden</li>
+                    <li>✅ Wissen, wer bei welchem Verzug schuld ist</li>
+                    <li>✅ Folgen der einzelnen Verzüge erklären können</li>
+                    <li>✅ Garantie vs. Gewährleistung unterscheiden</li>
+                    <li>✅ Verzugszinsen berechnen können (5% bzw. 8% p.a.)</li>
+                </ul>
+            </div>
+        </div>
+    </main>
+
+    <script>
+    // ── Reading Progress Bar ──────────────────────────────────────────────────
+    window.addEventListener('scroll', () => {
+        const sh = document.documentElement.scrollHeight - window.innerHeight;
+        document.getElementById('top-progress-bar').style.width = (sh > 0 ? window.scrollY / sh * 100 : 0) + '%';
+    });
+
+    // ── Dark Mode ─────────────────────────────────────────────────────────────
+    (function initDarkMode() {
+        const btn = document.getElementById('dm-toggle');
+        const apply = dark => {
+            document.body.classList.toggle('dark', dark);
+            btn.textContent = dark ? '☀️' : '🌙';
+            btn.title = dark ? 'Helles Design' : 'Dunkles Design';
+            try { localStorage.setItem('awl-theme', dark ? 'dark' : 'light'); } catch(e) {}
+        };
+        const saved = (() => { try { return localStorage.getItem('awl-theme'); } catch(e) { return null; } })();
+        const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+        apply(saved === 'dark' || (!saved && prefersDark));
+        btn.addEventListener('click', () => apply(!document.body.classList.contains('dark')));
+    })();
+
+    // ── Formelblatt ────────────────────────────────────────────────────────────
+    const FORMULA_DATA = [
+        { cat: '💰 Leasing', items: [
+            'Gesamtleasingkosten = Anzahlung + (Rate × Laufzeit) + Restwert',
+            'Mehrkosten          = Gesamtleasingkosten − Barkaufpreis',
+            'Kreditbetrag        = Barkaufpreis − Anzahlung',
+            'p [%] = (2 × Mehrkosten × 12) / (Kreditbetrag × (n + 1))',
+            '  n   = Laufzeit in Monaten (Anzahl der Raten)',
+        ]},
+        { cat: '📋 Ratengeschäft', items: [
+            'Gesamtpreis  = Anzahlung + (Rate × Anzahl Raten)',
+            'Mehrkosten   = Gesamtpreis − Barpreis',
+            'Kreditbetrag = Barpreis − Anzahlung',
+            'p [%] = (2 × Mehrkosten × 12) / (Kreditbetrag × (n + 1))',
+            '  n   = Anzahl der Raten',
+            'Terminverlust: ab 6 Wochen Rückstand (nach Mahnung + 2 Wochen Frist)',
+        ]},
+        { cat: '📈 KVur — Kaufvertrag unregelmäßiger Verlauf', items: [
+            'KVur 1 — Barzahlung:          Zahlung & Lieferung gleichzeitig',
+            'KVur 2 — Vorauszahlung:       Zahlung VOR der Lieferung',
+            'KVur 3 — Kauf auf Ziel:       Lieferung VOR der Zahlung',
+            'KVur 4 — Eigentumsvorbehalt:  Lieferung sofort, Eigentum erst nach Vollzahlung',
+        ]},
+        { cat: '⚠️ Verzüge & Zinsen', items: [
+            'Annahmeverzug:  Käufer nimmt die ordnungsgemäß angebotene Ware nicht an',
+            'Lieferverzug:   Verkäufer liefert nicht zum vereinbarten Termin',
+            'Verzugszinsen (unternehmerische Geschäfte):  8 % p.a.',
+            'Verzugszinsen (Verbrauchergeschäfte):        4 % p.a.',
+        ]},
+        { cat: '🔧 Gewährleistung & Garantie', items: [
+            'Gewährleistungsfrist (bewegliche Sachen):    2 Jahre',
+            'Gewährleistungsfrist (unbewegliche Sachen):  3 Jahre',
+            'Arglistig verschwiegene Mängel:             30 Jahre',
+            'Offener Mangel:     bei Übergabe erkennbar → sofort rügen',
+            'Versteckter Mangel: erst später erkennbar → nach Entdeckung rügen',
+            'Garantie: freiwillig & vertraglich → geht über Gewährleistung hinaus',
+        ]},
+    ];
+    function buildFormulaSheet() {
+        const body = document.getElementById('fml-body');
+        body.innerHTML = '';
+        FORMULA_DATA.forEach(({ cat, items }) => {
+            const sec = document.createElement('div');
+            sec.className = 'fml-section';
+            const head = document.createElement('div');
+            head.className = 'fml-section-head';
+            head.textContent = cat;
+            sec.appendChild(head);
+            const list = document.createElement('div');
+            list.className = 'fml-list';
+            items.forEach(txt => {
+                const el = document.createElement('div');
+                el.className = 'fml-item';
+                el.textContent = txt;
+                list.appendChild(el);
+            });
+            sec.appendChild(list);
+            body.appendChild(sec);
+        });
+    }
+    let formulaBuilt = false;
+    function openFormulaSheet() {
+        if (!formulaBuilt) { buildFormulaSheet(); formulaBuilt = true; }
+        document.getElementById('fml-overlay').classList.add('open');
+    }
+    function closeFormulaSheet() {
+        document.getElementById('fml-overlay').classList.remove('open');
+    }
+    (function(){
+        document.getElementById('formula-btn').addEventListener('click', openFormulaSheet);
+        document.getElementById('fml-close').addEventListener('click', closeFormulaSheet);
+        document.getElementById('fml-overlay').addEventListener('click', e => {
+            if (e.target.id === 'fml-overlay') closeFormulaSheet();
+        });
+        document.addEventListener('keydown', e => {
+            if (e.key === 'Escape' && document.getElementById('fml-overlay').classList.contains('open')) closeFormulaSheet();
+        });
+    })();
+
+    // ── Lernmodus (Karteikarten) ──────────────────────────────────────────────
+    const CARDS = [
+        {
+            phase: 'Leasing',
+            q: 'Was ist der Unterschied zwischen Leasing und Kauf?',
+            a: '<strong>Kauf:</strong> Käufer wird sofort Eigentümer, zahlt den vollen Preis.<br><br><strong>Leasing:</strong> Leasinggeber bleibt Eigentümer, Leasingnehmer zahlt nur eine Nutzungsgebühr (monatliche Rate) und hat keine Kaufpflicht.'
+        },
+        {
+            phase: 'Leasing',
+            q: 'Nenne die zwei Hauptarten des Leasings und erkläre den Unterschied.',
+            a: '<strong>Operatives Leasing:</strong> Kurzfristiger Mietvertrag, kein Eigentumserwerb am Ende.<br><br><strong>Finanzleasing:</strong> Langfristiger Vertrag, oft mit Kaufoption am Ende der Laufzeit. Wartung und Versicherung oft beim Leasingnehmer.'
+        },
+        {
+            phase: 'Leasing',
+            q: 'Wie berechnet man die Gesamtleasingkosten? Berechne: Rate = €350/Monat, 36 Monate, Restwert €3.000.',
+            a: '<strong>Formel:</strong> Gesamtkosten = (Rate × Monate) + Restwert<br><br><strong>Lösung:</strong><br>350 € × 36 = 12.600 €<br>12.600 € + 3.000 € = <strong>15.600 € Gesamtkosten</strong>'
+        },
+        {
+            phase: 'Ratengeschäft',
+            q: 'Was ist ein Ratengeschäft und wie unterscheidet es sich vom Leasing?',
+            a: '<strong>Ratengeschäft:</strong> Der Käufer wird Eigentümer der Ware (sofort oder nach 1. Rate), zahlt den Kaufpreis aber in gleichmäßigen Teilzahlungen (Raten).<br><br><strong>Unterschied zu Leasing:</strong> Beim Ratengeschäft wird man Eigentümer. Beim Leasing bleibt der Leasinggeber Eigentümer.'
+        },
+        {
+            phase: 'Ratengeschäft',
+            q: 'Wie berechnet man den Jahreszinsfuß beim Ratengeschäft? Berechne: Kaufpreis €500, 10 Raten à €52.',
+            a: '<strong>Formel:</strong> Jahreszinsfuß = (Zinsen × 100 × 12) ÷ (Kaufpreis × Monate)<br><br><strong>Schritt 1:</strong> Gesamtpreis = 10 × 52 € = 520 €<br>Zinsen = 520 € − 500 € = 20 €<br><br><strong>Schritt 2:</strong> JZF = (20 × 100 × 12) ÷ (500 × 10) = 24.000 ÷ 5.000 = <strong>4,8% p.a.</strong>'
+        },
+        {
+            phase: 'KVur',
+            q: 'Was bedeutet KVur und welche 4 Kurvenverläufe gibt es?',
+            a: '<strong>KVur</strong> = Kurvenverlauf im Kaufvertrag. Zeigt grafisch wann Zahlung, Lieferung und Eigentumsübergang stattfinden.<br><br>1. Barzahlung (gleichzeitig)<br>2. Vorauszahlung (Zahlung zuerst)<br>3. Kauf auf Ziel (Lieferung zuerst)<br>4. Eigentumsvorbehalt (Eigentumsübergang zuletzt)'
+        },
+        {
+            phase: 'KVur',
+            q: 'Erkläre KVur 1 (Barzahlung) und KVur 2 (Vorauszahlung).',
+            a: '<strong>KVur 1 – Barzahlung:</strong><br>Lieferung, Zahlung und Eigentumsübergang fallen gleichzeitig zusammen. Der einfachste Fall.<br><br><strong>KVur 2 – Vorauszahlung:</strong><br>Der Käufer zahlt zuerst. Danach erst erfolgen Lieferung und Eigentumsübergang.'
+        },
+        {
+            phase: 'KVur',
+            q: 'Erkläre KVur 3 (Kauf auf Ziel) und KVur 4 (Eigentumsvorbehalt). Was ist der Unterschied?',
+            a: '<strong>KVur 3 – Kauf auf Ziel:</strong><br>Lieferung + Eigentumsübergang sofort. Zahlung erst später (z.B. 14 oder 30 Tage).<br><br><strong>KVur 4 – Eigentumsvorbehalt:</strong><br>Lieferung + Besitz sofort. Aber Eigentumsübergang erst nach vollständiger Zahlung. Verkäufer bleibt bis dahin Eigentümer.<br><br><em>Unterschied: Bei KVur 3 geht das Eigentum sofort über, bei KVur 4 erst nach Zahlung.</em>'
+        },
+        {
+            phase: 'Verzüge',
+            q: 'Was ist Annahmeverzug? Wer ist schuld und was sind die Folgen?',
+            a: '<strong>Definition:</strong> Der Käufer nimmt die bereit gestellte Ware NICHT an, obwohl der Verkäufer liefern könnte.<br><br><strong>Schuld:</strong> Käufer<br><br><strong>Folgen:</strong><br>• Lagerungskosten gehen auf Käufer über<br>• Zinsen fallen auf den ausstehenden Kaufpreis an<br>• Verkäufer kann den Vertrag kündigen und Schadenersatz verlangen'
+        },
+        {
+            phase: 'Verzüge',
+            q: 'Was ist Zahlungsverzug? Wer ist schuld, was sind die Folgen und wie hoch sind die Verzugszinsen?',
+            a: '<strong>Definition:</strong> Der Käufer zahlt nicht pünktlich zum vereinbarten Zahlungsziel.<br><br><strong>Schuld:</strong> Käufer<br><br><strong>Folgen:</strong><br>• Verzugszinsen: <strong>5% p.a.</strong> (Privatpersonen), <strong>8% p.a.</strong> (geschäftlich)<br>• Mahnung wird fällig (meist nach 30 Tagen)<br>• Verkäufer kann den Vertrag kündigen'
+        },
+        {
+            phase: 'Verzüge',
+            q: 'Was ist Lieferverzug? Wer ist schuld und welche Rechte hat der Käufer?',
+            a: '<strong>Definition:</strong> Der Verkäufer liefert nicht zum vereinbarten Liefertermin.<br><br><strong>Schuld:</strong> Verkäufer<br><br><strong>Rechte des Käufers:</strong><br>1. <strong>Fristsetzung</strong> verlangen<br>2. Nach Ablauf der Frist: <strong>Schadensersatz</strong> fordern<br>3. Oder: Vom Vertrag <strong>zurücktreten</strong>'
+        },
+        {
+            phase: 'Verzüge',
+            q: 'Nenne alle drei Verzugsarten, wer jeweils schuld ist und eine Hauptfolge.',
+            a: '<table style="width:100%;font-size:0.85rem;border-collapse:collapse"><tr style="background:#ecfdf5"><th style="padding:0.4rem;text-align:left">Verzug</th><th style="padding:0.4rem;text-align:left">Schuld</th><th style="padding:0.4rem;text-align:left">Hauptfolge</th></tr><tr><td style="padding:0.4rem;border-top:1px solid #d1fae5"><strong>Annahmeverzug</strong></td><td style="padding:0.4rem;border-top:1px solid #d1fae5">Käufer</td><td style="padding:0.4rem;border-top:1px solid #d1fae5">Lagerkosten + Zinsen</td></tr><tr style="background:#f0fdf4"><td style="padding:0.4rem;border-top:1px solid #d1fae5"><strong>Zahlungsverzug</strong></td><td style="padding:0.4rem;border-top:1px solid #d1fae5">Käufer</td><td style="padding:0.4rem;border-top:1px solid #d1fae5">Verzugszinsen 5%/8%</td></tr><tr><td style="padding:0.4rem;border-top:1px solid #d1fae5"><strong>Lieferverzug</strong></td><td style="padding:0.4rem;border-top:1px solid #d1fae5">Verkäufer</td><td style="padding:0.4rem;border-top:1px solid #d1fae5">Schadensersatz / Rücktritt</td></tr></table>'
+        },
+        {
+            phase: 'Garantie & Gewährleistung',
+            q: 'Was ist der Unterschied zwischen Garantie und Gewährleistung?',
+            a: '<strong>Gewährleistung:</strong><br>• Gesetzliche Pflicht des Verkäufers<br>• Dauer: <strong>2 Jahre</strong> (bewegliche Güter), <strong>3 Jahre</strong> (unbewegliche Güter)<br>• Rechte: Reparatur, Austausch, Preisminderung, Rücktritt<br><br><strong>Garantie:</strong><br>• Freiwilliges Versprechen des Herstellers oder Verkäufers<br>• Dauer: frei vereinbar (z.B. 5 Jahre)<br>• Kann neben der Gewährleistung bestehen'
+        },
+        {
+            phase: 'Garantie & Gewährleistung',
+            q: 'Welche Mängelarten gibt es und wie lange gilt die Gewährleistung?',
+            a: '<strong>Mängelarten:</strong><br>• <strong>Offene Mängel:</strong> Sofort erkennbar → unverzüglich reklamieren<br>• <strong>Versteckte Mängel:</strong> Zeigen sich beim Gebrauch → 2 Jahre (beweglich), 3 Jahre (unbeweglich)<br>• <strong>Arglistig verschwiegene Mängel:</strong> Verjähren erst nach <strong>30 Jahren</strong><br><br><strong>Wichtig:</strong> Innerhalb der ersten 6 Monate liegt die Beweislast beim Verkäufer.'
+        }
+    ];
+
+    let lm = { idx: 0, correct: 0, wrong: [], revealed: false, active: false };
+
+    function startLearningMode() {
+        lm.idx = 0; lm.correct = 0; lm.wrong = []; lm.revealed = false; lm.active = true;
+        document.getElementById('learn-overlay').style.display = 'block';
+        const modal = document.getElementById('learn-modal');
+        modal.style.display = 'flex';
+        document.getElementById('lm-result').style.display = 'none';
+        document.getElementById('lm-card-area').style.display = 'block';
+        document.getElementById('lm-actions').classList.add('hidden');
+        document.body.style.overflow = 'hidden';
+        showCard();
+    }
+
+    function closeLearningMode() {
+        document.getElementById('learn-overlay').style.display = 'none';
+        document.getElementById('learn-modal').style.display = 'none';
+        document.body.style.overflow = '';
+        lm.active = false;
+    }
+
+    function showCard() {
+        if (lm.idx >= CARDS.length) { showResult(); return; }
+        const card = CARDS[lm.idx];
+        const pct = Math.round((lm.idx / CARDS.length) * 100);
+        document.getElementById('lm-progress').style.width = pct + '%';
+        document.getElementById('lm-counter').textContent = (lm.idx + 1) + ' / ' + CARDS.length;
+        document.getElementById('lm-phase-badge').textContent = card.phase;
+        document.getElementById('lm-question').textContent = card.q;
+        const ansEl = document.getElementById('lm-answer');
+        ansEl.style.display = 'none'; ansEl.innerHTML = card.a;
+        document.getElementById('lm-flip-btn').style.display = 'block';
+        document.getElementById('lm-actions').classList.add('hidden');
+        lm.revealed = false;
+        document.getElementById('lm-card-area').scrollTop = 0;
+    }
+
+    function revealAnswer() {
+        document.getElementById('lm-answer').style.display = 'block';
+        document.getElementById('lm-flip-btn').style.display = 'none';
+        document.getElementById('lm-actions').classList.remove('hidden');
+        lm.revealed = true;
+    }
+
+    function rateCard(correct) {
+        if (correct) {
+            lm.correct++;
+        } else {
+            lm.wrong.push(lm.idx);
+        }
+        lm.idx++;
+        showCard();
+    }
+
+    function showResult() {
+        document.getElementById('lm-card-area').style.display = 'none';
+        document.getElementById('lm-actions').classList.add('hidden');
+        document.getElementById('lm-result').style.display = 'block';
+        document.getElementById('lm-progress').style.width = '100%';
+        document.getElementById('lm-counter').textContent = 'Fertig!';
+
+        const total = CARDS.length;
+        const pct = Math.round((lm.correct / total) * 100);
+        let emoji = pct >= 80 ? '🎉' : pct >= 60 ? '👍' : '📖';
+        let msg = pct >= 80 ? 'Ausgezeichnet! Bereit für die Schularbeit.' : pct >= 60 ? 'Gut! Noch ein bisschen üben.' : 'Weitermachen! Nochmal üben.';
+
+        document.getElementById('lm-score').textContent = emoji + ' ' + pct + '%';
+        document.getElementById('lm-result-text').textContent = lm.correct + ' von ' + total + ' richtig — ' + msg;
+        document.getElementById('lm-result-bar').style.width = pct + '%';
+
+        // Falsche Karten auflisten
+        if (lm.wrong.length > 0) {
+            let html = '<p style="font-weight:600;margin-bottom:0.5rem;color:var(--muted)">Nochmal üben:</p><ul style="list-style:disc;padding-left:1.25rem">';
+            lm.wrong.forEach(i => { html += '<li style="margin-bottom:0.3rem">' + CARDS[i].q + '</li>'; });
+            html += '</ul>';
+            document.getElementById('lm-wrong-list').innerHTML = html;
+        } else {
+            document.getElementById('lm-wrong-list').innerHTML = '<p style="color:#059669;font-weight:600">✅ Alle Karten gewusst!</p>';
+        }
+
+        // Lernfortschritt in Nav aktualisieren
+        updateLpBar(pct);
+        try { localStorage.setItem('awl-lp', pct.toString()); } catch(e) {}
+    }
+
+    function restartLearningMode() {
+        startLearningMode();
+    }
+
+    function updateLpBar(pct) {
+        document.getElementById('lp-fill').style.width = pct + '%';
+        document.getElementById('lp-text').textContent = pct + '%';
+    }
+
+    // Gespeicherten Fortschritt laden
+    (() => {
+        try {
+            const saved = localStorage.getItem('awl-lp');
+            if (saved) updateLpBar(parseInt(saved));
+        } catch(e) {}
+    })();
+
+    // Escape-Taste schließt Modals
+    document.addEventListener('keydown', e => {
+        if (e.key === 'Escape' && lm.active) closeLearningMode();
+        if (e.key === 'Enter' && lm.active && !lm.revealed) revealAnswer();
+        if (e.key === 'ArrowRight' && lm.active && lm.revealed) rateCard(true);
+        if (e.key === 'ArrowLeft'  && lm.active && lm.revealed) rateCard(false);
+        if (e.key === 'Escape' && examState.active) closeExamMode();
+    });
+
+    // ── Probeschularbeit ───────────────────────────────────────────────────────
+    const EXAM_QS = [
+        { id: '1a', type: 'calc', answer: 20940, tol: 0.5,  pts: 3 },
+        { id: '1b', type: 'calc', answer: 2940,  tol: 0.5,  pts: 2 },
+        { id: '1c', type: 'calc', answer: 9.60,  tol: 0.11, pts: 5 },
+        { id: '2a', type: 'calc', answer: 930,   tol: 0.5,  pts: 3 },
+        { id: '2b', type: 'calc', answer: 30,    tol: 0.5,  pts: 2 },
+        { id: '2c', type: 'calc', answer: 6.00,  tol: 0.11, pts: 5 },
+        { id: '3a', type: 'mc',   answer: '2', pts: 2 },
+        { id: '3b', type: 'mc',   answer: '3', pts: 2 },
+        { id: '3c', type: 'mc',   answer: '4', pts: 2 },
+        { id: '4a', type: 'mc',   answer: '2', pts: 2 },
+        { id: '4b', type: 'mc',   answer: '3', pts: 2 },
+        { id: '4c', type: 'mc',   answer: '3', pts: 2 },
+        { id: '4d', type: 'mc',   answer: '2', pts: 2 },
+        { id: '5a', type: 'mc',   answer: '2', pts: 2 },
+        { id: '5b', type: 'mc',   answer: '2', pts: 2 },
+        { id: '5c', type: 'mc',   answer: '3', pts: 2 },
+    ];
+
+    const EXAM_DURATION = 45 * 60;
+    let examState = { active: false, submitted: false, secondsLeft: EXAM_DURATION, timerInterval: null };
+
+    function startExamMode() {
+        examState.active = true;
+        examState.submitted = false;
+        examState.secondsLeft = EXAM_DURATION;
+
+        // Reset all inputs and radios
+        EXAM_QS.forEach(q => {
+            if (q.type === 'calc') {
+                const inp = document.getElementById('ans-' + q.id);
+                if (inp) { inp.value = ''; inp.className = 'exam-ci'; inp.disabled = false; }
+                const fb = document.getElementById('fb-' + q.id);
+                if (fb) { fb.textContent = ''; fb.className = 'exam-ci-fb'; }
+            } else {
+                document.querySelectorAll('input[name="q' + q.id + '"]').forEach(r => { r.checked = false; r.disabled = false; });
+                document.querySelectorAll('#mc-' + q.id + ' .exam-mc-opt').forEach(o => {
+                    o.classList.remove('correct', 'wrong', 'show-correct');
+                });
+            }
+        });
+
+        document.getElementById('exam-timer').classList.remove('warning');
+        document.getElementById('exam-body').style.display = 'flex';
+        document.getElementById('exam-result-screen').style.display = 'none';
+        document.getElementById('exam-submit-btn').style.display = '';
+        document.getElementById('exam-overlay').style.display = 'block';
+        document.getElementById('exam-modal').style.display = 'flex';
+        document.body.style.overflow = 'hidden';
+
+        updateExamTimer();
+        updateAnsweredCount();
+
+        if (examState.timerInterval) clearInterval(examState.timerInterval);
+        examState.timerInterval = setInterval(tickExamTimer, 1000);
+    }
+
+    function closeExamMode() {
+        if (examState.timerInterval) clearInterval(examState.timerInterval);
+        document.getElementById('exam-overlay').style.display = 'none';
+        document.getElementById('exam-modal').style.display = 'none';
+        document.body.style.overflow = '';
+        examState.active = false;
+    }
+
+    function tickExamTimer() {
+        if (examState.submitted) return;
+        examState.secondsLeft--;
+        if (examState.secondsLeft <= 0) {
+            examState.secondsLeft = 0;
+            updateExamTimer();
+            clearInterval(examState.timerInterval);
+            submitExam(true);
+            return;
+        }
+        updateExamTimer();
+        if (examState.secondsLeft <= 300) {
+            document.getElementById('exam-timer').classList.add('warning');
+        }
+    }
+
+    function updateExamTimer() {
+        const m = Math.floor(examState.secondsLeft / 60);
+        const s = examState.secondsLeft % 60;
+        document.getElementById('exam-timer').textContent =
+            String(m).padStart(2, '0') + ':' + String(s).padStart(2, '0');
+    }
+
+    function updateAnsweredCount() {
+        let count = 0;
+        EXAM_QS.forEach(q => {
+            if (q.type === 'calc') {
+                const el = document.getElementById('ans-' + q.id);
+                if (el && el.value.trim() !== '') count++;
+            } else {
+                if (document.querySelector('input[name="q' + q.id + '"]:checked')) count++;
+            }
+        });
+        document.getElementById('exam-answered').textContent = count + ' / ' + EXAM_QS.length + ' beantwortet';
+    }
+
+    // Attach live answer-count listeners once DOM is ready
+    (function attachExamListeners() {
+        EXAM_QS.forEach(q => {
+            if (q.type === 'calc') {
+                const el = document.getElementById('ans-' + q.id);
+                if (el) el.addEventListener('input', updateAnsweredCount);
+            } else {
+                document.querySelectorAll('input[name="q' + q.id + '"]').forEach(r => {
+                    r.addEventListener('change', updateAnsweredCount);
+                });
+            }
+        });
+    })();
+
+    function parseExamInput(val) {
+        let s = val.replace(/\s/g, '').replace(/[€%]/g, '').trim();
+        const dots   = (s.match(/\./g) || []).length;
+        const commas = (s.match(/,/g) || []).length;
+        if (commas > 0 && dots > 0) {
+            s = s.replace(/\./g, '').replace(',', '.');
+        } else if (commas > 0) {
+            s = s.replace(',', '.');
+        } else if (dots === 1) {
+            const afterDot = s.split('.')[1] || '';
+            if (afterDot.length === 3) s = s.replace('.', '');
+        }
+        return parseFloat(s);
+    }
+
+    function submitExam(autoSubmit) {
+        if (examState.submitted) return;
+        examState.submitted = true;
+        if (examState.timerInterval) clearInterval(examState.timerInterval);
+
+        let totalPts = 0;
+        const results = [];
+
+        EXAM_QS.forEach(q => {
+            let earned = 0;
+            if (q.type === 'calc') {
+                const inp = document.getElementById('ans-' + q.id);
+                const fb  = document.getElementById('fb-' + q.id);
+                if (inp) {
+                    const val = parseExamInput(inp.value);
+                    const ok  = !isNaN(val) && Math.abs(val - q.answer) <= q.tol;
+                    earned = ok ? q.pts : 0;
+                    inp.classList.add(ok ? 'correct' : 'wrong');
+                    inp.disabled = true;
+                    if (fb) {
+                        if (ok) {
+                            fb.textContent = '✓ Richtig'; fb.className = 'exam-ci-fb ok';
+                        } else {
+                            const disp = (q.id === '1c' || q.id === '2c')
+                                ? q.answer.toFixed(2).replace('.', ',') + ' %'
+                                : q.answer.toLocaleString('de-AT') + ' €';
+                            fb.textContent = '✗ ' + disp; fb.className = 'exam-ci-fb err';
+                        }
+                    }
+                }
+            } else {
+                const checked = document.querySelector('input[name="q' + q.id + '"]:checked');
+                const userVal = checked ? checked.value : null;
+                earned = (userVal === q.answer) ? q.pts : 0;
+                document.querySelectorAll('input[name="q' + q.id + '"]').forEach(r => { r.disabled = true; });
+                document.querySelectorAll('#mc-' + q.id + ' .exam-mc-opt').forEach(opt => {
+                    const inp = opt.querySelector('input[type=radio]');
+                    if (!inp) return;
+                    if (inp.value === q.answer)       opt.classList.add('show-correct');
+                    if (inp.checked && inp.value !== q.answer) opt.classList.add('wrong');
+                });
+            }
+            totalPts += earned;
+            results.push({ q, earned });
+        });
+
+        showExamResults(totalPts, results, autoSubmit);
+    }
+
+    function getExamNote(pts) {
+        if (pts >= 36) return { note: 1, text: 'Sehr gut',        color: '#059669', bg: '#f0fdf4' };
+        if (pts >= 30) return { note: 2, text: 'Gut',             color: '#0d9488', bg: '#f0fdfa' };
+        if (pts >= 25) return { note: 3, text: 'Befriedigend',    color: '#d97706', bg: '#fffbeb' };
+        if (pts >= 20) return { note: 4, text: 'Genügend',        color: '#ea580c', bg: '#fff7ed' };
+        return                 { note: 5, text: 'Nicht genügend', color: '#dc2626', bg: '#fef2f2' };
+    }
+
+    function showExamResults(totalPts, results, autoSubmit) {
+        const { note, text, color, bg } = getExamNote(totalPts);
+        const maxPts = 40;
+        const pct = Math.round(totalPts / maxPts * 100);
+
+        const AUFGABEN = [
+            { num: 1, title: 'Leasing',                       ids: ['1a','1b','1c'], max: 10 },
+            { num: 2, title: 'Ratengeschäft',                 ids: ['2a','2b','2c'], max: 10 },
+            { num: 3, title: 'KVur-Formen',                   ids: ['3a','3b','3c'], max:  6 },
+            { num: 4, title: 'Verzüge',                       ids: ['4a','4b','4c','4d'], max: 8 },
+            { num: 5, title: 'Garantie / Gewährleistung',     ids: ['5a','5b','5c'], max:  6 },
+        ];
+        const byId = {};
+        results.forEach(r => { byId[r.q.id] = r.earned; });
+
+        let rows = '';
+        AUFGABEN.forEach(a => {
+            const earned = a.ids.reduce((s, id) => s + (byId[id] || 0), 0);
+            const cls = earned === a.max ? 'pts-full' : earned === 0 ? 'pts-zero' : 'pts-part';
+            rows += '<tr><td>Aufgabe ' + a.num + ': ' + a.title + '</td>' +
+                    '<td class="pts-col ' + cls + '">' + earned + ' / ' + a.max + '</td></tr>';
+        });
+
+        const SCALE = [
+            { note:1, text:'Sehr gut',        min:36 },
+            { note:2, text:'Gut',             min:30 },
+            { note:3, text:'Befriedigend',    min:25 },
+            { note:4, text:'Genügend',        min:20 },
+            { note:5, text:'Nicht genügend',  min:0  },
+        ];
+        let scaleTr = '';
+        SCALE.forEach(s => {
+            const act = s.note === note ? ' class="active-grade"' : '';
+            scaleTr += '<tr' + act + '><td><strong>' + s.note + '</strong></td><td>' + s.text + '</td><td>ab ' + s.min + ' P.</td></tr>';
+        });
+
+        const autoLine = autoSubmit
+            ? '<p class="exam-auto-note">⏱ Zeit abgelaufen — automatisch abgegeben.</p>'
+            : '';
+
+        document.getElementById('exam-result-screen').innerHTML =
+            autoLine +
+            '<div class="exam-grade-badge" style="border-color:' + color + ';color:' + color + ';background:' + bg + '">' +
+                '<span class="g-num">' + note + '</span>' +
+                '<span class="g-text">' + text + '</span>' +
+            '</div>' +
+            '<div>' +
+                '<div class="exam-pts-big">' + totalPts + ' von ' + maxPts + ' Punkten</div>' +
+                '<div class="exam-pts-sub">' + pct + '% erreicht</div>' +
+            '</div>' +
+            '<table class="exam-res-table">' +
+                '<thead><tr><th>Aufgabe</th><th style="text-align:right">Punkte</th></tr></thead>' +
+                '<tbody>' + rows + '</tbody>' +
+            '</table>' +
+            '<div class="exam-grade-scale">' +
+                '<table>' + scaleTr + '</table>' +
+            '</div>' +
+            '<div class="exam-res-actions">' +
+                '<button class="btn btn-primary" onclick="startExamMode()">🔄 Nochmal schreiben</button>' +
+                '<button class="btn btn-secondary" onclick="closeExamMode()">✕ Schließen</button>' +
+            '</div>';
+
+        document.getElementById('exam-body').style.display = 'none';
+        document.getElementById('exam-submit-btn').style.display = 'none';
+        document.getElementById('exam-result-screen').style.display = 'flex';
+    }
+    </script>
+<script src="../../shared/hub.js"></script>
+</body>
+</html>

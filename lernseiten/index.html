@@ -1,0 +1,408 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<!--ARTIFACT-HEAD-START-->
+<title>Lernportal 2Md</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap">
+<style>
+/* Layout: dunkles Kopfband mit der Suche als Hauptwerkzeug, darunter eine Spalte (max. 980px):
+   Fächer als Karten in Fachfarbe, danach der Themenindex A–Z. Bei aktiver Suche ersetzt die Trefferliste beides. */
+:root {
+    --bg: #f1f4fb; --card: #ffffff; --ink: #0f172a; --muted: #5b6780; --line: #dfe5f1;
+    --soft: #f6f8fd; --brand: #1e3a8a; --brand-2: #3b5bdb; --dot: rgba(148,163,184,0.24);
+    --head-a: #0b1533; --head-b: #1e2f6b; --head-c: #3b2a82; --head-ink: #ffffff;
+    --mark: #fde047; --mark-ink: #1a1a1a; --focus: #f59e0b;
+    --shadow: 0 2px 8px rgba(30,58,138,0.07), 0 1px 3px rgba(30,58,138,0.04);
+    --shadow-lg: 0 10px 32px rgba(30,58,138,0.14);
+    --font: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+    --mono: 'JetBrains Mono', ui-monospace, Consolas, monospace;
+    --radius: 16px; --radius-sm: 10px;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+    --bg: #070c18; --card: #101a2e; --ink: #e5eaf5; --muted: #9aa6bd; --line: #1f2c47;
+    --soft: #0b1424; --brand: #93b0ff; --brand-2: #7c9cff; --dot: rgba(40,58,96,0.75);
+    --head-a: #040814; --head-b: #101c45; --head-c: #2a1d63; --head-ink: #ffffff;
+    --mark: #facc15; --mark-ink: #1a1a1a; --focus: #fbbf24;
+    --shadow: 0 2px 8px rgba(0,0,0,0.35); --shadow-lg: 0 10px 32px rgba(0,0,0,0.5);
+    color-scheme: dark;
+} }
+:root[data-theme="dark"] {
+    --bg: #070c18; --card: #101a2e; --ink: #e5eaf5; --muted: #9aa6bd; --line: #1f2c47;
+    --soft: #0b1424; --brand: #93b0ff; --brand-2: #7c9cff; --dot: rgba(40,58,96,0.75);
+    --head-a: #040814; --head-b: #101c45; --head-c: #2a1d63; --head-ink: #ffffff;
+    --mark: #facc15; --mark-ink: #1a1a1a; --focus: #fbbf24;
+    --shadow: 0 2px 8px rgba(0,0,0,0.35); --shadow-lg: 0 10px 32px rgba(0,0,0,0.5);
+    color-scheme: dark;
+}
+/* Fachfarbe: jede Karte bringt --fc-l / --fc-d mit, --fc ist die im Theme gültige */
+.fc { --fc: var(--fc-l); }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .fc { --fc: var(--fc-d); } }
+:root[data-theme="dark"] .fc { --fc: var(--fc-d); }
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+    font-family: var(--font); font-size: 15px; line-height: 1.55; color: var(--ink);
+    background: var(--bg);
+    background-image: radial-gradient(circle, var(--dot) 0.85px, transparent 0.85px);
+    background-size: 22px 22px; min-height: 100vh;
+}
+a { color: inherit; }
+:focus-visible { outline: 3px solid var(--focus); outline-offset: 2px; border-radius: 6px; }
+.gutter { padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
+.col { max-width: 980px; margin: 0 auto; }
+
+/* ── Kopf ── */
+.top { background: linear-gradient(135deg, var(--head-a) 0%, var(--head-b) 55%, var(--head-c) 100%); color: var(--head-ink); padding-block: 1.6rem 1.5rem; position: relative; overflow: hidden; }
+.top::after { content: 'Σ § ⚡'; position: absolute; right: 2rem; top: 0.6rem; font-size: 3.4rem; font-style: italic; letter-spacing: 0.5rem; opacity: 0.07; pointer-events: none; white-space: nowrap; }
+.top-row { display: flex; align-items: flex-start; gap: 1rem; }
+.top h1 { font-size: 2.2rem; font-weight: 800; letter-spacing: -0.7px; line-height: 1.15; text-wrap: balance; }
+.top .sub { font-size: 0.9rem; opacity: 0.75; margin-top: 0.3rem; font-variant-numeric: tabular-nums; }
+.theme-btn { margin-left: auto; flex: none; background: rgba(255,255,255,0.12); border: 1px solid rgba(255,255,255,0.22); color: var(--head-ink); font: 600 0.78rem var(--font); padding: 0.4rem 0.8rem; border-radius: 9px; cursor: pointer; position: relative; z-index: 1; }
+.theme-btn:hover { background: rgba(255,255,255,0.2); }
+
+.search { margin-top: 1.15rem; position: relative; }
+.search input { width: 100%; font: 500 1.05rem var(--font); color: var(--ink); background: var(--card); border: 2px solid transparent; border-radius: 14px; padding: 0.95rem 6.2rem 0.95rem 3rem; box-shadow: var(--shadow-lg); }
+.search input::-webkit-search-cancel-button { display: none; }
+.search input:focus { outline: none; border-color: var(--focus); }
+.search input::placeholder { color: var(--muted); }
+.search svg { position: absolute; left: 1rem; top: 50%; transform: translateY(-50%); width: 1.2rem; height: 1.2rem; stroke: var(--muted); fill: none; stroke-width: 2.2; stroke-linecap: round; }
+.search .kbd, .search .clear { position: absolute; right: 0.9rem; top: 50%; transform: translateY(-50%); }
+.kbd { font: 500 0.7rem var(--mono); color: var(--muted); border: 1px solid var(--line); background: var(--soft); border-radius: 6px; padding: 0.2rem 0.45rem; pointer-events: none; }
+.clear { font: 600 0.78rem var(--font); color: var(--muted); background: var(--soft); border: 1px solid var(--line); border-radius: 8px; padding: 0.3rem 0.6rem; cursor: pointer; }
+
+/* ── Filterleiste ── */
+.bar { position: sticky; top: env(safe-area-inset-top, 0px); z-index: 20; background: var(--card); border-bottom: 1px solid var(--line); box-shadow: 0 1px 12px rgba(30,58,138,0.06); }
+.bar .col { display: flex; align-items: center; gap: 0.5rem; padding-block: 0.55rem; flex-wrap: wrap; }
+.bar-label { font-size: 0.7rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.07em; color: var(--muted); margin-right: 0.2rem; }
+.chip { font: 600 0.8rem var(--font); color: var(--ink); background: var(--soft); border: 1px solid var(--line); border-radius: 999px; padding: 0.32rem 0.8rem; cursor: pointer; display: inline-flex; align-items: center; gap: 0.4rem; }
+.chip i { width: 0.55rem; height: 0.55rem; border-radius: 50%; background: var(--fc, var(--brand-2)); }
+.chip[aria-pressed="true"] { background: var(--ink); color: var(--card); border-color: var(--ink); }
+.count { margin-left: auto; font-size: 0.78rem; color: var(--muted); font-variant-numeric: tabular-nums; }
+
+main { padding-block: 1.6rem 4rem; }
+.sec-title { font-size: 0.74rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; color: var(--muted); margin: 0 0 0.8rem; }
+section + section { margin-top: 2.4rem; }
+
+/* ── Fächer ── */
+.faecher { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1rem; }
+.fach { background: var(--card); border: 1px solid var(--line); border-radius: var(--radius); box-shadow: var(--shadow); overflow: hidden; display: flex; flex-direction: column; min-width: 0; }
+.fach-head { display: flex; gap: 0.85rem; align-items: center; padding: 1rem 1.1rem; border-bottom: 1px solid var(--line); background: linear-gradient(135deg, color-mix(in srgb, var(--fc) 11%, var(--card)), var(--card)); }
+.mono { flex: none; min-width: 3rem; height: 3rem; padding: 0 0.5rem; border-radius: 12px; background: var(--fc); color: var(--card); font: 600 0.92rem var(--mono); display: grid; place-items: center; letter-spacing: 0.02em; }
+.fach-name { font-size: 1.06rem; font-weight: 700; line-height: 1.25; }
+.fach-info { font-size: 0.8rem; color: var(--muted); }
+.seiten { list-style: none; display: flex; flex-direction: column; }
+.seite { display: grid; grid-template-columns: 1fr auto; gap: 0.2rem 0.75rem; padding: 0.8rem 1.1rem; text-decoration: none; border-top: 1px solid var(--line); }
+.seiten li:first-child .seite { border-top: 0; }
+.seite:hover { background: var(--soft); }
+.seite-titel { font-weight: 600; color: var(--fc); min-width: 0; }
+.seite-info { grid-column: 1 / -1; font-size: 0.8rem; color: var(--muted); }
+.art { font: 600 0.66rem var(--mono); text-transform: uppercase; letter-spacing: 0.05em; color: var(--fc); border: 1px solid color-mix(in srgb, var(--fc) 35%, transparent); border-radius: 6px; padding: 0.12rem 0.4rem; align-self: start; white-space: nowrap; }
+.seite-meta { grid-column: 1 / -1; font-size: 0.74rem; color: var(--muted); font-variant-numeric: tabular-nums; }
+
+.recent { display: flex; flex-wrap: wrap; gap: 0.5rem; }
+.recent a { text-decoration: none; font-size: 0.84rem; font-weight: 500; background: var(--card); border: 1px solid var(--line); border-left: 4px solid var(--fc); border-radius: 8px; padding: 0.4rem 0.75rem; }
+.recent a:hover { background: var(--soft); }
+
+/* ── Themenindex ── */
+.az { display: flex; flex-wrap: wrap; gap: 0.25rem; margin-bottom: 1rem; }
+.az a, .az span { font: 600 0.8rem var(--mono); width: 1.9rem; height: 1.9rem; display: grid; place-items: center; border-radius: 7px; text-decoration: none; }
+.az a { background: var(--card); border: 1px solid var(--line); color: var(--brand); }
+.az a:hover { background: var(--ink); color: var(--card); }
+.az span { color: var(--line); }
+.letter { display: grid; grid-template-columns: 2.6rem 1fr; gap: 0.5rem; padding: 0.7rem 0; border-top: 1px solid var(--line); scroll-margin-top: 4.5rem; }
+.letter > b { font: 800 1.5rem var(--font); color: var(--brand); line-height: 1.2; }
+.letter ul { list-style: none; columns: 2 17rem; column-gap: 1.6rem; min-width: 0; }
+.letter li { break-inside: avoid; padding: 0.16rem 0; }
+.letter a { text-decoration: none; display: flex; gap: 0.5rem; align-items: baseline; }
+.letter a:hover .t { text-decoration: underline; }
+.letter .t { font-size: 0.9rem; min-width: 0; overflow-wrap: anywhere; }
+.letter .tag { font: 600 0.62rem var(--mono); color: var(--fc); flex: none; }
+
+/* ── Treffer ── */
+.results { display: flex; flex-direction: column; gap: 0.6rem; }
+.res { display: block; text-decoration: none; background: var(--card); border: 1px solid var(--line); border-left: 4px solid var(--fc); border-radius: var(--radius-sm); padding: 0.75rem 1rem; box-shadow: var(--shadow); }
+.res:hover, .res.sel { border-color: var(--fc); background: var(--soft); }
+.res.sel { outline: 2px solid var(--fc); }
+.res-top { display: flex; gap: 0.6rem; align-items: baseline; flex-wrap: wrap; }
+.res-h { font-weight: 700; font-size: 0.98rem; min-width: 0; overflow-wrap: anywhere; }
+.res-path { font-size: 0.76rem; color: var(--muted); }
+.res-tag { font: 600 0.64rem var(--mono); color: var(--card); background: var(--fc); border-radius: 5px; padding: 0.1rem 0.4rem; flex: none; }
+.res-snip { font-size: 0.85rem; color: var(--muted); margin-top: 0.25rem; overflow-wrap: anywhere; }
+mark { background: var(--mark); color: var(--mark-ink); border-radius: 3px; padding: 0 2px; }
+.empty { background: var(--card); border: 1px dashed var(--line); border-radius: var(--radius); padding: 1.6rem; text-align: center; color: var(--muted); }
+.empty button { font: 600 0.82rem var(--font); margin: 0.25rem; padding: 0.3rem 0.7rem; border-radius: 999px; border: 1px solid var(--line); background: var(--soft); color: var(--ink); cursor: pointer; }
+footer { margin-top: 2.5rem; font-size: 0.78rem; color: var(--muted); text-align: center; }
+@media (max-width: 600px) {
+    .top h1 { font-size: 1.7rem; } .top::after { display: none; } .kbd { display: none; }
+    .search input { padding-right: 1rem; font-size: 1rem; } .search.has-q input { padding-right: 5.5rem; }
+    .letter { grid-template-columns: 1.8rem 1fr; } .count { width: 100%; margin-left: 0; }
+}
+@media (prefers-reduced-motion: no-preference) { .fach, .res { transition: box-shadow .18s, background .18s; } .fach:hover { box-shadow: var(--shadow-lg); } }
+</style>
+<!--ARTIFACT-HEAD-END-->
+</head>
+<body>
+<!--ARTIFACT-BODY-START-->
+<div class="top gutter">
+    <div class="col">
+        <div class="top-row">
+            <div>
+                <h1>Lernportal 2Md</h1>
+                <p class="sub" id="stats">Alle Fächer, alle Lernseiten</p>
+            </div>
+            <button class="theme-btn" id="theme-btn" type="button">Dunkel</button>
+        </div>
+        <div class="search" id="search-box">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.8-3.8"/></svg>
+            <input type="search" id="q" autocomplete="off" spellcheck="false" placeholder="In allen Fächern suchen, z. B. Resonanz, Leasing, Sinus" aria-label="In allen Fächern suchen">
+            <span class="kbd" id="kbd">Strg K</span>
+            <button class="clear" id="clear" type="button" hidden>Löschen</button>
+        </div>
+    </div>
+</div>
+
+<div class="bar gutter">
+    <div class="col">
+        <span class="bar-label">Fach</span>
+        <span id="chips" style="display:contents"></span>
+        <span class="count" id="count" aria-live="polite"></span>
+    </div>
+</div>
+
+<main class="gutter">
+<div class="col">
+    <div id="view-home">
+        <section id="recent-sec" hidden>
+            <h2 class="sec-title">Zuletzt geöffnet</h2>
+            <div class="recent" id="recent"></div>
+        </section>
+        <section>
+            <h2 class="sec-title">Fächer</h2>
+            <div class="faecher" id="faecher"></div>
+        </section>
+        <section>
+            <h2 class="sec-title">Themenindex A–Z</h2>
+            <div class="az" id="az"></div>
+            <div id="index"></div>
+        </section>
+    </div>
+    <div id="view-search" hidden>
+        <h2 class="sec-title" id="res-title">Treffer</h2>
+        <div class="results" id="results"></div>
+    </div>
+    <footer id="foot"></footer>
+</div>
+</main>
+
+<script src="shared/daten.js"></script>
+<script>
+(function () {
+'use strict';
+var D = window.LERN || { faecher: [], sektionen: [], stand: '' };
+var $ = function (id) { return document.getElementById(id); };
+var esc = function (s) { return String(s).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); };
+// Kleinschreibung, ä→a, ß→ss: gleiche Länge wie das Original bleibt bis auf ß erhalten
+var fold = function (s) { return s.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/ß/g, 'ss'); };
+var plain = function (h) { return h.replace(/^[^\p{L}\p{N}]+/u, '').trim(); };
+var store = { get: function (k, d) { try { return JSON.parse(localStorage.getItem(k)) || d; } catch (e) { return d; } },
+              set: function (k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) {} } };
+
+var fach = {}, seite = {};
+D.faecher.forEach(function (f) { fach[f.id] = f; f.seiten.forEach(function (s) { seite[s.datei] = { s: s, f: f }; }); });
+var fc = function (f) { return 'style="--fc-l:' + f.farbe + ';--fc-d:' + f.farbeDunkel + '"'; };
+D.sektionen.forEach(function (x) { x.H = fold(x.h); x.K = fold(x.k || ''); x.T = fold(x.t); });
+
+function link(x, q) {
+    var j = { q: q || '', at: x.h, k: x.k || '' };
+    return x.d + '#hub:' + encodeURIComponent(JSON.stringify(j));
+}
+// Sprungziel zusätzlich im sessionStorage ablegen (falls der #-Teil unterwegs verloren geht) + Verlauf merken
+document.addEventListener('click', function (e) {
+    var a = e.target.closest('a[data-d]');
+    if (!a) return;
+    try { sessionStorage.setItem('lern-jump', JSON.stringify({ p: a.dataset.d.split('/').pop(), q: a.dataset.q || '', at: a.dataset.at || '', k: a.dataset.k || '', ts: Date.now() })); } catch (err) {}
+    var r = store.get('lern-recent', []).filter(function (d) { return d !== a.dataset.d; });
+    r.unshift(a.dataset.d); store.set('lern-recent', r.slice(0, 4));
+});
+
+/* ── Theme ── */
+(function () {
+    var root = document.documentElement, btn = $('theme-btn');
+    var isDark = function () { var t = root.getAttribute('data-theme'); return t ? t === 'dark' : matchMedia('(prefers-color-scheme: dark)').matches; };
+    var label = function () { btn.textContent = isDark() ? 'Hell' : 'Dunkel'; };
+    var saved = store.get('lern-theme', null);
+    if (saved) root.setAttribute('data-theme', saved);
+    label();
+    btn.addEventListener('click', function () { var t = isDark() ? 'light' : 'dark'; root.setAttribute('data-theme', t); store.set('lern-theme', t); label(); });
+})();
+
+/* ── Startansicht ── */
+var active = store.get('lern-fach', 'alle');
+if (active !== 'alle' && !fach[active]) active = 'alle';
+
+function renderChips() {
+    var h = '<button class="chip" type="button" data-f="alle" aria-pressed="' + (active === 'alle') + '">Alle</button>';
+    D.faecher.forEach(function (f) {
+        h += '<button class="chip fc" type="button" ' + fc(f) + ' data-f="' + f.id + '" aria-pressed="' + (active === f.id) + '"><i></i>' + esc(f.kurz) + '</button>';
+    });
+    $('chips').innerHTML = h;
+}
+function renderFaecher() {
+    $('faecher').innerHTML = D.faecher.filter(function (f) { return active === 'alle' || f.id === active; }).map(function (f) {
+        return '<article class="fach fc" ' + fc(f) + '><div class="fach-head"><div class="mono">' + esc(f.kurz) + '</div><div><div class="fach-name">' + esc(f.name) +
+            '</div><div class="fach-info">' + esc(f.info) + '</div></div></div><ul class="seiten">' +
+            f.seiten.map(function (s) {
+                return '<li><a class="seite" href="' + s.datei + '" data-d="' + s.datei + '"><span class="seite-titel">' + esc(s.titel) + '</span><span class="art">' + esc(s.art) +
+                    '</span><span class="seite-info">' + esc(s.info) + '</span><span class="seite-meta">' + (s.themen || 0) + ' Abschnitte im Index</span></a></li>';
+            }).join('') + '</ul></article>';
+    }).join('');
+}
+function renderRecent() {
+    var r = store.get('lern-recent', []).filter(function (d) { return seite[d]; });
+    $('recent-sec').hidden = !r.length;
+    $('recent').innerHTML = r.map(function (d) { var p = seite[d]; return '<a class="fc" ' + fc(p.f) + ' href="' + d + '" data-d="' + d + '">' + esc(p.f.kurz + ' · ' + p.s.titel) + '</a>'; }).join('');
+}
+function renderIndex() {
+    // Hauptabschnitte immer; Unterabschnitte nur, wenn ihr Titel im ganzen Portal einmalig ist
+    var seen = {};
+    D.sektionen.forEach(function (x) { var k = fold(plain(x.h)); seen[k] = (seen[k] || 0) + 1; });
+    var list = D.sektionen.filter(function (x) {
+        if (active !== 'alle' && x.f !== active) return false;
+        var p = plain(x.h);
+        return p.length > 2 && (!x.k || seen[fold(p)] === 1);
+    }).map(function (x) { return { x: x, p: plain(x.h) }; });
+    list.sort(function (a, b) { return a.p.localeCompare(b.p, 'de', { sensitivity: 'base', numeric: true }); });
+    var groups = {};
+    list.forEach(function (e) { var c = fold(e.p.charAt(0)).toUpperCase(); if (!/[A-Z]/.test(c)) c = '#'; (groups[c] = groups[c] || []).push(e); });
+    var letters = '#ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('');
+    $('az').innerHTML = letters.map(function (c) { return groups[c] ? '<a href="#idx-' + (c === '#' ? 'num' : c) + '">' + c + '</a>' : '<span>' + c + '</span>'; }).join('');
+    $('index').innerHTML = letters.filter(function (c) { return groups[c]; }).map(function (c) {
+        return '<div class="letter" id="idx-' + (c === '#' ? 'num' : c) + '"><b>' + c + '</b><ul>' + groups[c].map(function (e) {
+            var x = e.x, f = fach[x.f];
+            return '<li><a class="fc" ' + fc(f) + ' href="' + link(x) + '" data-d="' + x.d + '" data-at="' + esc(x.h) + '" data-k="' + esc(x.k || '') + '"><span class="t">' + esc(e.p) + '</span><span class="tag">' + esc(f.kurz) + '</span></a></li>';
+        }).join('') + '</ul></div>';
+    }).join('');
+    return list.length;
+}
+// Buchstabenleiste: im Dokument scrollen statt den Hash zu ändern
+$('az').addEventListener('click', function (e) {
+    var a = e.target.closest('a'); if (!a) return;
+    e.preventDefault();
+    var el = document.getElementById(a.getAttribute('href').slice(1));
+    if (el) el.scrollIntoView({ block: 'start' });
+});
+
+/* ── Suche ── */
+var sel = -1, lastHits = [];
+function search(q) {
+    var words = fold(q).split(/\s+/).filter(Boolean);
+    var hits = [];
+    D.sektionen.forEach(function (x) {
+        if (active !== 'alle' && x.f !== active) return;
+        var score = 0;
+        for (var i = 0; i < words.length; i++) {
+            var w = words[i], inH = x.H.indexOf(w), inK = x.K.indexOf(w), inT = x.T.indexOf(w);
+            if (inH < 0 && inK < 0 && inT < 0) return;
+            if (inH >= 0) score += inH === 0 || /[^a-z0-9]/.test(x.H.charAt(inH - 1)) ? 12 : 8;
+            if (inK >= 0) score += 3;
+            if (inT >= 0) score += 2 + Math.min(3, x.T.split(w).length - 1);
+        }
+        if (!x.k) score += 2;
+        hits.push({ x: x, score: score });
+    });
+    hits.sort(function (a, b) { return b.score - a.score; });
+    return { hits: hits, words: words };
+}
+function markUp(text, words) {
+    // Treffer auf der gefalteten Fassung finden, im Original markieren (ß verschiebt Positionen → zeichenweise abbilden)
+    var map = [], folded = '';
+    for (var i = 0; i < text.length; i++) { var f = fold(text.charAt(i)); for (var k = 0; k < f.length; k++) map.push(i); folded += f; }
+    var spans = [];
+    words.forEach(function (w) { var p = -1; while ((p = folded.indexOf(w, p + 1)) >= 0) spans.push([map[p], map[p + w.length - 1] + 1]); });
+    spans.sort(function (a, b) { return a[0] - b[0]; });
+    var out = '', pos = 0;
+    spans.forEach(function (s) { if (s[0] < pos) return; out += esc(text.slice(pos, s[0])) + '<mark>' + esc(text.slice(s[0], s[1])) + '</mark>'; pos = s[1]; });
+    return out + esc(text.slice(pos));
+}
+function snippet(x, words) {
+    var at = -1;
+    words.forEach(function (w) { var p = x.T.indexOf(w); if (p >= 0 && (at < 0 || p < at)) at = p; });
+    var from = Math.max(0, at - 70);
+    var s = x.t.slice(from, from + 210);
+    return (from > 0 ? '… ' : '') + markUp(s, words) + (from + 210 < x.t.length ? ' …' : '');
+}
+function renderSearch(q) {
+    var r = search(q), shown = r.hits.slice(0, 60);
+    lastHits = shown; sel = -1;
+    $('res-title').textContent = 'Treffer für „' + q.trim() + '“';
+    $('count').textContent = r.hits.length ? r.hits.length + (r.hits.length === 1 ? ' Treffer' : ' Treffer') + (r.hits.length > 60 ? ', die besten 60 angezeigt' : '') : 'Keine Treffer';
+    if (!shown.length) {
+        var tipps = ['Resonanz', 'Leasing', 'Blindleistung', 'Pythagoras', 'Zahlungsverzug'];
+        $('results').innerHTML = '<div class="empty"><p>Nichts gefunden' + (active !== 'alle' ? ' in ' + esc(fach[active].name) + '. Der Fachfilter ist aktiv.' : '. Prüfe die Schreibweise oder suche nach einem kürzeren Wort.') + '</p><p style="margin-top:.6rem">' +
+            (active !== 'alle' ? '<button type="button" data-all="1">In allen Fächern suchen</button>' : tipps.map(function (t) { return '<button type="button" data-tip="' + t + '">' + t + '</button>'; }).join('')) + '</p></div>';
+        return;
+    }
+    $('results').innerHTML = shown.map(function (h, i) {
+        var x = h.x, p = seite[x.d];
+        return '<a class="res fc" ' + fc(p.f) + ' id="res-' + i + '" href="' + link(x, q.trim()) + '" data-d="' + x.d + '" data-q="' + esc(q.trim()) + '" data-at="' + esc(x.h) + '" data-k="' + esc(x.k || '') + '">' +
+            '<div class="res-top"><span class="res-tag">' + esc(p.f.kurz) + '</span><span class="res-h">' + markUp(x.h, r.words) + '</span></div>' +
+            '<div class="res-path">' + esc(p.s.titel) + (x.k ? ' › ' + esc(plain(x.k)) : '') + '</div>' +
+            (x.t ? '<div class="res-snip">' + snippet(x, r.words) + '</div>' : '') + '</a>';
+    }).join('');
+}
+function update() {
+    var q = $('q').value, has = q.trim().length > 0;
+    $('view-home').hidden = has; $('view-search').hidden = !has;
+    $('clear').hidden = !has; $('kbd').hidden = has;
+    $('search-box').classList.toggle('has-q', has);
+    renderChips();
+    if (has) renderSearch(q);
+    else {
+        renderRecent(); renderFaecher();
+        var n = renderIndex();
+        $('count').textContent = n + ' Einträge im Index';
+    }
+}
+function move(d) {
+    if (!lastHits.length) return;
+    sel = (sel + d + lastHits.length) % lastHits.length;
+    document.querySelectorAll('.res.sel').forEach(function (e) { e.classList.remove('sel'); });
+    var el = $('res-' + sel); el.classList.add('sel'); el.scrollIntoView({ block: 'nearest' });
+}
+var timer;
+$('q').addEventListener('input', function () { clearTimeout(timer); timer = setTimeout(update, 90); });
+$('q').addEventListener('keydown', function (e) {
+    if (e.key === 'ArrowDown') { e.preventDefault(); move(1); }
+    else if (e.key === 'ArrowUp') { e.preventDefault(); move(-1); }
+    else if (e.key === 'Enter') { var el = $('res-' + (sel < 0 ? 0 : sel)); if (el && !$('view-search').hidden) el.click(); }
+    else if (e.key === 'Escape') { $('q').value = ''; update(); }
+});
+$('clear').addEventListener('click', function () { $('q').value = ''; update(); $('q').focus(); });
+$('chips').addEventListener('click', function (e) {
+    var b = e.target.closest('.chip'); if (!b) return;
+    active = b.dataset.f; store.set('lern-fach', active); update();
+});
+$('results').addEventListener('click', function (e) {
+    var b = e.target.closest('button'); if (!b) return;
+    if (b.dataset.all) { active = 'alle'; store.set('lern-fach', active); }
+    if (b.dataset.tip) $('q').value = b.dataset.tip;
+    update();
+});
+document.addEventListener('keydown', function (e) {
+    if ((e.key === 'k' && (e.ctrlKey || e.metaKey)) || (e.key === '/' && document.activeElement !== $('q'))) { e.preventDefault(); $('q').focus(); $('q').select(); }
+});
+window.addEventListener('pageshow', renderRecent);
+
+var nSeiten = D.faecher.reduce(function (n, f) { return n + f.seiten.length; }, 0);
+$('stats').textContent = D.faecher.length + ' Fächer · ' + nSeiten + ' Seiten · ' + D.sektionen.length + ' durchsuchbare Abschnitte';
+$('foot').textContent = 'Index-Stand ' + D.stand.split('-').reverse().join('.');
+update();
+})();
+</script>
+<!--ARTIFACT-BODY-END-->
+</body>
+</html>
