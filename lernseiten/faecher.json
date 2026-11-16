@@ -11,13 +11,15 @@
         "datei": "faecher/mathematik/mathematik-2md.html",
         "titel": "Mathematik 2Md",
         "art": "Lernseite",
-        "info": "Lernzusammenfassungen, Übungsaufgaben, Lernmodus und Probeschularbeit"
+        "info": "Lernzusammenfassungen, Übungsaufgaben, Lernmodus und Probeschularbeit",
+        "jahr": 2
       },
       {
         "datei": "faecher/mathematik/probeschularbeit.html",
         "titel": "Probeschularbeit Mathematik 2Md",
         "art": "Probearbeit",
-        "info": "10 Aufgaben mit aufklappbaren Lösungen, Kurzformeln und typischen Fehlern"
+        "info": "10 Aufgaben mit aufklappbaren Lösungen, Kurzformeln und typischen Fehlern",
+        "jahr": 2
       }
     ]
   },
@@ -33,25 +35,29 @@
         "datei": "faecher/aee/kompensation.html",
         "titel": "Kompensation — RLC-Schaltungen",
         "art": "Lernseite",
-        "info": "Reihen- und Parallelschaltung, Resonanz, Blindleistungskompensation"
+        "info": "Reihen- und Parallelschaltung, Resonanz, Blindleistungskompensation",
+        "jahr": 2
       },
       {
         "datei": "faecher/aee/test-2a-loesungen.html",
         "titel": "Test 2a — Lösungen",
         "art": "Testlösung",
-        "info": "Musterlösung zum Test vom 19.06.2026, 8 Aufgaben"
+        "info": "Musterlösung zum Test vom 19.06.2026, 8 Aufgaben",
+        "jahr": 2
       },
       {
         "datei": "faecher/aee/formeluebersicht.html",
         "titel": "AEE2 — Formelübersicht",
         "art": "Formeln",
-        "info": "Alle Formeln der Wechselstromtechnik in 8 Abschnitten"
+        "info": "Alle Formeln der Wechselstromtechnik in 8 Abschnitten",
+        "jahr": 2
       },
       {
         "datei": "faecher/aee/merksaetze.html",
         "titel": "AEE2 — Merksätze & Eselsbrücken",
         "art": "Merkhilfe",
-        "info": "13 Kompaktkarten zum Auswendiglernen"
+        "info": "13 Kompaktkarten zum Auswendiglernen",
+        "jahr": 2
       }
     ]
   },
@@ -67,7 +73,8 @@
         "datei": "faecher/awl/awl-lernseite.html",
         "titel": "AWL — Allgemeines Wirtschaftsrecht",
         "art": "Lernseite",
-        "info": "Schularbeitenstoff mit Lernmodus, Formeln und Probeschularbeit"
+        "info": "Schularbeitenstoff mit Lernmodus, Formeln und Probeschularbeit",
+        "jahr": 2
       }
     ]
   },
@@ -83,13 +90,15 @@
         "datei": "faecher/met/lernuebersicht.html",
         "titel": "MET — Lernübersicht",
         "art": "Übersicht",
-        "info": "Leitungen, Sicherungen und Schutzmaßnahmen, Unterrichtseinheiten 7–21"
+        "info": "Leitungen, Sicherungen und Schutzmaßnahmen, Unterrichtseinheiten 7–21",
+        "jahr": 2
       },
       {
         "datei": "faecher/met/met-test2-schutzmassnahmen.html",
         "titel": "MET — Test 2: Schutzmaßnahmen",
         "art": "Lernseite",
-        "info": "Teststoff zu Schutzmaßnahmen und Überstromschutz"
+        "info": "Teststoff zu Schutzmaßnahmen und Überstromschutz",
+        "jahr": 2
       }
     ]
   },
@@ -105,7 +114,8 @@
         "datei": "faecher/cnc/cnc-drehen.html",
         "titel": "CNC-Drehen — Lernseite",
         "art": "Lernseite",
-        "info": "Grundlagen und Programmierung beim CNC-Drehen"
+        "info": "Grundlagen und Programmierung beim CNC-Drehen",
+        "jahr": 2
       }
     ]
   }

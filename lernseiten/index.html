@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <!--ARTIFACT-HEAD-START-->
-<title>Lernportal 2Md</title>
+<title>Lernportal</title>
 <meta name="claude:viewport-fit-sides" content="cover">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap">
@@ -81,6 +81,11 @@ a { color: inherit; }
 .chip { font: 600 0.8rem var(--font); color: var(--ink); background: var(--soft); border: 1px solid var(--line); border-radius: 999px; padding: 0.32rem 0.8rem; cursor: pointer; display: inline-flex; align-items: center; gap: 0.4rem; }
 .chip i { width: 0.55rem; height: 0.55rem; border-radius: 50%; background: var(--fc, var(--brand-2)); }
 .chip[aria-pressed="true"] { background: var(--ink); color: var(--card); border-color: var(--ink); }
+.bar-sep { width: 1px; align-self: stretch; background: var(--line); margin: 0 0.3rem; }
+.chip small { font: 500 0.68rem var(--mono); opacity: 0.75; }
+.chip .now { font: 600 0.6rem var(--mono); text-transform: uppercase; letter-spacing: 0.05em; background: var(--focus); color: var(--mark-ink); border-radius: 4px; padding: 0.05rem 0.3rem; }
+.hinweis { background: var(--card); border: 1px solid var(--line); border-left: 4px solid var(--focus); border-radius: var(--radius-sm); padding: 0.7rem 1rem; margin-bottom: 1.6rem; font-size: 0.88rem; }
+.jtag { font: 600 0.62rem var(--mono); color: var(--muted); border: 1px solid var(--line); border-radius: 5px; padding: 0.05rem 0.35rem; flex: none; white-space: nowrap; }
 .count { margin-left: auto; font-size: 0.78rem; color: var(--muted); font-variant-numeric: tabular-nums; }
 
 main { padding-block: 1.6rem 4rem; }
@@ -151,7 +156,7 @@ footer { margin-top: 2.5rem; font-size: 0.78rem; color: var(--muted); text-align
     <div class="col">
         <div class="top-row">
             <div>
-                <h1>Lernportal 2Md</h1>
+                <h1>Lernportal</h1>
                 <p class="sub" id="stats">Alle Fächer, alle Lernseiten</p>
             </div>
             <button class="theme-btn" id="theme-btn" type="button">Dunkel</button>
@@ -167,6 +172,9 @@ footer { margin-top: 2.5rem; font-size: 0.78rem; color: var(--muted); text-align
 
 <div class="bar gutter">
     <div class="col">
+        <span class="bar-label">Jahr</span>
+        <span id="jahre" style="display:contents"></span>
+        <span class="bar-sep" aria-hidden="true"></span>
         <span class="bar-label">Fach</span>
         <span id="chips" style="display:contents"></span>
         <span class="count" id="count" aria-live="polite"></span>
@@ -176,6 +184,7 @@ footer { margin-top: 2.5rem; font-size: 0.78rem; color: var(--muted); text-align
 <main class="gutter">
 <div class="col">
     <div id="view-home">
+        <div class="hinweis" id="hinweis" hidden></div>
         <section id="recent-sec" hidden>
             <h2 class="sec-title">Zuletzt geöffnet</h2>
             <div class="recent" id="recent"></div>
@@ -241,23 +250,51 @@ document.addEventListener('click', function (e) {
 })();
 
 /* ── Startansicht ── */
+/* ── Schuljahre: jedes Jahr hat seinen eigenen Index; das aktuelle ist Standard ── */
+var JAHRE = D.jahre || [], AKT = D.aktuell;
+var klasse = function (nr) { for (var i = 0; i < JAHRE.length; i++) if (JAHRE[i].nr === nr) return JAHRE[i].klasse; return ''; };
+var seitenIm = function (nr) { var n = 0; D.faecher.forEach(function (f) { f.seiten.forEach(function (s) { if (nr === 'alle' || s.jahr === nr) n++; }); }); return n; };
+// Gemerkte Auswahl verfällt, sobald ein neues Schuljahr beginnt oder das aktuelle Jahr seine ersten Seiten bekommt
+var gemerkt = store.get('lern-jahr', null), ausweich = false;
+var jahr = gemerkt && gemerkt.akt === AKT && !(gemerkt.leer && seitenIm(AKT)) ? gemerkt.j : null;
+var merkeJahr = function () { store.set('lern-jahr', { j: jahr, akt: AKT, leer: !seitenIm(AKT) }); };
+if (jahr !== 'alle' && !JAHRE.some(function (j) { return j.nr === jahr; })) jahr = null;
+if (jahr === null) {
+    jahr = AKT;
+    // Solange das aktuelle Jahr noch leer ist, das neueste Jahr mit Seiten zeigen
+    if (!seitenIm(AKT)) { var voll = JAHRE.filter(function (j) { return seitenIm(j.nr); })[0]; if (voll) { jahr = voll.nr; ausweich = true; } }
+}
+var imJahr = function (j) { return jahr === 'alle' || j === jahr; };
+var fachHat = function (f) { return f.seiten.some(function (s) { return imJahr(s.jahr); }); };
+function renderJahre() {
+    var h = JAHRE.map(function (j) {
+        return '<button class="chip" type="button" data-j="' + j.nr + '" aria-pressed="' + (jahr === j.nr) + '">' + j.nr + '. Jahr · ' + esc(j.klasse) +
+            (j.nr === AKT ? ' <span class="now">aktuell</span>' : '') + ' <small>' + seitenIm(j.nr) + '</small></button>';
+    }).join('');
+    $('jahre').innerHTML = h + '<button class="chip" type="button" data-j="alle" aria-pressed="' + (jahr === 'alle') + '">Alle Jahre</button>';
+    var leer = jahr !== 'alle' && !seitenIm(jahr);
+    $('hinweis').hidden = !(ausweich || leer);
+    if (ausweich) $('hinweis').textContent = 'Für das ' + AKT + '. Jahr (' + klasse(AKT) + ') gibt es noch keine Lernseiten. Du siehst deshalb das ' + jahr + '. Jahr (' + klasse(jahr) + ').';
+    else if (leer) $('hinweis').textContent = 'Für das ' + jahr + '. Jahr (' + klasse(jahr) + ') gibt es noch keine Lernseiten. Neue Seiten erscheinen hier automatisch.';
+}
 var active = store.get('lern-fach', 'alle');
 if (active !== 'alle' && !fach[active]) active = 'alle';
 
 function renderChips() {
     var h = '<button class="chip" type="button" data-f="alle" aria-pressed="' + (active === 'alle') + '">Alle</button>';
-    D.faecher.forEach(function (f) {
+    if (active !== 'alle' && !fachHat(fach[active])) active = 'alle';
+    D.faecher.filter(fachHat).forEach(function (f) {
         h += '<button class="chip fc" type="button" ' + fc(f) + ' data-f="' + f.id + '" aria-pressed="' + (active === f.id) + '"><i></i>' + esc(f.kurz) + '</button>';
     });
     $('chips').innerHTML = h;
 }
 function renderFaecher() {
-    $('faecher').innerHTML = D.faecher.filter(function (f) { return active === 'alle' || f.id === active; }).map(function (f) {
+    $('faecher').innerHTML = D.faecher.filter(function (f) { return fachHat(f) && (active === 'alle' || f.id === active); }).map(function (f) {
         return '<article class="fach fc" ' + fc(f) + '><div class="fach-head"><div class="mono">' + esc(f.kurz) + '</div><div><div class="fach-name">' + esc(f.name) +
             '</div><div class="fach-info">' + esc(f.info) + '</div></div></div><ul class="seiten">' +
-            f.seiten.map(function (s) {
+            f.seiten.filter(function (s) { return imJahr(s.jahr); }).map(function (s) {
                 return '<li><a class="seite" href="' + s.datei + '" data-d="' + s.datei + '"><span class="seite-titel">' + esc(s.titel) + '</span><span class="art">' + esc(s.art) +
-                    '</span><span class="seite-info">' + esc(s.info) + '</span><span class="seite-meta">' + (s.themen || 0) + ' Abschnitte im Index</span></a></li>';
+                    '</span><span class="seite-info">' + esc(s.info) + '</span><span class="seite-meta">' + (s.themen || 0) + ' Abschnitte im Index' + (jahr === 'alle' ? ' · ' + s.jahr + '. Jahr (' + esc(klasse(s.jahr)) + ')' : '') + '</span></a></li>';
             }).join('') + '</ul></article>';
     }).join('');
 }
@@ -271,7 +308,7 @@ function renderIndex() {
     var seen = {};
     D.sektionen.forEach(function (x) { var k = fold(plain(x.h)); seen[k] = (seen[k] || 0) + 1; });
     var list = D.sektionen.filter(function (x) {
-        if (active !== 'alle' && x.f !== active) return false;
+        if (!imJahr(x.j) || (active !== 'alle' && x.f !== active)) return false;
         var p = plain(x.h);
         return p.length > 2 && (!x.k || seen[fold(p)] === 1);
     }).map(function (x) { return { x: x, p: plain(x.h) }; });
@@ -298,11 +335,11 @@ $('az').addEventListener('click', function (e) {
 
 /* ── Suche ── */
 var sel = -1, lastHits = [];
-function search(q) {
+function search(q, jedesJahr) {
     var words = fold(q).split(/\s+/).filter(Boolean);
     var hits = [];
     D.sektionen.forEach(function (x) {
-        if (active !== 'alle' && x.f !== active) return;
+        if ((!jedesJahr && !imJahr(x.j)) || (active !== 'alle' && x.f !== active)) return;
         var score = 0;
         for (var i = 0; i < words.length; i++) {
             var w = words[i], inH = x.H.indexOf(w), inK = x.K.indexOf(w), inT = x.T.indexOf(w);
@@ -342,14 +379,18 @@ function renderSearch(q) {
     $('count').textContent = r.hits.length ? r.hits.length + (r.hits.length === 1 ? ' Treffer' : ' Treffer') + (r.hits.length > 60 ? ', die besten 60 angezeigt' : '') : 'Keine Treffer';
     if (!shown.length) {
         var tipps = ['Resonanz', 'Leasing', 'Blindleistung', 'Pythagoras', 'Zahlungsverzug'];
-        $('results').innerHTML = '<div class="empty"><p>Nichts gefunden' + (active !== 'alle' ? ' in ' + esc(fach[active].name) + '. Der Fachfilter ist aktiv.' : '. Prüfe die Schreibweise oder suche nach einem kürzeren Wort.') + '</p><p style="margin-top:.6rem">' +
-            (active !== 'alle' ? '<button type="button" data-all="1">In allen Fächern suchen</button>' : tipps.map(function (t) { return '<button type="button" data-tip="' + t + '">' + t + '</button>'; }).join('')) + '</p></div>';
+        var woanders = jahr !== 'alle' ? search(q, true).hits.length : 0;
+        var text, knopf;
+        if (woanders) { text = 'Im ' + jahr + '. Jahr (' + esc(klasse(jahr)) + ') nichts gefunden. In anderen Jahren gibt es ' + woanders + ' Treffer.'; knopf = '<button type="button" data-jahre="1">In allen Jahren suchen</button>'; }
+        else if (active !== 'alle') { text = 'Nichts gefunden in ' + esc(fach[active].name) + '. Der Fachfilter ist aktiv.'; knopf = '<button type="button" data-all="1">In allen Fächern suchen</button>'; }
+        else { text = 'Nichts gefunden. Prüfe die Schreibweise oder suche nach einem kürzeren Wort.'; knopf = tipps.map(function (t) { return '<button type="button" data-tip="' + t + '">' + t + '</button>'; }).join(''); }
+        $('results').innerHTML = '<div class="empty"><p>' + text + '</p><p style="margin-top:.6rem">' + knopf + '</p></div>';
         return;
     }
     $('results').innerHTML = shown.map(function (h, i) {
         var x = h.x, p = seite[x.d];
         return '<a class="res fc" ' + fc(p.f) + ' id="res-' + i + '" href="' + link(x, q.trim()) + '" data-d="' + x.d + '" data-q="' + esc(q.trim()) + '" data-at="' + esc(x.h) + '" data-k="' + esc(x.k || '') + '">' +
-            '<div class="res-top"><span class="res-tag">' + esc(p.f.kurz) + '</span><span class="res-h">' + markUp(x.h, r.words) + '</span></div>' +
+            '<div class="res-top"><span class="res-tag">' + esc(p.f.kurz) + '</span><span class="res-h">' + markUp(x.h, r.words) + '</span>' + (jahr === 'alle' ? '<span class="jtag">' + x.j + '. Jahr</span>' : '') + '</div>' +
             '<div class="res-path">' + esc(p.s.titel) + (x.k ? ' › ' + esc(plain(x.k)) : '') + '</div>' +
             (x.t ? '<div class="res-snip">' + snippet(x, r.words) + '</div>' : '') + '</a>';
     }).join('');
@@ -359,7 +400,7 @@ function update() {
     $('view-home').hidden = has; $('view-search').hidden = !has;
     $('clear').hidden = !has; $('kbd').hidden = has;
     $('search-box').classList.toggle('has-q', has);
-    renderChips();
+    renderJahre(); renderChips(); renderStats();
     if (has) renderSearch(q);
     else {
         renderRecent(); renderFaecher();
@@ -389,6 +430,7 @@ $('chips').addEventListener('click', function (e) {
 $('results').addEventListener('click', function (e) {
     var b = e.target.closest('button'); if (!b) return;
     if (b.dataset.all) { active = 'alle'; store.set('lern-fach', active); }
+    if (b.dataset.jahre) { jahr = 'alle'; ausweich = false; merkeJahr(); }
     if (b.dataset.tip) $('q').value = b.dataset.tip;
     update();
 });
@@ -397,8 +439,14 @@ document.addEventListener('keydown', function (e) {
 });
 window.addEventListener('pageshow', renderRecent);
 
-var nSeiten = D.faecher.reduce(function (n, f) { return n + f.seiten.length; }, 0);
-$('stats').textContent = D.faecher.length + ' Fächer · ' + nSeiten + ' Seiten · ' + D.sektionen.length + ' durchsuchbare Abschnitte';
+$('jahre').addEventListener('click', function (e) {
+    var b = e.target.closest('.chip'); if (!b) return;
+    jahr = b.dataset.j === 'alle' ? 'alle' : +b.dataset.j; ausweich = false; merkeJahr(); update();
+});
+function renderStats() {
+    var nF = D.faecher.filter(fachHat).length, nA = D.sektionen.filter(function (x) { return imJahr(x.j); }).length;
+    $('stats').textContent = (jahr === 'alle' ? 'Alle Jahre' : jahr + '. Jahr · ' + klasse(jahr)) + ' · ' + nF + ' Fächer · ' + seitenIm(jahr) + ' Seiten · ' + nA + ' durchsuchbare Abschnitte';
+}
 $('foot').textContent = 'Index-Stand ' + D.stand.split('-').reverse().join('.');
 update();
 })();

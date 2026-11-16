@@ -8,6 +8,9 @@ import path from 'node:path';
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const faecher = JSON.parse(readFileSync(path.join(root, 'faecher.json'), 'utf8'));
+const portal = JSON.parse(readFileSync(path.join(root, 'portal.json'), 'utf8'));
+// Seiten ohne "jahr" gehören automatisch zum aktuellen Schuljahr
+for (const f of faecher) for (const s of f.seiten) if (!s.jahr) s.jahr = portal.aktuell;
 const browser = await chromium.launch();
 const sektionen = [];
 
@@ -46,13 +49,13 @@ for (const fach of faecher) {
       return out.map(s => ({ h: s.h, k: s.k, t: clean(s.t).slice(0, 1400) })).filter(s => s.h && s.h.length < 140);
     });
     seite.themen = secs.length;
-    for (const s of secs) sektionen.push({ f: fach.id, d: seite.datei, h: s.h, k: s.k, t: s.t });
+    for (const s of secs) sektionen.push({ f: fach.id, j: seite.jahr, d: seite.datei, h: s.h, k: s.k, t: s.t });
     console.log(`${seite.datei}: ${secs.length} Abschnitte`);
     await page.close();
   }
 }
 await browser.close();
 const js = '/* Automatisch erzeugt von tools/build.mjs – nicht von Hand ändern. */\n' +
-  'window.LERN = ' + JSON.stringify({ stand: new Date().toISOString().slice(0, 10), faecher, sektionen }) + ';\n';
+  'window.LERN = ' + JSON.stringify({ aktuell: portal.aktuell, jahre: portal.jahre, stand: new Date().toISOString().slice(0, 10), faecher, sektionen }) + ';\n';
 writeFileSync(path.join(root, 'shared', 'daten.js'), js);
 console.log(`daten.js: ${sektionen.length} Abschnitte, ${(js.length / 1024).toFixed(0)} KB`);

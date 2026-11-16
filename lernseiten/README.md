@@ -26,3 +26,10 @@ direkt an der passenden Stelle, `Esc` leert die Suche.
 `python3 tools/seiten.py` baut aus den Vorlagen in `quellen/` (Markdown, einfache HTML-Seiten) Lernseiten im
 einheitlichen Stil: MET-Lernübersicht, AEE2-Formelübersicht, AEE2-Merksätze und die Mathematik-Probeschularbeit.
 Danach `node tools/build.mjs` ausführen, damit die Suche die neuen Seiten kennt.
+
+## Schuljahre
+
+`portal.json` legt fest, welches Jahr aktuell ist (`aktuell`) und wie die Klassen heißen. Jede Seite in
+`faecher.json` trägt ein `"jahr"`; fehlt es, zählt die Seite automatisch zum aktuellen Jahr. Das Portal führt
+pro Jahr einen eigenen Fächer- und Themenindex und durchsucht standardmäßig nur das gewählte Jahr.
+Zum Schuljahreswechsel: neuen Eintrag in `jahre` ergänzen und `aktuell` hochzählen.
