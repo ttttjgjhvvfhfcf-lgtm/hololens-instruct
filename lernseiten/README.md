@@ -14,6 +14,7 @@ faecher/<fach>/*.html die Lernseiten
 faecher/<fach>/bilder/ Abbildungen der Lernseiten (relativ eingebunden, Klick öffnet sie in voller Größe)
 shared/hub.css        gemeinsame Schicht für alle Fachseiten (Handy-Korrekturen, Tabellen, Treffer-Leiste)
 shared/hub.js         Zurück-Link, Design-Übernahme, Sprung zum Treffer, Bildplatzhalter, Querverweise
+shared/icons/         Seiten-Symbole (Tab-Icon, Startbildschirm): Buch für Portal und Lernseiten, Uhr für den Stundenplan, Blatt für die Schularbeiten
 shared/live.js        Rechenlogik: was läuft gerade, was kommt danach, wie lange noch
 shared/daten.js       Suchindex          – wird erzeugt, nicht von Hand ändern
 shared/seiten.js      Seitenliste        – wird erzeugt, nicht von Hand ändern
@@ -22,6 +23,7 @@ shared/schularbeiten.js Schularbeiten    – wird erzeugt, nicht von Hand änder
 tools/build.mjs       erzeugt daten.js, seiten.js, stundenplan.js, schularbeiten.js und bindet hub.css/hub.js ein
 tools/plan.mjs        prüft und bereitet Stundenplan und Schularbeiten auf (wird von build.mjs und den Tests benutzt)
 tools/test-live.mjs   Tests für Aufbereitung und Live-Logik (node tools/test-live.mjs)
+tools/icons.mjs       erzeugt die Seiten-Symbole in shared/icons/ (SVG und PNG)
 tools/seiten.py       baut Lernseiten aus den Rohdateien in quellen/
 ```
 

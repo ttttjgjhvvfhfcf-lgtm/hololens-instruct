@@ -2,7 +2,7 @@
 //   shared/daten.js   Fächer, Seiten und alle durchsuchbaren Abschnitte (für index.html)
 //   shared/seiten.js  nur Fächer und Seiten (für die Querverweise auf den Fachseiten)
 //   shared/stundenplan.js und shared/schularbeiten.js  aus stundenplan.json und schularbeiten.json (siehe tools/plan.mjs)
-// Bindet außerdem hub.css und hub.js in jede gelistete Seite ein, falls sie noch fehlen.
+// Bindet außerdem hub.css, hub.js und das Seiten-Symbol (Tab-Icon, siehe tools/icons.mjs) in jede gelistete Seite ein, falls sie noch fehlen.
 // Aufruf:  node tools/build.mjs     (braucht "playwright")
 import { createRequire } from 'node:module';
 const { chromium } = createRequire(import.meta.url)('playwright');
@@ -23,6 +23,7 @@ function einbinden(datei) {
   const shared = path.relative(path.dirname(file), path.join(root, 'shared')).split(path.sep).join('/');
   let html = readFileSync(file, 'utf8'), neu = html;
   if (!/hub\.css/.test(neu)) neu = neu.replace(/<\/head>/i, `<link rel="stylesheet" href="${shared}/hub.css">\n</head>`);
+  if (!/rel=["']icon["']/.test(neu)) neu = neu.replace(/<\/head>/i, `<link rel="icon" href="${shared}/icons/lernportal.svg" type="image/svg+xml">\n<link rel="icon" href="${shared}/icons/lernportal-32.png" type="image/png" sizes="32x32">\n<link rel="apple-touch-icon" href="${shared}/icons/lernportal-180.png">\n</head>`);
   if (!/hub\.js/.test(neu)) neu = neu.replace(/<\/body>/i, `<script src="${shared}/hub.js"></script>\n</body>`);
   if (neu !== html) { writeFileSync(file, neu); console.log(`${datei}: Portal-Anbindung ergänzt`); }
 }
