@@ -77,6 +77,7 @@ button { font-family: inherit; }
 .live-main { font: 700 0.88rem var(--font); line-height: 1.25; font-variant-numeric: tabular-nums; overflow-wrap: anywhere; }
 .live-sub { font: 500 0.76rem var(--font); line-height: 1.25; opacity: 0.85; overflow-wrap: anywhere; }
 .live-sub:empty { display: none; }
+.live .pt { display: inline-block; max-width: 100%; }
 @media (prefers-reduced-motion: no-preference) { .live-unterricht .live-dot { animation: livepulse 2s ease-in-out infinite; } }
 @keyframes livepulse { 50% { box-shadow: 0 0 0 5px rgba(52,211,153,0.28); } }
 
@@ -695,13 +696,19 @@ if (document.fonts && document.fonts.ready) document.fonts.ready.then(measure);
 
 /* ── Live-Anzeige im Menü: laufendes Fach, Restzeit, nächstes Fach ── */
 var PLAN = window.STUNDENPLAN, LIVE = window.LernLive, liveEl = $('live');
+// Die Teile zwischen „ · “ bleiben zusammen: Zeilenumbrüche entstehen nur an den Trennpunkten, nicht mitten in „Fach bis 10:40“
+function teile(s) {
+    if (!s) return '';
+    var p = s.split(' · ');
+    return p.map(function (x, i) { return '<span class="pt">' + esc(x) + (i < p.length - 1 ? ' ·' : '') + '</span>'; }).join(' ');
+}
 function renderLive() {
     if (!PLAN || !LIVE || !liveEl) return;
     var st = LIVE.status(PLAN, LIVE.jetzt()), t = LIVE.text(st, PLAN);
     liveEl.hidden = false;
     liveEl.className = 'live live-' + st.state;
-    liveEl.querySelector('.live-main').textContent = t.haupt;
-    liveEl.querySelector('.live-sub').textContent = t.neben;
+    liveEl.querySelector('.live-main').innerHTML = teile(t.haupt);
+    liveEl.querySelector('.live-sub').innerHTML = teile(t.neben);
     liveEl.title = (LIVE.simuliert() ? 'Testzeit · ' : '') + 'Laut gespeichertem Stundenplan ' + PLAN.klasse + '. Klick für die Wochenansicht.';
     measure();
 }

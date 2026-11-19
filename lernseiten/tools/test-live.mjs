@@ -70,9 +70,10 @@ t('Heute (Do 19.11.) 12:17: Pause in der Freistunde, danach AEE 12:20', () => {
   const s = at('2026-11-19 12:17'); assert.equal(s.state, 'pause'); assert.equal(s.pause.restSek, 180); assert.equal(s.pause.weiter, false);
   assert.equal(s.danach.fach, 'AEE'); assert.equal(txt('2026-11-19 12:17').haupt, 'Pause · noch 3 min'); assert.equal(txt('2026-11-19 12:17').neben, 'Danach 12:20 AEE');
 });
-t('Heute 10:00: AWL, Einheit 1 von 2, noch 40 min', () => {
+t('Heute 10:00: AWL, Einheit 1 von 2, noch 1 h 30 min bis zum Ende des Fachs (11:30)', () => {
   const s = at('2026-11-19 10:00'); assert.equal(s.state, 'unterricht'); assert.equal(s.jetzt.block.fach, 'AWL'); assert.equal(s.jetzt.einheit, 1); assert.equal(s.jetzt.anzahl, 2);
-  assert.equal(s.jetzt.restSek, 40 * 60); assert.equal(txt('2026-11-19 10:00').haupt, 'AWL · noch 40 min');
+  assert.equal(s.jetzt.restSek, 40 * 60);                                   // die laufende Einheit
+  assert.equal(s.jetzt.fachRestSek, 90 * 60); assert.equal(txt('2026-11-19 10:00').haupt, 'AWL · noch 1 h 30 min');
 });
 t('Heute früh und abends', () => {
   const v = at('2026-11-19 06:00'); assert.equal(v.state, 'vor'); assert.equal(v.vor.inSek, 115 * 60); assert.equal(v.danach.fach, 'TD');
@@ -84,16 +85,47 @@ t('Samstag: frei, nächster ist Mo 07:55 MET', () => {
 t('Vor Beginn des Plans (Mi 18.11.): frei, morgen 07:55 TD', () => {
   assert.equal(at('2026-11-18 10:00').state, 'frei'); assert.equal(txt('2026-11-18 10:00').neben, 'Nächster: morgen 07:55 TD');
 });
-t('Mo 23.11. 07:55:00: MET, 50 min, Fach bis 10:40, danach PB', () => {
+t('Mo 23.11. 07:55:00: MET über drei Einheiten, noch 2 h 45 min bis 10:40, danach PB', () => {
   const s = at('2026-11-23 07:55:00'); assert.equal(s.jetzt.restSek, 50 * 60); assert.equal(s.jetzt.anzahl, 3);
-  assert.equal(txt('2026-11-23 07:55').neben, 'Fach bis 10:40 · Danach 10:40 PB');
+  assert.equal(s.jetzt.fachVon, '07:55'); assert.equal(s.jetzt.fachBis, '10:40'); assert.equal(s.jetzt.fachRestSek, 165 * 60); assert.equal(s.jetzt.fachDauerSek, 165 * 60);
+  assert.deepEqual(s.jetzt.fachEinheiten, [['07:55', '08:45'], ['08:45', '09:35'], ['09:50', '10:40']]);
+  assert.equal(txt('2026-11-23 07:55').haupt, 'MET · noch 2 h 45 min'); assert.equal(txt('2026-11-23 07:55').kurz, 'MET · noch 2 h 45 min');
+  assert.equal(txt('2026-11-23 07:55').neben, 'Fach bis 10:40 · Danach PB');           // PB beginnt nahtlos um 10:40
 });
-t('Einheitenwechsel 08:44:59 → 08:45:00', () => {
-  assert.equal(at('2026-11-23 08:44:59').jetzt.restSek, 1); const s = at('2026-11-23 08:45:00'); assert.equal(s.jetzt.einheit, 2); assert.equal(s.jetzt.restSek, 50 * 60);
+t('Die Fach-Restzeit zählt über Einheiten und Pause hinweg ohne Sprung', () => {
+  const a = at('2026-11-23 08:44:59'), b = at('2026-11-23 08:45:00');                 // Einheitenwechsel 1 → 2
+  assert.equal(a.jetzt.restSek, 1); assert.equal(a.jetzt.einheit, 1); assert.equal(b.jetzt.einheit, 2); assert.equal(b.jetzt.restSek, 50 * 60);
+  assert.equal(a.jetzt.fachRestSek - b.jetzt.fachRestSek, 1); assert.equal(b.jetzt.fachRestSek, 115 * 60);
+  assert.equal(at('2026-11-23 09:35:00').state, 'pause'); assert.equal(at('2026-11-23 09:35:00').pause.fachRestSek, 65 * 60);   // kleine Pause 09:35–09:50
+  const c = at('2026-11-23 09:50:00'); assert.equal(c.jetzt.einheit, 3); assert.equal(c.jetzt.fachRestSek, 50 * 60);
+  assert.equal(txt('2026-11-23 10:39:00').haupt, 'MET · noch 1 min'); assert.equal(at('2026-11-23 10:40:00').jetzt.block.fach, 'PB');
+  assert.equal(txt('2026-11-23 10:40:00').haupt, 'PB · noch 1 h 40 min');             // PB 4–5 bis 12:20
 });
 t('Pause im Block (09:40) und Freistunde (12:30)', () => {
-  const p = at('2026-11-23 09:40'); assert.equal(p.pause.weiter, true); assert.equal(txt('2026-11-23 09:40').neben, 'Weiter mit MET um 09:50');
+  const p = at('2026-11-23 09:40'); assert.equal(p.pause.weiter, true); assert.equal(p.pause.fachRestSek, 60 * 60); assert.equal(p.danach.fach, 'MET');
+  assert.equal(txt('2026-11-23 09:40').haupt, 'Pause · noch 10 min'); assert.equal(txt('2026-11-23 09:40').neben, 'Weiter mit MET um 09:50 · Fach bis 10:40');
   const f = at('2026-11-23 12:30'); assert.equal(f.pause.weiter, false); assert.equal(f.danach.fach, 'AWL'); assert.equal(f.pause.restSek, 40 * 60);
+  assert.equal(txt('2026-11-23 12:30').neben, 'Danach 13:10 AWL');
+});
+t('Mi 2.12.: MLA 7–10 mit kleiner Pause 14:50–15:00, Restzeit immer bis 16:40', () => {
+  const u = at('2026-12-02 13:15'); assert.equal(u.jetzt.block.fach, 'MLA'); assert.equal(u.jetzt.anzahl, 4); assert.equal(txt('2026-12-02 13:15').haupt, 'MLA · noch 3 h 25 min');
+  const p = at('2026-12-02 14:55'); assert.equal(p.state, 'pause'); assert.equal(p.pause.weiter, true); assert.equal(p.pause.restSek, 5 * 60); assert.equal(p.pause.fachRestSek, 105 * 60);
+  assert.equal(txt('2026-12-02 14:55').neben, 'Weiter mit MLA um 15:00 · Fach bis 16:40');
+  const e = at('2026-12-02 15:00'); assert.equal(e.jetzt.einheit, 3); assert.equal(e.jetzt.fachRestSek, 100 * 60);
+  assert.equal(txt('2026-12-02 16:00').neben, 'Fach bis 16:40 · Danach morgen 07:55 TD');
+});
+t('Direkt aufeinanderfolgende Blöcke desselben Fachs zählen als ein Fach', () => {
+  const k = klon(plan), w = k.wochen.find(x => x.von === '2026-11-30'), met = w.tage.mo[0]; assert.equal(met.fach, 'MET');
+  w.tage.mo.splice(0, 1, { ...met, bis: 2 }, { ...met, ab: 3, bis: 3 });             // MET 1–3 als zwei Blöcke: 1–2 und 3
+  const s = L.status(k, wall('2026-11-30 07:55')); assert.equal(s.jetzt.anzahl, 3); assert.equal(s.jetzt.fachBis, '10:40'); assert.equal(s.jetzt.fachRestSek, 165 * 60);
+  const m = L.status(k, wall('2026-11-30 09:40')); assert.equal(m.state, 'pause'); assert.equal(m.pause.weiter, true); assert.equal(m.pause.fachRestSek, 60 * 60);
+  assert.equal(L.text(m, k).neben, 'Weiter mit MET um 09:50 · Fach bis 10:40');
+  const x = L.status(k, wall('2026-11-30 10:00')); assert.equal(x.jetzt.block.ab, 3); assert.equal(x.jetzt.einheit, 3); assert.equal(x.jetzt.fachRestSek, 40 * 60);
+  // Anderes Fach oder entfallener Block dahinter: der Lauf endet vorher
+  const a = klon(k), wa = a.wochen.find(x => x.von === '2026-11-30'); wa.tage.mo[1].fach = 'AM';
+  assert.equal(L.status(a, wall('2026-11-30 07:55')).jetzt.fachBis, '09:35'); assert.equal(L.status(a, wall('2026-11-30 09:40')).pause.weiter, false);
+  const e = klon(k), we = e.wochen.find(x => x.von === '2026-11-30'); we.tage.mo[1].status = 'entfall';
+  assert.equal(L.status(e, wall('2026-11-30 07:55')).jetzt.fachBis, '09:35');
 });
 t('Di 24.11. 09:00: MLA mit zwei Gruppen als Änderung; Di 1.12. dasselbe ohne Änderung', () => {
   const s = at('2026-11-24 09:00'); assert.equal(s.jetzt.block.status, 'aenderung');
@@ -106,10 +138,10 @@ t('Di 8.12.: Feiertag, nächster ist morgen 07:55 MET', () => {
 });
 t('Do 17.12.: Schularbeit AWL', () => {
   const s = at('2026-12-17 10:00'); assert.equal(s.jetzt.block.status, 'pruefung');
-  assert.equal(txt('2026-12-17 10:00').haupt, 'AWL Schularbeit · noch 40 min'); assert.equal(txt('2026-12-17 10:00').neben, 'Fach bis 11:30 · Danach 12:20 AEE');
+  assert.equal(txt('2026-12-17 10:00').haupt, 'AWL Schularbeit · noch 1 h 30 min'); assert.equal(txt('2026-12-17 10:00').neben, 'Fach bis 11:30 · Danach 12:20 AEE');
   assert.equal(txt('2026-12-17 09:40').neben, 'Danach 09:50 AWL Schularbeit');
 });
-t('Do 28.1.2027: zweite Schularbeit', () => { assert.equal(txt('2027-01-28 10:30').haupt, 'AWL Schularbeit · noch 10 min'); });
+t('Do 28.1.2027: zweite Schularbeit', () => { assert.equal(txt('2027-01-28 10:30').haupt, 'AWL Schularbeit · noch 1 h'); });
 t('Mi 23.12. 12:00 noch Unterricht, Do 24.12. Weihnachtsferien bis zum nächsten Schultag Do 7.1.', () => {
   assert.equal(at('2026-12-23 12:00').jetzt.block.fach, 'AM');
   const s = at('2026-12-24 10:00'); assert.equal(s.state, 'frei'); assert.equal(s.grund, 'Weihnachtsferien');

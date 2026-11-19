@@ -74,8 +74,12 @@ Neue Lehrkräfte kommen unter `lehrer` dazu, neue Fächer unter `faecher`.
 `node tools/build.mjs` prüft alles (unbekannte Kürzel, doppelt belegte Einheiten, ungültige Zeiten), setzt aus Vorlage,
 Einzelwochen und freien Tagen die konkreten Wochen zusammen und erzeugt `shared/stundenplan.js`.
 
-- **Menü:** Im Portal zeigt die Menüzeile oben das laufende Fach mit der Restzeit der aktuellen Einheit und das nächste
-  Fach. Auf den Lernseiten erscheint während der Unterrichtszeit ein kleiner Chip in der Werkzeugleiste.
+- **Menü:** Im Portal zeigt die Menüzeile oben das laufende Fach mit der Restzeit bis zum Ende des Fachs und das nächste
+  Fach. Direkt aufeinanderfolgende Einheiten desselben Fachs (MET 1–3) zählen als ein Fach: Die Restzeit läuft ohne Sprung
+  bis zum Ende der letzten Einheit, die kleinen Pausen dazwischen sind eingerechnet (um 08:00 steht bei MET 1–3 „noch
+  2 h 40 min“, nicht „noch 45 min“). In der Pause innerhalb eines Fachs steht, wann es weitergeht und wann das Fach endet.
+  Das gilt auch, wenn ein Fach im Plan als zwei Blöcke hintereinander eingetragen ist. Auf den Lernseiten erscheint während
+  der Unterrichtszeit ein kleiner Chip in der Werkzeugleiste.
 - **Stundenplan-Seite:** Wochenraster (Handy: Tagesansicht), Blättern nach Kalenderwoche, „Heute“-Knopf, freie Tage mit Grund.
 - **Außerhalb des hinterlegten Plans** zeigt die Anzeige „Kein aktueller Stundenplan“ und nennt das Ende der Gültigkeit.
 - **Zeit:** Gerechnet wird mit der Wiener Ortszeit. Zum Ausprobieren hängt man `?zeit=2026-11-24T10:15` an die Adresse,
@@ -85,6 +89,6 @@ Einzelwochen und freien Tagen die konkreten Wochen zusammen und erzeugt `shared/
 ## Schularbeiten
 
 `schularbeiten.json` enthält die Termine (`datum`, `fach`, optional `titel` und `stoff`). Der Build markiert den Block
-des Fachs an diesem Tag im Stundenplan als Schularbeit (gelb), die Live-Anzeige nennt sie („AWL Schularbeit · noch 40 min“),
+des Fachs an diesem Tag im Stundenplan als Schularbeit (gelb), die Live-Anzeige nennt sie („AWL Schularbeit · noch 1 h 30 min“),
 und `schularbeiten.html` zeigt die nächste Schularbeit mit Countdown und die Stunde laut Stundenplan. Hat das Fach an dem
 Tag laut Plan keinen Unterricht oder liegt der Tag außerhalb des Plans, gibt der Build einen Hinweis aus.
