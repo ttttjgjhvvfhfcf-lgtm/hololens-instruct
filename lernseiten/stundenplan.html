@@ -81,11 +81,13 @@ h2.sec { font-size: 0.74rem; font-weight: 700; text-transform: uppercase; letter
 .jz-fach { font-size: 2.2rem; font-weight: 800; letter-spacing: -0.5px; line-height: 1.1; margin-top: 0.35rem; }
 .jz-lt { font-size: 0.98rem; margin-top: 0.15rem; }
 .jz-lt small { color: var(--muted); font-size: 0.82rem; }
-.jz-bar { height: 0.5rem; border-radius: 999px; background: color-mix(in srgb, var(--muted) 22%, transparent); margin-top: 0.9rem; overflow: hidden; }
+.jz-bar { height: 0.5rem; border-radius: 999px; background: color-mix(in srgb, var(--muted) 22%, transparent); margin-top: 0.9rem; overflow: hidden; position: relative; }
 .jz-bar i { display: block; height: 100%; border-radius: 999px; background: var(--fc, var(--brand)); transition: width 0.4s linear; }
-.jz-rest { margin-top: 0.5rem; font-size: 0.95rem; }
-.jz-rest b { font-size: 1.15rem; font-variant-numeric: tabular-nums; }
+.jz-bar u { position: absolute; top: 0; bottom: 0; width: 3px; margin-left: -1.5px; background: var(--card); }   /* Beginn der weiteren Einheiten des Fachs */
+.jz-rest { margin-top: 0.5rem; font-size: 0.95rem; display: flex; flex-wrap: wrap; align-items: baseline; gap: 0.1rem 0.75rem; }   /* Umbrüche nur zwischen den Teilen */
+.jz-rest b { font-size: 1.15rem; font-variant-numeric: tabular-nums; white-space: nowrap; }
 .jz-rest span { color: var(--muted); font-size: 0.86rem; }
+.jz-rest .nw { white-space: nowrap; }
 .jz-next { margin-top: 0.8rem; padding-top: 0.7rem; border-top: 1px solid var(--line); font-size: 0.9rem; }
 .jz-next small { color: var(--muted); display: block; font-size: 0.82rem; }
 .jz-link { display: inline-block; margin-top: 0.6rem; font-size: 0.86rem; font-weight: 600; color: var(--brand); text-decoration: none; }
@@ -414,13 +416,19 @@ function naechsteZeile(st) {
     var wann = b.datum === st.datum ? '' : (b.datum === L.addDays(st.datum, 1) ? 'morgen, ' : L.KURZ[b.tag] + ' ' + L.ddmm(b.datum) + ', ');
     return '<div class="jz-next">Danach: <b>' + esc(L.fachLabel(b)) + '</b> · ' + wann + b.zeitVon + '–' + b.zeitBis + '<small>' + esc(L.lehrerText(plan, b.gruppen, true)) + '</small></div>';
 }
+// Fortschritt über das ganze Fach (alle zusammenhängenden Einheiten samt Pausen), nicht nur über die laufende Einheit
+function fachProzent(j) { return Math.min(100, Math.max(0, Math.round((1 - j.fachRestSek / j.fachDauerSek) * 100))); }
+function fachStriche(j) {
+    var s = L.toMin(j.fachVon), g = L.toMin(j.fachBis) - s;
+    return j.fachEinheiten.slice(1).map(function (e) { return '<u style="left:' + ((L.toMin(e[0]) - s) / g * 100).toFixed(2) + '%"></u>'; }).join('');
+}
 function renderJetzt(st) {
     var el = $('jz'), t = L.text(st, plan), f = plan.faecher;
     var sig = st.state + '|' + (st.jetzt ? st.jetzt.block.id + st.jetzt.einheit : '') + '|' + (st.danach ? st.danach.id : '');
     var simu = L.simuliert() ? '<p class="simu">Testzeit: ' + L.ddmm(st.datum) + ' ' + L.fromMin(Math.floor(st.sek / 60)) + ' Uhr (aus der Adresse)</p>' : '';
     if (sig === jzSig && st.state === 'unterricht') {   // nur die laufenden Werte auffrischen, damit ein Tastaturfokus nicht verloren geht
-        var rest = el.querySelector('.jz-rest b'); if (rest) rest.textContent = 'noch ' + L.dauer(st.jetzt.restSek);
-        var bar = el.querySelector('.jz-bar i'); if (bar) bar.style.width = Math.round((1 - st.jetzt.restSek / st.jetzt.dauerSek) * 100) + '%';
+        var rest = el.querySelector('.jz-rest b'); if (rest) rest.textContent = 'noch ' + L.dauer(st.jetzt.fachRestSek);
+        var bar = el.querySelector('.jz-bar i'); if (bar) bar.style.width = fachProzent(st.jetzt) + '%';
         return;
     }
     jzSig = sig;
@@ -428,18 +436,21 @@ function renderJetzt(st) {
     if (st.state === 'unterricht') {
         var b = st.jetzt.block, p = f[b.fach] || {};
         el.className = 'jz on fc'; el.setAttribute('style', '--fc-l:' + (p.farbe || '#64748b') + ';--fc-d:' + (p.farbeDunkel || '#94a3b8'));
-        h = '<div class="jz-top"><span class="jz-dot"></span>Läuft gerade<span class="jz-zeit">' + st.jetzt.von + '–' + st.jetzt.bis + '</span></div>' +
+        h = '<div class="jz-top"><span class="jz-dot"></span>Läuft gerade<span class="jz-zeit">' + st.jetzt.fachVon + '–' + st.jetzt.fachBis + '</span></div>' +
             '<div class="jz-fach">' + esc(b.fach) + (b.status === 'pruefung' ? '<span class="sachip">' + esc(statusText(b)) + '</span>' : '') + '</div>' +
             '<p class="jz-lt">' + esc(L.lehrerText(plan, b.gruppen, false)) + '<small>' + raumText(b.gruppen) + '</small></p>' +
-            '<div class="jz-bar"><i style="width:' + Math.round((1 - st.jetzt.restSek / st.jetzt.dauerSek) * 100) + '%"></i></div>' +
-            '<p class="jz-rest"><b>noch ' + L.dauer(st.jetzt.restSek) + '</b> <span>in dieser Einheit' + (st.jetzt.anzahl > 1 ? ' · Einheit ' + st.jetzt.einheit + ' von ' + st.jetzt.anzahl + ' · Fach bis ' + b.zeitBis : '') + '</span></p>' +
+            '<div class="jz-bar"><i style="width:' + fachProzent(st.jetzt) + '%"></i>' + fachStriche(st.jetzt) + '</div>' +
+            '<p class="jz-rest"><b>noch ' + L.dauer(st.jetzt.fachRestSek) + '</b> <span>bis ' + st.jetzt.fachBis + ' (Ende des Fachs)</span>' +
+                (st.jetzt.anzahl > 1 ? ' <span>Einheit ' + st.jetzt.einheit + ' von ' + st.jetzt.anzahl + '</span>' : '') + '</p>' +
             naechsteZeile(st) +
             (p.portal ? '<a class="jz-link" href="index.html?fach=' + encodeURIComponent(p.portal) + '">Lernseiten zu ' + esc(b.fach) + ' →</a>' : '');
     } else {
         el.className = 'jz' + (st.state === 'pause' ? ' pause' : ''); el.removeAttribute('style');
         var label = { pause: 'Pause', vor: 'Gleich geht es los', nach: 'Für heute geschafft', frei: 'Heute frei', abgelaufen: 'Kein aktueller Plan', keinplan: 'Kein Plan' }[st.state];
         h = '<div class="jz-top"><span class="jz-dot"></span>' + label + '</div><div class="jz-fach" style="font-size:1.6rem">' + esc(t.haupt) + '</div>';
-        if (st.state === 'pause') h += '<p class="jz-rest"><span>' + (st.pause.weiter ? 'Weiter mit ' + esc(L.fachLabel(st.danach)) + ' um ' + st.pause.bis : 'Nächste Einheit um ' + st.pause.bis) + '</span></p>';
+        if (st.state === 'pause') h += '<p class="jz-rest">' + (st.pause.weiter
+            ? '<span>Weiter mit ' + esc(L.fachLabel(st.danach)) + ' um ' + st.pause.bis + '</span> <span>Fach bis ' + st.pause.fachBis + ' (<span class="nw">noch ' + L.dauer(st.pause.fachRestSek) + '</span>)</span>'
+            : '<span>Nächste Einheit um ' + st.pause.bis + '</span>') + '</p>';
         if (st.state === 'vor') h += '<p class="jz-rest"><b>in ' + L.dauer(st.vor.inSek) + '</b> <span>Erstes Fach heute: ' + blockZeile(st.danach) + raumText(st.danach.gruppen) + '</span></p>';
         if (st.state === 'frei' && st.grund) h += '<p class="jz-rest"><span>' + esc(st.grund) + '</span></p>';
         if (st.state === 'abgelaufen') h += '<p class="jz-rest"><span>' + esc(t.neben) + '. Sobald ein neuer Plan eingetragen ist, erscheint er hier.</span></p>';

@@ -86,6 +86,22 @@
     }
     return -1;
   }
+  // Ein Fach läuft oft über mehrere Einheiten (MET 1–3). Der Lauf fasst alle unmittelbar aufeinanderfolgenden
+  // Einheiten desselben Fachs zusammen, auch wenn sie als getrennte Blöcke eingetragen sind. Die Restzeit zählt
+  // bis zum Ende des ganzen Laufs (inklusive der kleinen Pausen dazwischen), nicht bis zum Ende der Einheit.
+  function lauf(liste, block) {
+    var l = { ab: block.ab, bis: block.bis, start: block.start, ende: block.ende, bloecke: [block] };
+    for (var weiter = true; weiter;) {
+      weiter = false;
+      liste.forEach(function (b) {
+        if (b.fach !== block.fach || l.bloecke.indexOf(b) >= 0) return;
+        if (b.ab === l.bis + 1) { l.bis = b.bis; l.ende = b.ende; l.bloecke.push(b); weiter = true; }
+        else if (b.bis === l.ab - 1) { l.ab = b.ab; l.start = b.start; l.bloecke.unshift(b); weiter = true; }
+      });
+    }
+    l.zeitVon = fromMin(l.start); l.zeitBis = fromMin(l.ende);
+    return l;
+  }
 
   /* ── Zustand zu einem Zeitpunkt ───────────────────────────────────────────
      state: unterricht | pause | vor | nach | frei | abgelaufen | keinplan */
@@ -108,20 +124,23 @@
     var cur = null;
     l.forEach(function (b) { if (b.start * 60 <= sek && sek < b.ende * 60) cur = b; });
     if (cur) {
-      var i = einheitBei(plan, sek);
+      var lf = lauf(l, cur), i = einheitBei(plan, sek);
       if (i >= 0) {                                         // mitten in einer Einheit
         var pe = plan.einheiten[i];
         res.state = 'unterricht';
-        res.jetzt = { block: cur, einheit: i + 1 - cur.ab + 1, anzahl: cur.bis - cur.ab + 1,
+        // restSek/von/bis betreffen die laufende Einheit, die fach…-Werte das ganze Fach (alle zusammenhängenden Einheiten)
+        res.jetzt = { block: cur, einheit: i + 2 - lf.ab, anzahl: lf.bis - lf.ab + 1,
                       von: pe[0], bis: pe[1], restSek: toMin(pe[1]) * 60 - sek, dauerSek: (toMin(pe[1]) - toMin(pe[0])) * 60,
-                      blockRestSek: cur.ende * 60 - sek };
-        res.danach = naechster(plan, d, cur.ende);
-      } else {                                              // Pause innerhalb eines mehrteiligen Blocks
+                      fachVon: lf.zeitVon, fachBis: lf.zeitBis, fachRestSek: lf.ende * 60 - sek, fachDauerSek: (lf.ende - lf.start) * 60,
+                      fachEinheiten: plan.einheiten.slice(lf.ab - 1, lf.bis) };
+        res.danach = naechster(plan, d, lf.ende);
+      } else {                                              // kleine Pause innerhalb eines zusammenhängenden Fachs
         var n = null;
         plan.einheiten.forEach(function (e) { if (n === null && toMin(e[0]) * 60 > sek) n = e; });
+        var weiter = lf.bloecke.filter(function (b) { return b.start <= toMin(n[0]) && toMin(n[0]) < b.ende; })[0] || cur;
         res.state = 'pause';
-        res.pause = { bis: n[0], restSek: toMin(n[0]) * 60 - sek, weiter: true };
-        res.danach = cur;
+        res.pause = { bis: n[0], restSek: toMin(n[0]) * 60 - sek, weiter: true, fachBis: lf.zeitBis, fachRestSek: lf.ende * 60 - sek };
+        res.danach = weiter;
       }
       return res;
     }
@@ -138,8 +157,12 @@
     }
     var nb = null;                                          // Lücke zwischen zwei Blöcken (Pause oder Freistunde)
     l.forEach(function (b) { if (nb === null && b.start * 60 > sek) nb = b; });
+    var lg = lauf(l, nb);
     res.state = 'pause';
     res.pause = { bis: nb.zeitVon, restSek: nb.start * 60 - sek, weiter: false };
+    if (lg.start * 60 <= sek) {                             // die Lücke liegt zwischen zwei Blöcken desselben Fachs: es geht weiter
+      res.pause.weiter = true; res.pause.fachBis = lg.zeitBis; res.pause.fachRestSek = lg.ende * 60 - sek;
+    }
     res.danach = nb;
     return res;
   }
@@ -157,20 +180,25 @@
     if (b.datum === addDays(heute, 1)) return 'morgen ' + b.zeitVon + ' ' + fachLabel(b);
     return KURZ[b.tag] + ' ' + ddmm(b.datum) + ' ' + b.zeitVon + ' ' + fachLabel(b);
   }
+  // „Danach PB“, wenn es nahtlos weitergeht (abMin = Minute, in der das Fach endet), sonst mit Zeitpunkt („Danach 13:10 AWL“)
+  function danachText(st, abMin) {
+    var b = st.danach;
+    if (!b) return 'Danach nichts mehr hinterlegt';
+    return 'Danach ' + (b.datum === st.datum && b.start === abMin ? fachLabel(b) : wannText(b, st.datum));
+  }
   // haupt = erste Zeile, neben = zweite Zeile, kurz = einzeilig für schmale Leisten, klasse = Farbton
   function text(st, plan) {
     var t = { klasse: st.state, haupt: '', neben: '', kurz: '' };
     switch (st.state) {
-      case 'unterricht':
-        t.haupt = fachLabel(st.jetzt.block) + ' · noch ' + dauer(st.jetzt.restSek);
-        t.kurz = fachLabel(st.jetzt.block) + ' · ' + dauer(st.jetzt.restSek);
-        t.neben = (st.jetzt.anzahl > 1 ? 'Fach bis ' + st.jetzt.block.zeitBis + ' · ' : '') +
-                  (st.danach ? 'Danach ' + wannText(st.danach, st.datum) : 'Danach nichts mehr hinterlegt');
+      case 'unterricht':                                    // die Restzeit gilt für das ganze Fach, nicht nur für die Einheit
+        t.haupt = fachLabel(st.jetzt.block) + ' · noch ' + dauer(st.jetzt.fachRestSek);
+        t.kurz = t.haupt;
+        t.neben = 'Fach bis ' + st.jetzt.fachBis + ' · ' + danachText(st, toMin(st.jetzt.fachBis));
         break;
       case 'pause':
         t.haupt = 'Pause · noch ' + dauer(st.pause.restSek);
-        t.kurz = 'Pause · ' + dauer(st.pause.restSek);
-        t.neben = st.pause.weiter ? 'Weiter mit ' + fachLabel(st.danach) + ' um ' + st.pause.bis : 'Danach ' + wannText(st.danach, st.datum);
+        t.kurz = t.haupt;
+        t.neben = st.pause.weiter ? 'Weiter mit ' + fachLabel(st.danach) + ' um ' + st.pause.bis + ' · Fach bis ' + st.pause.fachBis : danachText(st);
         break;
       case 'vor':
         t.haupt = 'Unterricht ab ' + st.vor.von;
