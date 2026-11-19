@@ -5,8 +5,15 @@
     "kurz": "AM",
     "farbe": "#6d28d9",
     "farbeDunkel": "#a78bfa",
-    "info": "Trigonometrie, Funktionen, Wechselstromrechnung",
+    "info": "Trigonometrie, Funktionen, Wechselstromrechnung, Pneumatik",
     "seiten": [
+      {
+        "datei": "faecher/mathematik/pneumatik-grundlagen.html",
+        "titel": "AM3 — Pneumatik: Grundlagen",
+        "art": "Lernseite",
+        "info": "Druck, Kolbenkraft, Wirkungsgrad: 4 Beispiele und 4 Übungen mit Lösungsvorschlägen",
+        "jahr": 3
+      },
       {
         "datei": "faecher/mathematik/mathematik-2md.html",
         "titel": "Mathematik 2Md",

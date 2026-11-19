@@ -278,7 +278,7 @@ def mathe():
 # ───────────────────────── AEE 3. Jahr (3Mb): Drehstrom, Einheit 1 + Arbeitsblatt Dreiphasenwechselspannung ─────────────────────────
 import math
 
-AEE3_CSS = """
+FIG_CSS = """
 /* Abbildungen: Bilder bekommen einen hellen (Dunkelmodus: dunklen) Rahmen, Tafelbilder auf Schwarz werden im Hellmodus umgekehrt */
 .fig{margin:.6rem auto 1rem;text-align:center}
 .fig-row{display:flex;flex-wrap:wrap;gap:.9rem 1.2rem;justify-content:center;align-items:flex-start;margin:.6rem 0 1rem}
@@ -289,7 +289,11 @@ body.dark .bild{background:#000}
 body.dark .fig.hell img{filter:invert(1) hue-rotate(180deg)}
 body:not(.dark) .fig.dunkel img{filter:invert(1) hue-rotate(180deg)}
 .fig figcaption{font-size:.8rem;color:var(--muted);margin:.4rem auto 0;line-height:1.4;max-width:34rem}
-/* eigene Diagramme (SVG) */
+/* Lösungstabellen (zwei Spalten): auf schmalen Bildschirmen steht die Beschriftung über der Rechnung */
+@media(max-width:560px){table.lsg,table.lsg tbody,table.lsg tr,table.lsg td{display:block;width:auto}table.lsg tr{border-top:1px solid var(--border);padding:.4rem 0}table.lsg tr:first-child{border-top:0}table.lsg td{border:0;padding:.05rem .5rem}details.loesung table.lsg td:first-child{width:auto;white-space:normal;font-size:.72rem;text-transform:uppercase;letter-spacing:.05em}}
+"""
+
+SV_CSS = """/* eigene Diagramme (SVG) */
 .fig.svg .bild,body.dark .fig.svg .bild{display:block;background:var(--card)}
 .fig-row .fig.svg{flex:1 1 230px;max-width:330px}
 .fig-row .fig.svg.breit{flex:2 1 400px;max-width:640px}
@@ -307,6 +311,7 @@ body.dark .sv .k1{--k:#60a5fa}body.dark .sv .k2{--k:#fbbf24}body.dark .sv .k3{--
 .vorteile li{margin-bottom:.45rem}
 @media(max-width:560px){.sv.lin .tx{font-size:22px;stroke-width:5px}.sv.lin .lb{font-size:29px}.sv.lin .ln{stroke-width:3.4}}
 """
+AEE3_CSS = FIG_CSS + SV_CSS
 
 def _f(x):
     return '%.1f' % x
@@ -508,7 +513,7 @@ def aee3():
     tab = ''.join('<tr%s><td>%s</td><td>%s</td></tr>' % (' class="erg"' if k == 'Ergebnis' else '', k, v) for k, v in rows)
     t += wrap('5', 'Momentanwerte bei α = 150°',
               '<p>Berechnen Sie für den Zeitpunkt α = 150° aus voriger Aufgabe die Momentanwerte für u₁, u₂ und u₃, anschließend die Summe der drei Momentanwerte.</p>' +
-              loesung('<div class="tbl-wrap"><table>%s</table></div>' % tab +
+              loesung('<div class="tbl-wrap"><table class="lsg">%s</table></div>' % tab +
                       fig_svg(diagramm_linien('a5-lsg-l', marke=True), 'Bei α = 150° sind u₁ und u₂ gleich groß (162,5 V), u₃ steht im Minimum (−325 V).', breit=True) +
                       '<p>Die Summe ist 0 V, wie es für jede Dreiphasenwechselspannung gilt.</p>'), anker='a5')
     t += wrap('6', 'Verkettungsarten',
@@ -522,10 +527,178 @@ def aee3():
           'u = Û · sin α', t, [('a%d' % n, str(n)) for n in range(1, 7)], 'Aufgabe',
           extra_nav='<button class="btn" id="sol-toggle" type="button">Alle Lösungen zeigen</button>', extra_css=AEE3_CSS)
 
+
+# ───────────────────────── AM 3. Jahr (3Mb): Pneumatik – Grundlagen (aus dem Arbeitsblatt, Lösungen als Vorschlag) ─────────────────────────
+def de(x, nd=1):
+    """Zahl im deutschen Format: Komma als Dezimalzeichen, geschütztes Leerzeichen als Tausendertrenner ab fünf Stellen"""
+    t = ('%.*f' % (nd, abs(x))).replace('.', ',')
+    a, _, b = t.partition(',')
+    if len(a) > 4:
+        a = ' '.join(reversed([a[max(0, i - 3):i] for i in range(len(a), 0, -3)]))
+    return ('−' if x < 0 and float(t.replace(',', '.')) != 0 else '') + a + (',' + b if b else '')
+
+def zeilen(rows):
+    """Lösungstabelle: (Beschriftung, Text[, 'erg']) – Ergebniszeilen werden hervorgehoben"""
+    return '<div class="tbl-wrap"><table class="lsg">%s</table></div>' % ''.join(
+        '<tr%s><td>%s</td><td>%s</td></tr>' % (' class="erg"' if len(r) > 2 else '', r[0], r[1]) for r in rows)
+
+def pneu():
+    kreis = lambda D: math.pi / 4 * D * D                 # Kreisfläche in mm²
+    ring = lambda D, d: math.pi / 4 * (D * D - d * d)      # Ringfläche in mm²
+    PA = lambda bar: bar / 10                              # 1 bar = 0,1 N/mm²
+
+    # ── Beispiel 1: einfach wirkender Zylinder D = 32 mm, 5 bar, η = 92 % ──
+    a1 = kreis(32); f1th = PA(5) * a1; f1 = f1th * .92
+    # ── Beispiel 2: Einfahren, F = 350 N, 5,5 bar, η = 88 %, Bild: D = 32 mm, d = 10 mm ──
+    a2_erf = 350 / (PA(5.5) * .88); d2 = math.sqrt(4 * a2_erf / math.pi + 10 ** 2); a2 = ring(32, 10); f2 = PA(5.5) * a2 * .88
+    # ── Beispiel 3: Spannstock, D = 140 mm, 6 bar, η = 88 %, l1 = 150 mm, l2 = 50 mm ──
+    a3 = kreis(140); f3a = PA(6) * a3 * .88; f3b = f3a * 150 / 50
+    # ── Beispiel 4: Zangengreifer, 4,5 bar, F = 120 N, D = 25 mm, η = 92 % → Stangendurchmesser d ──
+    a4r = 120 / (PA(4.5) * .92); a4k = kreis(25); a4s = a4k - a4r; d4 = math.sqrt(4 * a4s / math.pi)
+    # ── Übung 1: a–c ──
+    u1 = [(n, D, pe, kreis(D), PA(pe) * kreis(D), PA(pe) * kreis(D) * .85) for n, D, pe in (('a', 80, 6), ('b', 63, 8), ('c', 50, 4))]
+    # ── Übung 2: Rückstelldruck 0,5 bar, D = 25 mm, d = 10 mm, η = 90 % ──
+    a_u2 = ring(25, 10); f_u2 = PA(0.5) * a_u2 * .90
+    # ── Übung 3: 63 × 20 × 125, η = 85 %, F = 1480 N in beiden Richtungen ──
+    a_v = kreis(63); a_r = ring(63, 20); p_v = 1480 / (a_v * .85); p_r = 1480 / (a_r * .85)
+    # ── Übung 4: Spannvorrichtung, D = 32 mm, 5,0 bar, η = 0,87, i = 2,8 : 1 ──
+    a_u4 = kreis(32); f_u4a = PA(5) * a_u4 * .87; f_u4b = f_u4a * 2.8
+    print('Kontrollwerte  B1 F=%.2f  B2 A=%.2f D=%.2f F=%.2f  B3 F1=%.1f F2=%.1f  B4 d=%.3f  U2 F=%.2f  U3 p=%.3f/%.3f bar  U4 F1=%.2f F2=%.2f'
+          % (f1, a2_erf, d2, f2, f3a, f3b, d4, f_u2, p_v * 10, p_r * 10, f_u4a, f_u4b))
+
+    sub = lambda t, i: '%s<sub>%s</sub>' % (t, i)
+    b = ''
+    b += wrap('1', 'Was ist Pneumatik?',
+              '<p>Die Pneumatik beschäftigt sich mit der Erzeugung, Aufbereitung, Steuerung und Nutzung von <strong>Druckluft</strong>.</p>'
+              '<p>Druckluft wird verwendet, um Bewegungen und Kräfte zu erzeugen. Sie dient beispielsweise dazu, Werkstücke zu spannen, Bauteile zu transportieren oder Werkzeuge anzutreiben.</p>'
+              '<h3>Vorteile der Pneumatik</h3><ul>'
+              '<li>Druckluft ist relativ einfach verfügbar.</li><li>Hohe Arbeitsgeschwindigkeiten sind möglich.</li><li>Pneumatische Anlagen sind robust.</li>'
+              '<li>Einfache Steuerung und Automatisierung.</li><li>Keine elektrische Energie am pneumatischen Antrieb erforderlich.</li></ul>'
+              '<h3>Nachteile der Pneumatik</h3><ul>'
+              '<li>Druckluft ist relativ teuer in der Erzeugung.</li><li>Luft ist kompressibel (zusammendrückbar).</li><li>Bewegungen lassen sich schwieriger exakt positionieren.</li>'
+              '<li>Geräuschentwicklung durch ausströmende Luft.</li><li>Kraft ist im Vergleich zu hydraulischen Antrieben begrenzt.</li></ul>', anker='s1')
+    tab = [('Druck', 'p', 'Pascal (Pa), bar'), ('Kraft', 'F', 'Newton (N)'), ('Fläche', 'A', 'm²'), ('Volumen', 'V', 'm³, Liter'), ('Temperatur', 'T', 'Kelvin (K)'),
+           ('Volumenstrom', 'Q', 'm³/s, l/min'), ('Weg', 's', 'Meter (m)'), ('Geschwindigkeit', 'v', 'm/s')]
+    b += wrap('2', 'Physikalische Grundlagen',
+              '<p>Für die Pneumatik sind einige physikalische Größen besonders wichtig.</p>'
+              '<div class="tbl-wrap"><table><tr><th>Größe</th><th>Formelzeichen</th><th>Einheit</th></tr>%s</table></div>'
+              % ''.join('<tr><td><strong>%s</strong></td><td>%s</td><td>%s</td></tr>' % r for r in tab), anker='s2')
+    b += wrap('3', 'Druck',
+              '<p>Der Druck gibt an, mit welcher Kraft auf eine bestimmte Fläche gedrückt wird.</p>'
+              '<h3>Formel</h3><div class="formula-box">p = F / A</div>'
+              '<p>Dabei gilt:</p><ul><li>p = Druck in Pascal (Pa)</li><li>F = Kraft in Newton (N)</li><li>A = Fläche in Quadratmeter (m²)</li></ul>'
+              '<h3>Wichtige Umrechnungen</h3>'
+              '<div class="formula-box">1 bar = 100 000 Pa<br>1 bar = 0,1 MPa<br>1 MPa = 10 bar<br>1 bar = 100 kPa</div>'
+              '<div class="info-box"><strong>Zum Rechnen:</strong> 1 bar = 10 N/cm² = 0,1 N/mm². Rechnet man die Fläche in mm² und den Druck in N/mm² '
+              '(5 bar = 0,5 N/mm²), erhält man die Kraft direkt in Newton.</div>', anker='s3')
+    b += wrap('4', 'Kolbenkraft',
+              '<p>Die in den Pneumatikzylinder einströmende Druckluft übt auf die Kolbenfläche einen Druck aus. Dadurch wird der Kolben gemeinsam mit der Kolbenstange bewegt. '
+              'Es entsteht die <strong>theoretische Kolbenkraft</strong>:</p>'
+              '<div class="formula-box">%s = %s · A</div>' % (sub('F', 'th'), sub('p', 'e')) +
+              fig('pneumatik-kolbenkraft.jpg', 'Pneumatikzylinder im Schnitt: Der Überdruck pe wirkt auf die Kolbenfläche A und erzeugt die theoretische Kolbenkraft Fth; Reibungskräfte FR mindern sie zur wirksamen Kolbenkraft F',
+                  'Theoretische Kolbenkraft F<sub>th</sub>, Reibungskräfte F<sub>R</sub> und wirksame Kolbenkraft F', 'hell', breite=520, w=1013, h=562) +
+              '<p>In der Praxis treten Reibungsverluste zwischen Kolben, Kolbenstange, Dichtungen und Zylinderwand auf. Deshalb ist die tatsächlich nutzbare Kolbenkraft kleiner als die theoretische Kolbenkraft. '
+              'Diese Verluste werden durch den <strong>Wirkungsgrad η</strong> berücksichtigt:</p>'
+              '<div class="formula-box">F = %s · A · η</div>' % sub('p', 'e') +
+              '<div class="info-box"><strong>Rechenhilfe (für die Beispiele):</strong><br>Kolbenfläche: A = π/4 · D²<br>'
+              'Ringfläche beim Einfahren des doppelt wirkenden Zylinders: A = π/4 · (D² − d²)<br>'
+              'D = Kolbendurchmesser, d = Kolbenstangendurchmesser, pe = Überdruck</div>', anker='s4')
+
+    # ── Beispiele ──
+    b += wrap('B1', 'Einfach wirkender Zylinder',
+              '<p>Wie groß ist die wirksame Kolbenkraft, wenn der einfach wirkende Zylinder mit Kolbendurchmesser 32 mm mit einem Überdruck von 5 bar beaufschlagt wird? Der Wirkungsgrad beträgt 92 %.</p>' +
+              fig('zylinder-einfach-wirkend.jpg', 'Einfach wirkender Zylinder mit Kolbendurchmesser 32 mm, Druckfeder, Manschettendichtung, Entlüftung und Schaltzeichen',
+                  'Einfach wirkender Zylinder (ø32 mm)', 'hell', breite=420, w=714, h=393) +
+              loesung(zeilen([('Gegeben', 'D = 32 mm, pe = 5 bar = 0,5 N/mm², η = 0,92'),
+                              ('Fläche', 'A = π/4 · D² = π/4 · (32 mm)² = %s mm²' % de(a1)),
+                              ('Theoretisch', 'F<sub>th</sub> = pe · A = 0,5 N/mm² · %s mm² = %s N' % (de(a1), de(f1th))),
+                              ('Ergebnis', 'F = F<sub>th</sub> · η = %s N · 0,92 ≈ %s N' % (de(f1th), de(f1, 0)), 'erg')])), 'Beispiel 1', anker='b1')
+    b += wrap('B2', 'Einfahren eines doppelt wirkenden Zylinders',
+              '<p>Beim Einfahren eines doppelt wirkenden Zylinders soll eine Kraft von F = 350 N erzeugt werden. Der Druck beträgt pe = 5,5 bar. Der Wirkungsgrad beträgt 88 %.</p>' +
+              fig('zylinder-einfahren.jpg', 'Doppelt wirkender Zylinder beim Einfahren mit der Kraft F; daneben die Ansicht auf Kolbenstange mit 10 mm und Kolben mit 32 mm Durchmesser',
+                  'Doppelt wirkender Zylinder beim Einfahren: Kolbenstange ø10 mm, Kolben ø32 mm', 'hell', breite=560, w=926, h=318) +
+              loesung('<p>Das Arbeitsblatt nennt keine Frage. Aus den Zahlen und dem Bild bietet sich an: Welcher Kolbendurchmesser ist nötig, und wird mit den Maßen im Bild (ø32 mm, Stange ø10 mm) die Kraft erreicht? '
+                      'Beim Einfahren wirkt der Druck nur auf die <strong>Ringfläche</strong>.</p>' +
+                      zeilen([('Gegeben', 'F = 350 N, pe = 5,5 bar = 0,55 N/mm², η = 0,88, Kolbenstange d = 10 mm'),
+                              ('Ringfläche', 'A = F / (pe · η) = 350 N / (0,55 N/mm² · 0,88) = %s mm²' % de(a2_erf)),
+                              ('Durchmesser', 'D² = 4A/π + d² = %s mm² + 100 mm² → D = %s mm ≈ 32 mm' % (de(4 * a2_erf / math.pi), de(d2)), 'erg'),
+                              ('Probe', 'ø32/ø10: A = π/4 · (32² − 10²) mm² = %s mm²; F = 0,55 N/mm² · %s mm² · 0,88 = %s N ≈ 350 N' % (de(a2), de(a2), de(f2)))])), 'Beispiel 2', anker='b2')
+    b += wrap('B3', 'Spannstock mit Kipphebel',
+              '<p>Ein Werkstück wird zum Überfräsen in einen Spannstock eingespannt. Ein mit pe = 6 bar beaufschlagter Kolben betätigt einen Kipphebel, der auf der kürzeren Hebelseite die bewegliche Spannbacke gegen das Werkstück drückt.</p>'
+              '<p>Wie groß ist die Spannkraft F2, wenn der Wirkungsgrad 88 % beträgt?</p>' +
+              fig('spannstock-kipphebel.jpg', 'Spannstock im Schnitt: Kolben mit 140 mm Durchmesser, Hebelarm 150 mm von der Kolbenachse zum Drehpunkt und 50 mm vom Drehpunkt zur Spannkraft F2, Druck 6 bar',
+                  'Spannstock: Kolben ø140 mm, Hebelarme 150 mm und 50 mm', 'hell', breite=420, w=556, h=389) +
+              loesung(zeilen([('Gegeben', 'D = 140 mm, pe = 6 bar = 0,6 N/mm², η = 0,88; Hebelarme laut Bild: l<sub>1</sub> = 150 mm (Kolbenachse bis Drehpunkt), l<sub>2</sub> = 50 mm (Drehpunkt bis F<sub>2</sub>)'),
+                              ('Fläche', 'A = π/4 · (140 mm)² = %s mm²' % de(a3, 0)),
+                              ('Kolbenkraft', 'F<sub>1</sub> = pe · A · η = 0,6 N/mm² · %s mm² · 0,88 = %s N' % (de(a3, 0), de(f3a, 0))),
+                              ('Hebel', 'F<sub>1</sub> · l<sub>1</sub> = F<sub>2</sub> · l<sub>2</sub> → F<sub>2</sub> = F<sub>1</sub> · l<sub>1</sub> / l<sub>2</sub> = %s N · 150 / 50' % de(f3a, 0)),
+                              ('Ergebnis', 'F<sub>2</sub> = %s N ≈ %s kN' % (de(f3b, 0), de(f3b / 1000)), 'erg'),
+                              ('Hinweis', 'Der Wirkungsgrad gilt für die ganze Anordnung und wird einmal berücksichtigt.')])), 'Beispiel 3', anker='b3')
+    b += wrap('B4', 'Zangengreifer',
+              '<p>Die Zylindereinheit eines pneumatischen Zangengreifers wird mit pe = 4,5 bar beaufschlagt. Für die Kolbenkraft in der Stange ist F = 120 N nötig, wenn sich die Zange schließt. Der Zylinderdurchmesser D beträgt 25 mm.</p>'
+              '<p>Wie groß muss der Stangendurchmesser d in mm bei einem Wirkungsgrad von 92 % werden?</p>' +
+              fig('zangengreifer.jpg', 'Pneumatischer Zangengreifer: Zylindereinheit mit Kolbenstange, die über Gelenke die Zangenbacken schließt; Kraft F gleich 120 N, Druck 4,5 bar',
+                  'Zangengreifer: F = 120 N, pe = 4,5 bar', 'hell', breite=420, w=556, h=321) +
+              loesung('<p>Beim Schließen der Zange fährt der Kolben ein: Der Druck wirkt auf die <strong>Ringfläche</strong>.</p>' +
+                      zeilen([('Gegeben', 'pe = 4,5 bar = 0,45 N/mm², F = 120 N, D = 25 mm, η = 0,92'),
+                              ('Ringfläche', 'A = F / (pe · η) = 120 N / (0,45 N/mm² · 0,92) = %s mm²' % de(a4r)),
+                              ('Kolbenfläche', 'A<sub>K</sub> = π/4 · (25 mm)² = %s mm²' % de(a4k)),
+                              ('Stangenfläche', 'A<sub>S</sub> = A<sub>K</sub> − A = %s mm² − %s mm² = %s mm²' % (de(a4k), de(a4r), de(a4s))),
+                              ('Ergebnis', 'd = √(4 · A<sub>S</sub> / π) = %s mm ≈ 16 mm' % de(d4), 'erg')])), 'Beispiel 4', anker='b4')
+
+    # ── Übungen ──
+    kopf = '<tr><th>Zylinder</th><th>D</th><th>pe</th><th>A</th><th>F<sub>th</sub></th><th>F (η = 0,85)</th></tr>'
+    zl = ''.join('<tr%s><td><strong>%s</strong></td><td>%d mm</td><td>%d bar</td><td>%s mm²</td><td>%s N</td><td><strong>%s N</strong></td></tr>'
+                 % ('', n, D, pe, de(A_), de(Fth), de(F_)) for n, D, pe, A_, Fth, F_ in u1)
+    b += wrap('Ü1', 'Kolbenkräfte einfach wirkender Zylinder',
+              '<p>Wie groß sind die Kolbenkräfte für die einfach wirkenden Pneumatikzylinder a bis c? Der Wirkungsgrad der Zylinder beträgt jeweils 85 %.</p>'
+              '<div class="tbl-wrap"><table><tr><th>Zylinder</th><th>D in mm</th><th>pe in bar</th></tr><tr><td><strong>a</strong></td><td>80</td><td>6</td></tr>'
+              '<tr><td><strong>b</strong></td><td>63</td><td>8</td></tr><tr><td><strong>c</strong></td><td>50</td><td>4</td></tr></table></div>' +
+              loesung('<p>Je Zylinder: A = π/4 · D², F<sub>th</sub> = pe · A, F = F<sub>th</sub> · η.</p><div class="tbl-wrap"><table>%s%s</table></div>' % (kopf, zl)), 'Übung 1', anker='u1')
+    b += wrap('Ü2', 'Kolbenstangenrückführung',
+              '<p>Nach dem Ausfahren des doppelt wirkenden Zylinders wird das 3/2-Wegeventil wieder losgelassen.</p>'
+              '<p>Mit welcher Kraft fährt der Zylinderkolben mit D = 25 mm und Stangendurchmesser d = 10 mm in seine Endlage zurück, wenn das Druckregelventil für einen konstanten Rückstelldruck sorgt und der Wirkungsgrad 90 % beträgt?</p>' +
+              fig('kolbenstangenrueckfuehrung.jpg', 'Schaltplan: doppelt wirkender Zylinder, 3/2-Wegeventil mit 6 bar Versorgungsdruck und Druckregelventil mit Entlastungsöffnung, am Zylinder liegen 0,5 bar an',
+                  'Schaltplan: Versorgung pe = 6 bar, Rückstelldruck pe = 0,5 bar', 'hell', breite=380, w=720, h=623) +
+              loesung(zeilen([('Gegeben', 'D = 25 mm, d = 10 mm, η = 0,9, Rückstelldruck pe = 0,5 bar = 0,05 N/mm² (laut Bild)'),
+                              ('Ringfläche', 'A = π/4 · (D² − d²) = π/4 · (25² − 10²) mm² = %s mm²' % de(a_u2)),
+                              ('Ergebnis', 'F = pe · A · η = 0,05 N/mm² · %s mm² · 0,9 ≈ %s N' % (de(a_u2), de(f_u2)), 'erg')])), 'Übung 2', anker='u2')
+    b += wrap('Ü3', 'Konstante Kraft an Pneumatikzylindern',
+              '<p>Ein doppelt wirkender Zylinder hat die Maße 63 x 20 x 125 und einen Wirkungsgrad von 85 %. Er soll im Vorhub als auch im Rückhub die gleiche Kraft F = 1480 N aufbringen.</p>'
+              '<p>Auf welchen Druck müssen die Regelventile eingestellt werden, damit die gleiche Kraft erzielt werden kann?</p>' +
+              fig('druckregelventil.jpg', 'Druckregelventil im Schnitt mit Eingangsdruck pe1 und Ausgangsdruck pe2 sowie das zugehörige Schaltzeichen',
+                  'Druckregelventil: Eingangsdruck p<sub>e1</sub>, Ausgangsdruck p<sub>e2</sub>', 'hell', breite=380, w=831, h=643) +
+              loesung('<p>Maße üblicherweise: Kolben ø63 mm, Kolbenstange ø20 mm, Hub 125 mm. Im Vorhub wirkt der Druck auf die volle Kolbenfläche, im Rückhub nur auf die Ringfläche, '
+                      'also braucht der Rückhub einen höheren Druck.</p>' +
+                      zeilen([('Gegeben', 'F = 1480 N, η = 0,85'),
+                              ('Vorhub', 'A = π/4 · 63² = %s mm² → pe = F / (A · η) = 1480 N / (%s mm² · 0,85) = %s N/mm² = %s bar' % (de(a_v), de(a_v), de(p_v, 4), de(p_v * 10, 2)), 'erg'),
+                              ('Rückhub', 'A = π/4 · (63² − 20²) = %s mm² → pe = 1480 N / (%s mm² · 0,85) = %s N/mm² = %s bar' % (de(a_r), de(a_r), de(p_r, 4), de(p_r * 10, 2)), 'erg')])), 'Übung 3', anker='u3')
+    b += wrap('Ü4', 'Pneumatisch Spannen',
+              '<p>Für die pneumatische Spannvorrichtung sollen bei einem Wirkungsgrad von 0,87 folgende Werte berechnet werden:</p>'
+              '<ul><li>a) Die wirksame Kolbenkraft F1, bei einem Kolbendurchmesser von 32 mm.</li>'
+              '<li>b) Die wirksame Spannkraft F2, wenn das Übersetzungsverhältnis des Hebels i = l1 : l2 = 2,8 : 1 beträgt.</li></ul>' +
+              fig('pneumatisch-spannen.jpg', 'Pneumatische Spannvorrichtung: Zylinder mit 5 bar drückt mit der Kraft F1 auf den Hebel mit den Armen l1 und l2, am kurzen Arm entsteht die Spannkraft F2',
+                  'Spannvorrichtung: pe = 5,0 bar, Hebelarme l<sub>1</sub> und l<sub>2</sub>', 'hell', breite=420, w=745, h=566) +
+              loesung(zeilen([('Gegeben', 'D = 32 mm, pe = 5,0 bar = 0,5 N/mm² (laut Bild), η = 0,87, i = 2,8'),
+                              ('a)', 'A = π/4 · (32 mm)² = %s mm² → F<sub>1</sub> = pe · A · η = 0,5 N/mm² · %s mm² · 0,87 = %s N ≈ %s N' % (de(a_u4), de(a_u4), de(f_u4a), de(f_u4a, 0)), 'erg'),
+                              ('b)', 'F<sub>2</sub> = F<sub>1</sub> · i = %s N · 2,8 = %s N ≈ %s N' % (de(f_u4a), de(f_u4b), de(f_u4b, 0)), 'erg')])), 'Übung 4', anker='u4')
+
+    kurz = [('Druck', 'p = F / A'), ('Theoretische Kolbenkraft', 'F<sub>th</sub> = pe · A'), ('Wirksame Kolbenkraft', 'F = pe · A · η'),
+            ('Kolbenfläche', 'A = π/4 · D²'), ('Ringfläche (Einfahren)', 'A = π/4 · (D² − d²)'), ('Hebel', 'F<sub>1</sub> · l<sub>1</sub> = F<sub>2</sub> · l<sub>2</sub>'),
+            ('Umrechnung', '1 bar = 10 N/cm² = 0,1 N/mm² = 100 kPa = 100 000 Pa')]
+    b += wrap('', 'Kurz gemerkt', '<div class="tbl-wrap"><table>%s</table></div>' % ''.join('<tr><td><strong>%s</strong></td><td>%s</td></tr>' % kv for kv in kurz), anker='merker')
+    jump = [('s1', '1'), ('s2', '2'), ('s3', '3'), ('s4', '4'), ('b1', 'B1'), ('b2', 'B2'), ('b3', 'B3'), ('b4', 'B4'), ('u1', 'Ü1'), ('u2', 'Ü2'), ('u3', 'Ü3'), ('u4', 'Ü4'), ('merker', 'Merker')]
+    seite('faecher/mathematik/pneumatik-grundlagen.html', 'am', 'AM3 — Pneumatik: Grundlagen', '🔧 3Mb · Pneumatik',
+          'Druck · Kolbenkraft · Wirkungsgrad · Beispiele und Übungen mit Lösungsvorschlägen', 'p = F / A', 
+          '<div class="notice-box"><strong>Hinweis:</strong> Die Beispiele und Übungen stammen aus dem Arbeitsblatt „Pneumatik“ (AM3). '
+          'Die Lösungen sind eigene Lösungsvorschläge, bei Abweichungen gilt die Lösung aus dem Unterricht.</div>\n' + b, jump, 'Abschnitt',
+          extra_nav='<button class="btn" id="sol-toggle" type="button">Alle Lösungen zeigen</button>', extra_css=FIG_CSS)
+
 if __name__ == '__main__':
     import sys
-    todo = sys.argv[1:] or ['met', 'aee', 'mathe', 'aee3']
+    todo = sys.argv[1:] or ['met', 'aee', 'mathe', 'aee3', 'pneu']
     if 'met' in todo: met()
     if 'aee' in todo: aee()
     if 'mathe' in todo: print('Punktesumme Mathe:', mathe())
     if 'aee3' in todo: aee3()
+    if 'pneu' in todo: pneu()
