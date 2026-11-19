@@ -1,6 +1,7 @@
 // Baut den Suchindex und die Seitenliste des Lernportals aus faecher.json und den Fachseiten.
 //   shared/daten.js   Fächer, Seiten und alle durchsuchbaren Abschnitte (für index.html)
 //   shared/seiten.js  nur Fächer und Seiten (für die Querverweise auf den Fachseiten)
+//   shared/stundenplan.js und shared/schularbeiten.js  aus stundenplan.json und schularbeiten.json (siehe tools/plan.mjs)
 // Bindet außerdem hub.css und hub.js in jede gelistete Seite ein, falls sie noch fehlen.
 // Aufruf:  node tools/build.mjs     (braucht "playwright")
 import { createRequire } from 'node:module';
@@ -8,6 +9,7 @@ const { chromium } = createRequire(import.meta.url)('playwright');
 import { readFileSync, writeFileSync } from 'node:fs';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 import path from 'node:path';
+import { baue } from './plan.mjs';
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const faecher = JSON.parse(readFileSync(path.join(root, 'faecher.json'), 'utf8'));
@@ -76,46 +78,17 @@ await browser.close();
 
 const kopf = '/* Automatisch erzeugt von tools/build.mjs – nicht von Hand ändern. */\n';
 
-// ── Stundenplan: stundenplan.json prüfen und als shared/stundenplan.js ausgeben ──────────────────────────
+// ── Stundenplan und Schularbeiten: prüfen, zu konkreten Wochen aufbereiten und ausgeben ──────────────────
 {
-  const plan = JSON.parse(readFileSync(path.join(root, 'stundenplan.json'), 'utf8'));
-  const fehler = [];
-  const hm = /^([01]\d|2[0-3]):[0-5]\d$/, datum = /^\d{4}-\d{2}-\d{2}$/;
-  const min = s => +s.slice(0, 2) * 60 + +s.slice(3);
-  let vorher = -1;
-  plan.einheiten.forEach(([a, b], i) => {
-    if (!hm.test(a) || !hm.test(b) || min(a) >= min(b)) fehler.push(`Einheit ${i + 1}: ungültige Zeiten ${a}–${b}`);
-    if (min(a) < vorher) fehler.push(`Einheit ${i + 1}: beginnt vor dem Ende der vorigen`);
-    vorher = min(b);
-  });
-  // Portal-Fächer liefern Farbe und Name; weitere Fächer bringen ihre Farbe selbst mit
-  for (const [code, f] of Object.entries(plan.faecher)) {
-    const p = f.portal && faecher.find(x => x.id === f.portal);
-    if (f.portal && !p) fehler.push(`Fach ${code}: Portal-Fach "${f.portal}" gibt es nicht`);
-    if (p) { f.farbe = p.farbe; f.farbeDunkel = p.farbeDunkel; f.portalName = p.name; }
-    else if (!f.farbe || !f.farbeDunkel) fehler.push(`Fach ${code}: Farbe fehlt`);
-  }
-  let bloecke = 0;
-  plan.wochen.forEach((w, wi) => {
-    if (!datum.test(w.von) || !datum.test(w.bis) || w.von > w.bis) fehler.push(`Woche ${wi + 1}: ungültiger Zeitraum`);
-    for (const [tag, liste] of Object.entries(w.tage)) {
-      if (!['mo', 'di', 'mi', 'do', 'fr', 'sa', 'so'].includes(tag)) fehler.push(`Woche ${wi + 1}: unbekannter Tag "${tag}"`);
-      const belegt = new Set();
-      for (const b of liste) {
-        bloecke++;
-        const wo = `Woche ${wi + 1} ${tag} ab ${b.ab}`;
-        if (!Number.isInteger(b.ab) || !Number.isInteger(b.bis) || b.ab < 1 || b.bis > plan.einheiten.length || b.ab > b.bis) fehler.push(`${wo}: ungültige Einheiten`);
-        if (!plan.faecher[b.fach]) fehler.push(`${wo}: Fach "${b.fach}" ist nicht definiert`);
-        if (!b.gruppen?.length) fehler.push(`${wo}: keine Lehrkraft angegeben`);
-        for (const g of b.gruppen || []) if (!plan.lehrer[g.lehrer]) fehler.push(`${wo}: Kürzel "${g.lehrer}" fehlt in "lehrer"`);
-        if (b.status && !['aenderung', 'entfall', 'pruefung'].includes(b.status)) fehler.push(`${wo}: unbekannter Status "${b.status}"`);
-        for (let n = b.ab; n <= b.bis; n++) { if (belegt.has(n)) fehler.push(`${wo}: Einheit ${n} ist doppelt belegt`); belegt.add(n); }
-      }
-    }
-  });
-  if (fehler.length) { console.error('stundenplan.json fehlerhaft:\n - ' + fehler.join('\n - ')); process.exit(1); }
-  writeFileSync(path.join(root, 'shared', 'stundenplan.js'), kopf + 'window.STUNDENPLAN = ' + JSON.stringify(plan) + ';\n');
-  console.log(`stundenplan.js: ${plan.wochen.length} Woche(n), ${bloecke} Blöcke, ${Object.keys(plan.lehrer).length} Lehrkräfte`);
+  const lies = f => JSON.parse(readFileSync(path.join(root, f), 'utf8'));
+  const r = baue(lies('stundenplan.json'), faecher, lies('schularbeiten.json').schularbeiten);
+  r.warnungen.forEach(w => console.warn('Hinweis: ' + w));
+  if (r.fehler.length) { console.error('Stundenplan oder Schularbeiten fehlerhaft:\n - ' + r.fehler.join('\n - ')); process.exit(1); }
+  writeFileSync(path.join(root, 'shared', 'stundenplan.js'), kopf + 'window.STUNDENPLAN = ' + JSON.stringify(r.plan) + ';\n');
+  writeFileSync(path.join(root, 'shared', 'schularbeiten.js'), kopf + 'window.SCHULARBEITEN = ' + JSON.stringify(r.schularbeiten) + ';\n');
+  const bloecke = r.plan.wochen.reduce((n, w) => n + Object.values(w.tage).reduce((m, l) => m + l.length, 0), 0);
+  console.log(`stundenplan.js: ${r.plan.wochen.length} Wochen (${r.plan.wochen[0].von} bis ${r.plan.wochen.at(-1).bis}), ${bloecke} Blöcke, ${Object.keys(r.plan.lehrer).length} Lehrkräfte`);
+  console.log(`schularbeiten.js: ${r.schularbeiten.length} Termine`);
 }
 
 const stand = new Date().toISOString().slice(0, 10);
