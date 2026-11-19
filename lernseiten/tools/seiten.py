@@ -113,7 +113,7 @@ window.addEventListener('scroll',function(){var sh=document.documentElement.scro
 })();
 """
 
-def seite(pfad, farbe, titel, badge, motto, deco, body, jump=(), jump_label='Abschnitt', mathjax=False, extra_nav=''):
+def seite(pfad, farbe, titel, badge, motto, deco, body, jump=(), jump_label='Abschnitt', mathjax=False, extra_nav='', extra_css=''):
     h, d = FARBEN[farbe]
     keys = ('p', 'pl', 'bg', 'soft', 'soft2', 'bd', 'h1', 'h2')
     css = CSS % {**dict(zip(keys, h)), **dict(zip(['d' + k for k in keys], d))}
@@ -127,7 +127,7 @@ def seite(pfad, farbe, titel, badge, motto, deco, body, jump=(), jump_label='Abs
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap">
 {'<script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/3.2.2/es5/tex-mml-chtml.min.js"></script>' if mathjax else ''}
-<style>{css}</style>
+<style>{css}{extra_css}</style>
 </head>
 <body>
 <div id="top-progress-bar"></div>
@@ -274,5 +274,258 @@ def mathe():
           extra_nav='<button class="btn" id="sol-toggle" type="button">Alle Lösungen zeigen</button>')
     return sum(a[1] for a in AUFGABEN)
 
+
+# ───────────────────────── AEE 3. Jahr (3Mb): Drehstrom, Einheit 1 + Arbeitsblatt Dreiphasenwechselspannung ─────────────────────────
+import math
+
+AEE3_CSS = """
+/* Abbildungen: Bilder bekommen einen hellen (Dunkelmodus: dunklen) Rahmen, Tafelbilder auf Schwarz werden im Hellmodus umgekehrt */
+.fig{margin:.6rem auto 1rem;text-align:center}
+.fig-row{display:flex;flex-wrap:wrap;gap:.9rem 1.2rem;justify-content:center;align-items:flex-start;margin:.6rem 0 1rem}
+.fig-row .fig{margin:0;flex:0 1 auto;max-width:100%}
+.bild{display:block;line-height:0;border:1px solid var(--border);border-radius:10px;overflow:hidden;background:#fff}
+body.dark .bild{background:#000}
+.bild img,.bild svg,.bild a{display:block;width:100%;height:auto}
+body.dark .fig.hell img{filter:invert(1) hue-rotate(180deg)}
+body:not(.dark) .fig.dunkel img{filter:invert(1) hue-rotate(180deg)}
+.fig figcaption{font-size:.8rem;color:var(--muted);margin:.4rem auto 0;line-height:1.4;max-width:34rem}
+/* eigene Diagramme (SVG) */
+.fig.svg .bild,body.dark .fig.svg .bild{display:block;background:var(--card)}
+.fig-row .fig.svg{flex:1 1 230px;max-width:330px}
+.fig-row .fig.svg.breit{flex:2 1 400px;max-width:640px}
+.sv .g{stroke:var(--muted);stroke-width:1;opacity:.3;fill:none}
+.sv .ax{stroke:var(--muted);stroke-width:1.4;fill:none}
+.sv .af{fill:var(--muted);stroke:none}
+.sv .tx{fill:var(--muted);font:500 15px 'JetBrains Mono',monospace;paint-order:stroke;stroke:var(--card);stroke-width:4px;stroke-linejoin:round}
+.sv .k1{--k:#2563eb}.sv .k2{--k:#d97706}.sv .k3{--k:#059669}
+body.dark .sv .k1{--k:#60a5fa}body.dark .sv .k2{--k:#fbbf24}body.dark .sv .k3{--k:#34d399}
+.sv .ln{fill:none;stroke:var(--k);stroke-width:2.6;stroke-linejoin:round;stroke-linecap:round}
+.sv .pf{fill:var(--k);stroke:none}
+.sv .ring{fill:none;stroke:var(--k);stroke-width:2}
+.sv .lb{fill:var(--k);font:700 21px Inter,sans-serif;paint-order:stroke;stroke:var(--card);stroke-width:4px;stroke-linejoin:round}
+.sv .mk{stroke:var(--muted);stroke-width:1.2;stroke-dasharray:4 4;fill:none}
+.vorteile li{margin-bottom:.45rem}
+@media(max-width:560px){.sv.lin .tx{font-size:22px;stroke-width:5px}.sv.lin .lb{font-size:29px}.sv.lin .ln{stroke-width:3.4}}
+"""
+
+def _f(x):
+    return '%.1f' % x
+
+def _pfeil(x0, y0, x1, y1, kl='ax', fl='af', sz=9):
+    """Linie mit Pfeilspitze (Spitze als Dreieck gezeichnet, damit keine marker-IDs nötig sind)"""
+    a = math.atan2(y1 - y0, x1 - x0)
+    bx, by = x1 - sz * math.cos(a), y1 - sz * math.sin(a)
+    px, py = -math.sin(a) * sz * .4, math.cos(a) * sz * .4
+    return ('<line class="%s" x1="%s" y1="%s" x2="%s" y2="%s"/><polygon class="%s" points="%s,%s %s,%s %s,%s"/>'
+            % (kl, _f(x0), _f(y0), _f(bx), _f(by), fl, _f(x1), _f(y1), _f(bx + px), _f(by + py), _f(bx - px), _f(by - py)))
+
+UH = 325  # Scheitelwert in V (Arbeitsblatt)
+PHASEN = ((1, 0, 'u₁'), (2, 120, 'u₂'), (3, 240, 'u₃'))   # (Nr, Nacheilung in °, Name)
+
+def diagramm_linien(pid, alle=True, marke=False):
+    """Liniendiagramm der Strangspannungen über α; alle=False zeigt nur u₁ (Aufgabenstellung), marke=True markiert α = 150°"""
+    W, H, x0, x1, yc, A = 640, 304, 74, 586, 152, 112
+    X = lambda a: x0 + (x1 - x0) * a / 360
+    Y = lambda u: yc - A * u / UH
+    namen = 'u₁, u₂ und u₃' if alle else 'u₁'
+    o = ['<svg class="sv lin" viewBox="0 0 %d %d" role="img" aria-labelledby="%s-t"><title id="%s-t">Liniendiagramm der Spannung %s über dem Winkel α in Grad, Scheitelwert 325 V</title>' % (W, H, pid, pid, namen)]
+    for a in range(0, 361, 30):
+        o.append('<line class="g" x1="%s" y1="%s" x2="%s" y2="%s"/>' % (_f(X(a)), _f(Y(UH) - 10), _f(X(a)), _f(Y(-UH) + 10)))
+    for u in (UH, UH / 2, -UH / 2, -UH):
+        o.append('<line class="g" x1="%s" y1="%s" x2="%s" y2="%s"/>' % (_f(x0), _f(Y(u)), _f(x1 + 6), _f(Y(u))))
+    o.append(_pfeil(x0 - 8, yc, x1 + 22, yc))
+    o.append(_pfeil(x0, Y(-UH) + 14, x0, Y(UH) - 24))
+    for a in (0, 90, 180, 270, 360):
+        o.append('<text class="tx" x="%s" y="%s" text-anchor="middle">%d</text>' % (_f(X(a)), _f(Y(-UH) + 28), a))
+    for u, t in ((UH, '325'), (0, '0'), (-UH, '−325')):
+        o.append('<text class="tx" x="%s" y="%s" text-anchor="end">%s</text>' % (_f(x0 - 8), _f(Y(u) + 4), t))
+    o.append('<text class="tx" x="%s" y="%s" text-anchor="start">u in V</text>' % (_f(x0 + 10), _f(Y(UH) - 20)))
+    o.append('<text class="tx" x="%d" y="%s" text-anchor="end">α in °</text>' % (W - 6, _f(yc + 26)))
+    for k, ph, nm in (PHASEN if alle else PHASEN[:1]):
+        pts = ' '.join('%s,%s' % (_f(X(a)), _f(Y(UH * math.sin(math.radians(a - ph))))) for a in range(0, 361, 3))
+        o.append('<g class="k%d"><polyline class="ln" points="%s"/><text class="lb" x="%s" y="%s">%s</text></g>'
+                 % (k, pts, _f(X(90 + ph if 90 + ph <= 360 else 90 + ph - 360) + 10), _f(Y(UH) - 7), nm))
+    if marke:
+        xm = X(150)
+        o.append('<line class="mk" x1="%s" y1="%s" x2="%s" y2="%s"/><text class="tx" x="%s" y="%s" text-anchor="middle">α = 150°</text>'
+                 % (_f(xm), _f(Y(UH) - 14), _f(xm), _f(Y(-UH) + 12), _f(xm), _f(Y(UH) - 20)))
+        for k, ph, nm in PHASEN:
+            yv = Y(UH * math.sin(math.radians(150 - ph)))
+            o.append('<g class="k%d">%s</g>' % (k, '<circle class="pf" cx="%s" cy="%s" r="4.5"/>' % (_f(xm), _f(yv)) if k != 2 else '<circle class="ring" cx="%s" cy="%s" r="8"/>' % (_f(xm), _f(yv))))
+    o.append('</svg>')
+    return ''.join(o)
+
+def diagramm_zeiger(pid, alle=True):
+    """Zeigerbild (Kreisdiagramm): u₁ bei 0°, u₂ 120° und u₃ 240° im Uhrzeigersinn dahinter; alle Zeiger Länge Û = 325 V"""
+    W = H = 300; cx = cy = 150; R = 104
+    P = lambda ang, r=R: (cx + r * math.cos(math.radians(ang)), cy - r * math.sin(math.radians(ang)))
+    namen = 'u₁, u₂ und u₃' if alle else 'u₁'
+    o = ['<svg class="sv" viewBox="0 0 %d %d" role="img" aria-labelledby="%s-t"><title id="%s-t">Zeigerbild der Spannung %s, Länge des Zeigers entspricht 325 V</title>' % (W, H, pid, pid, namen),
+         '<circle class="g" cx="%d" cy="%d" r="%d"/>' % (cx, cy, R),
+         '<line class="g" x1="%d" y1="%d" x2="%d" y2="%d"/><line class="g" x1="%d" y1="%d" x2="%d" y2="%d"/>' % (cx - R - 16, cy, cx + R + 16, cy, cx, cy - R - 16, cx, cy + R + 16)]
+    for k, ph, nm in (PHASEN if alle else PHASEN[:1]):
+        tx, ty = P(-ph)
+        lx, ly = P(-ph, R + 17)
+        o.append('<g class="k%d">%s<text class="lb" x="%s" y="%s" text-anchor="middle">%s</text></g>'
+                 % (k, _pfeil(cx, cy, tx, ty, 'ln', 'pf', 11), _f(lx), _f(ly + 5), nm))
+    if alle:
+        for a1, a2, am in ((-10, -110, -60), (-130, -230, -180), (-250, -350, -300)):
+            (x1, y1), (x2, y2), (mx, my) = P(a1, 32), P(a2, 32), P(am, 56)
+            o.append('<path class="ax" d="M %s %s A 32 32 0 0 1 %s %s"/><text class="tx" x="%s" y="%s" text-anchor="middle">120°</text>' % (_f(x1), _f(y1), _f(x2), _f(y2), _f(mx), _f(my + 4)))
+    o.append('<text class="tx" x="%s" y="%s" text-anchor="end">Û = 325 V</text>' % (_f(cx + R + 8), _f(cy - 10)))
+    o.append('</svg>')
+    return ''.join(o)
+
+def fig(src, alt, cap, art='hell', breite=None, w=None, h=None):
+    """Bild mit Beschriftung; art='hell': Zeichnung auf weißem Grund, 'dunkel': Tafelbild auf Schwarz (wird dem Design angepasst)"""
+    mw = breite or w
+    st = ' style="width:min(100%%,%dpx)"' % mw if mw else ''
+    wh = ' width="%d" height="%d"' % (w, h) if w and h else ''
+    return ('<figure class="fig %s"%s><div class="bild"><a href="bilder/%s" target="_blank" rel="noopener" title="Bild in voller Größe öffnen"><img src="bilder/%s" alt="%s"%s loading="lazy"></a></div><figcaption>%s</figcaption></figure>'
+            % (art, st, src, src, html.escape(alt, quote=True), wh, cap))
+
+def fig_svg(svg, cap, breit=False):
+    return '<figure class="fig svg%s"><div class="bild">%s</div><figcaption>%s</figcaption></figure>' % (' breit' if breit else '', svg, cap)
+
+def loesung(inhalt):
+    return '<details class="loesung"><summary>Lösung zeigen</summary><div class="sum-body md-out">%s</div></details>' % inhalt
+
+def aee3():
+    # ── Seite 1: Einheit 1 · Drehstrom (aus den Unterrichtsnotizen) ──
+    b = ''
+    b += wrap('1', 'Was ist Drehstrom?',
+              '<p>Drehstrom wird aus Wasser- und Windkraft oder aus thermischer Energie mit <strong>Synchronmaschinen</strong> erzeugt. '
+              'Mit <strong>Wechselrichtern</strong> kann Drehstrom auch aus Gleichstrom (Photovoltaik, Batterien) umgewandelt werden.</p>', anker='s1')
+    b += wrap('2', 'Dreiphasengenerator (Synchrongenerator)',
+              '<div class="fig-row">' +
+              fig('generator-staender.png', 'Ständer des Generators mit drei Spulen U1–U2, V1–V2 und W1–W2, die jeweils 120° auseinanderliegen; in der Mitte das drehende Polpaar',
+                  'Ständer mit drei Spulen, räumlich um 120° versetzt', 'hell', w=337, h=297) +
+              fig('generator-polrad.png', 'Schnitt durch den Generator: Das Polrad mit Nord- und Südpol dreht sich im Ständer, die Spulenseiten U1/U2, V1/V2 und W1/W2 liegen 120° auseinander',
+                  'Das Polpaar (N/S) dreht sich im Ständer', 'hell', w=296, h=302) +
+              '</div>'
+              '<ul>'
+              '<li>Bei jeder Drehung des Polpaares wird in jeder Spule eine Wechselspannung induziert.</li>'
+              '<li>Die Spulen sind räumlich um <strong>120°</strong> versetzt.</li>'
+              '<li>Die Wechselspannungen sind gleich groß und haben die gleiche Frequenz, sind aber um <strong>⅓ Periode, also 120°</strong>, zueinander phasenverschoben.</li>'
+              '<li>Die 3 Strangspannungen sind vollkommen gleichwertig.</li>'
+              '</ul>'
+              '<p class="fnote" style="font-size:.8rem;color:var(--muted)">Strang = eine der drei Spulen; Strangspannung = die Spannung an einer Spule.</p>', anker='s2')
+    b += wrap('3', 'Zeigerbild und Liniendiagramm',
+              fig('strangspannungen-zeiger-linien.png',
+                  'Links das Kreisdiagramm: drei Zeiger U Str 1, U Str 2 und U Str 3, jeweils 120° auseinander. Rechts das Liniendiagramm: drei gleiche Sinuskurven über dem Winkel, gegeneinander um 120° verschoben',
+                  'Links: Kreisdiagramm (Zeigerbild) · rechts: Liniendiagramm der drei Strangspannungen U<sub>Str1</sub>, U<sub>Str2</sub>, U<sub>Str3</sub>', 'hell', w=947, h=330) +
+              '<div class="info-box"><strong>Die Summe der drei Strangspannungen ist zu jedem Zeitpunkt gleich null.</strong></div>' +
+              fig('zeiger-summe-null.png',
+                  'Handskizze: Die drei Zeiger U Str 1, U Str 2 und U Str 3 mit Spitze an Fuß aneinandergelegt bilden ein geschlossenes Dreieck',
+                  'Die Zeiger aneinandergelegt (Spitze an Fuß) schließen sich zu einem Dreieck: Die Summe ist 0.', 'dunkel', breite=300, w=461, h=307), anker='s3')
+    b += wrap('4', 'Verkettung: Stern und Dreieck',
+              '<p>Die drei Stränge werden praktisch immer <strong>verkettet</strong>, dadurch ergeben sich besondere Vorteile.</p>'
+              '<p>Es gibt <strong>2 Möglichkeiten</strong> der Verkettung:</p>'
+              '<h3>Sternschaltung</h3>'
+              '<div class="fig-row">' +
+              fig('sternschaltung.png', 'Schaltbild der Sternschaltung: Die Spulenanfänge U1, V1, W1 liegen an den Leitungen L1, L2, L3, die Spulenenden U2, V2, W2 sind im Sternpunkt verbunden',
+                  'Schaltbild: Anfänge U1, V1, W1 an L1, L2, L3', 'hell', breite=300, w=715, h=671) +
+              fig('stern-verbindung.png', 'Handskizze: Die Enden W2, U2 und V2 werden miteinander verbunden',
+                  'Verbindung: Die Enden W2, U2, V2 werden zum Sternpunkt zusammengeschlossen', 'dunkel', breite=300, w=475, h=262) +
+              '</div>'
+              '<h3>Dreieckschaltung</h3>'
+              '<div class="fig-row">' +
+              fig('dreieckschaltung.png', 'Schaltbild der Dreieckschaltung: Die drei Spulen bilden ein Dreieck, an den Ecken liegen die Leitungen L1, L2, L3',
+                  'Schaltbild: An den Ecken liegen L1, L2, L3', 'hell', breite=300, w=857, h=714) +
+              fig('dreieck-verbindung.png', 'Handskizze: Das Ende jeder Spule wird mit dem Anfang der nächsten verbunden, also W2 mit U1, U2 mit V1 und V2 mit W1',
+                  'Verbindung: Ende einer Spule an den Anfang der nächsten (W2–U1, U2–V1, V2–W1)', 'dunkel', breite=300, w=477, h=335) +
+              '</div>'
+              '<h3>Unverkettet und verkettet im Vergleich</h3>' +
+              fig('verkettung-vergleich.png',
+                  'Oben der unverkettete Dreiphasenstrom: drei getrennte Stromkreise mit je zwei Leitungen. Unten der verkettete Dreiphasenstrom: die drei Stromkreise teilen sich eine gemeinsame Rückleitung',
+                  'Oben: unverketteter Dreiphasenstrom (drei getrennte Stromkreise) · unten: verketteter Dreiphasenstrom (gemeinsame Rückleitung)', 'dunkel', breite=640, w=1282, h=524), anker='s4')
+    b += wrap('5', 'Drehstrom und seine Vorteile',
+              '<div class="info-box"><strong>Drehstrom ist ein verketteter Dreiphasenwechselstrom.</strong></div>'
+              '<h3>Vorteile</h3>'
+              '<ul class="vorteile">'
+              '<li>Generatoren und Transformatoren sind kleiner als Wechselstromgeräte gleicher Leistung.</li>'
+              '<li>Bei der Übertragung großer Leistungen spart man 50 % Leitungsmaterial.</li>'
+              '<li>Drehstrommotoren lassen sich besonders günstig herstellen.</li>'
+              '<li>Im Drehstromnetz stehen 2 Spannungen zur Verfügung: einphasige und dreiphasige Verbraucher können angeschlossen werden.</li>'
+              '</ul>', anker='s5')
+    kurz = [('Erzeugung', 'Synchrongenerator: Das Polrad dreht sich im Ständer mit drei Spulen'),
+            ('Versatz', 'Spulen räumlich 120°, Spannungen zeitlich ⅓ Periode = 120°'),
+            ('Eigenschaften', 'gleich groß, gleiche Frequenz, vollkommen gleichwertig'),
+            ('Summe', 'u₁ + u₂ + u₃ = 0 zu jedem Zeitpunkt'),
+            ('Verkettung', 'Sternschaltung oder Dreieckschaltung')]
+    b += wrap('', 'Kurz gemerkt', '<div class="tbl-wrap"><table>%s</table></div>' % ''.join('<tr><td><strong>%s</strong></td><td>%s</td></tr>' % kv for kv in kurz), anker='merker')
+    seite('faecher/aee/drehstrom-einheit-1.html', 'aee', 'AEE3 — Einheit 1: Drehstrom', '⚡ 3Mb · Einheit 1',
+          'Entstehung · 120° Phasenverschiebung · Zeigerbild und Liniendiagramm · Verkettung in Stern und Dreieck · Vorteile',
+          'L1 L2 L3', b, [('s1', '1'), ('s2', '2'), ('s3', '3'), ('s4', '4'), ('s5', '5'), ('merker', 'Merker')], 'Abschnitt', extra_css=AEE3_CSS)
+
+    # ── Seite 2: Arbeitsblatt Dreiphasenwechselspannung (Aufgaben aus dem Arbeitsblatt, Lösungen als Vorschlag) ──
+    t = ''
+    t += ('<div class="info-box"><strong>Information:</strong> Die Elektroenergieversorgung erfolgt weltweit meistens mithilfe von Drehstromsystemen. '
+          'In Drehstromsystemen werden drei Wechselspannungen gemeinsam übertragen.</div>\n'
+          '<div class="notice-box"><strong>Hinweis:</strong> Die Aufgaben stammen aus dem Arbeitsblatt „Dreiphasenwechselspannung“ (AEE, 3Mb). '
+          'Die Lösungen sind eigene Lösungsvorschläge, bei Abweichungen gilt die Lösung aus dem Unterricht. '
+          'Hintergrund und Schaltbilder findest du in <a href="drehstrom-einheit-1.html">Einheit 1: Drehstrom</a>.</div>\n')
+    t += wrap('1', 'Entstehung einer Dreiphasenwechselspannung',
+              '<p>Beschreiben Sie mithilfe von Bild die Entstehung einer Dreiphasenwechselspannung.</p>' +
+              fig('generator-staender.png', 'Dreiphasengenerator: Ständer mit drei um 120° versetzten Spulen U1–U2, V1–V2, W1–W2 und drehendes Polpaar',
+                  'Bild: Dreiphasengenerator', 'hell', breite=300, w=337, h=297) +
+              loesung('<ul>'
+                      '<li>Im <strong>Ständer</strong> sitzen drei Spulen (U1–U2, V1–V2, W1–W2), räumlich um <strong>120°</strong> versetzt.</li>'
+                      '<li>Das <strong>Polrad</strong> (drehbarer Magnet mit Nord- und Südpol) wird angetrieben und dreht sich im Ständer.</li>'
+                      '<li>Das umlaufende Magnetfeld induziert in jeder Spule eine Wechselspannung (Induktionsgesetz).</li>'
+                      '<li>Weil die Spulen um 120° versetzt sind, erreicht jede Spannung ihren Höchstwert zeitlich nacheinander: '
+                      'Es entstehen drei Wechselspannungen, die um 120° (⅓ Periode) gegeneinander phasenverschoben sind.</li></ul>'), anker='a1')
+    t += wrap('2', 'Eigenschaften der drei Spannungen',
+              '<p>Welche Eigenschaften haben die drei Spannungen u₁, u₂ und u₃ eines Drehstromsystems?</p>' +
+              loesung('<ul>'
+                      '<li>gleich groß (gleicher Scheitelwert Û₁ = Û₂ = Û₃)</li>'
+                      '<li>gleiche Frequenz</li>'
+                      '<li>gegeneinander um 120° (⅓ Periode) phasenverschoben</li>'
+                      '<li>die Summe der Augenblickswerte ist zu jedem Zeitpunkt 0 V</li>'
+                      '<li>vollkommen gleichwertig</li></ul>'), anker='a2')
+    t += wrap('3', 'Spannungsgleichung für u₃',
+              '<p>Wie lautet die Spannungsgleichung für u₃?</p><p>Gegeben:</p>'
+              '<div class="formula-box">u₁ = Û₁ · sin α<br>u₂ = Û₂ · sin(α − 120°)</div>' +
+              loesung('<div class="formula-box">u₃ = Û₃ · sin(α − 240°)</div>'
+                      '<p>Jede Spannung eilt der vorigen um weitere 120° nach, bei u₃ sind es 240°. '
+                      'Mit Û₁ = Û₂ = Û₃ = Û und sin(α − 240°) = sin(α + 120°) kann man auch u₃ = Û · sin(α + 120°) schreiben.</p>'), anker='a3')
+    t += wrap('4', 'Liniendiagramm und Zeigerbild',
+              '<p>Ergänzen Sie im Bild die Spannungen u₂ und u₃ einer Dreiphasenwechselspannung als:</p>'
+              '<ul><li>a) Liniendiagramm</li><li>b) Zeigerbild</li></ul><p>Der Maximalwert Û beträgt jeweils 325 V.</p>'
+              '<div class="fig-row">' + fig_svg(diagramm_linien('a4-aufgabe-l', alle=False), 'Liniendiagramm (u₁ vorgegeben)', breit=True)
+              + fig_svg(diagramm_zeiger('a4-aufgabe-z', alle=False), 'Zeigerbild (u₁ vorgegeben)') + '</div>' +
+              loesung('<div class="fig-row">' + fig_svg(diagramm_linien('a4-lsg-l'), 'Liniendiagramm: u₂ ist um 120° nach rechts verschoben, u₃ um 240°', breit=True)
+                      + fig_svg(diagramm_zeiger('a4-lsg-z'), 'Zeigerbild: drei gleich lange Zeiger (Û = 325 V), jeweils 120° auseinander') + '</div>'
+                      '<ul>'
+                      '<li><strong>u₂</strong>: steigender Nulldurchgang bei 120°, Maximum bei 210°, Minimum bei 30°.</li>'
+                      '<li><strong>u₃</strong>: steigender Nulldurchgang bei 240°, Maximum bei 330°, Minimum bei 150°.</li>'
+                      '<li>Im Zeigerbild drehen die Zeiger gegen den Uhrzeigersinn; u₂ liegt 120° und u₃ 240° im Uhrzeigersinn hinter u₁ (nacheilend).</li></ul>'), anker='a4')
+    rows = [('Gegeben', 'Û = 325 V und α = 150°'),
+            ('u₁', 'u₁ = Û · sin α = 325 V · sin 150° = 325 V · 0,5 = 162,5 V'),
+            ('u₂', 'u₂ = Û · sin(α − 120°) = 325 V · sin 30° = 162,5 V'),
+            ('u₃', 'u₃ = Û · sin(α − 240°) = 325 V · sin(−90°) = −325 V'),
+            ('Ergebnis', 'u₁ + u₂ + u₃ = 162,5 V + 162,5 V − 325 V = 0 V')]
+    tab = ''.join('<tr%s><td>%s</td><td>%s</td></tr>' % (' class="erg"' if k == 'Ergebnis' else '', k, v) for k, v in rows)
+    t += wrap('5', 'Momentanwerte bei α = 150°',
+              '<p>Berechnen Sie für den Zeitpunkt α = 150° aus voriger Aufgabe die Momentanwerte für u₁, u₂ und u₃, anschließend die Summe der drei Momentanwerte.</p>' +
+              loesung('<div class="tbl-wrap"><table>%s</table></div>' % tab +
+                      fig_svg(diagramm_linien('a5-lsg-l', marke=True), 'Bei α = 150° sind u₁ und u₂ gleich groß (162,5 V), u₃ steht im Minimum (−325 V).', breit=True) +
+                      '<p>Die Summe ist 0 V, wie es für jede Dreiphasenwechselspannung gilt.</p>'), anker='a5')
+    t += wrap('6', 'Verkettungsarten',
+              '<p>Die Summe der Momentanwerte der drei Wechselspannungen ist immer gleich 0 V. Die drei Wechselspannungen werden meistens zusammengeschaltet (verkettet). '
+              'Nennen Sie die beiden in der Drehstromtechnik verwendeten Verkettungsarten.</p>' +
+              loesung('<ul><li><strong>Sternschaltung</strong>: die Spulenenden U2, V2, W2 werden im Sternpunkt verbunden.</li>'
+                      '<li><strong>Dreieckschaltung</strong>: das Ende jeder Spule wird mit dem Anfang der nächsten verbunden (U2–V1, V2–W1, W2–U1).</li></ul>'
+                      '<p>Schaltbilder: <a href="drehstrom-einheit-1.html#s4">Einheit 1, Abschnitt 4</a>.</p>'), anker='a6')
+    seite('faecher/aee/dreiphasenwechselspannung.html', 'aee', 'AEE3 — Dreiphasenwechselspannung', '📝 Arbeitsblatt · 6 Aufgaben mit Lösungsvorschlägen',
+          'Entstehung · Eigenschaften · Spannungsgleichung · Liniendiagramm und Zeigerbild · Momentanwerte · Verkettung',
+          'u = Û · sin α', t, [('a%d' % n, str(n)) for n in range(1, 7)], 'Aufgabe',
+          extra_nav='<button class="btn" id="sol-toggle" type="button">Alle Lösungen zeigen</button>', extra_css=AEE3_CSS)
+
 if __name__ == '__main__':
-    met(); aee(); print('Punktesumme Mathe:', mathe())
+    import sys
+    todo = sys.argv[1:] or ['met', 'aee', 'mathe', 'aee3']
+    if 'met' in todo: met()
+    if 'aee' in todo: aee()
+    if 'mathe' in todo: print('Punktesumme Mathe:', mathe())
+    if 'aee3' in todo: aee3()
