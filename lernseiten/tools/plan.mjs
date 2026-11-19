@@ -7,6 +7,7 @@
 
 const KEYS = ['mo', 'di', 'mi', 'do', 'fr', 'sa', 'so'];
 const STATUS = ['aenderung', 'entfall', 'pruefung'];
+const ARTEN = ['Schularbeit', 'Test'];            // Art eines Termins in schularbeiten.json (Standard: Schularbeit)
 const HM = /^([01]\d|2[0-3]):[0-5]\d$/;
 const ms = s => Date.UTC(+s.slice(0, 4), +s.slice(5, 7) - 1, +s.slice(8, 10));
 const iso = t => new Date(t).toISOString().slice(0, 10);
@@ -86,16 +87,18 @@ export function baue(quelle, portal = [], schularbeiten = []) {
   }
   const alle = [...wochen.values()].sort((a, b) => a.von.localeCompare(b.von));
 
-  // ── Schularbeiten: im Plan als „Prüfung“ kennzeichnen ──────────────────────
+  // ── Schularbeiten und Tests: im Plan als „Prüfung“ kennzeichnen (Hinweis = Art) ──────────
   const sa = [];
   const gesehen = new Set();
   (schularbeiten || []).forEach((s, i) => {
-    const wo = `Schularbeit ${i + 1}`;
+    const wo = `Termin ${i + 1}`;
+    const art = s.art || 'Schularbeit';
     if (!datumOk(s.datum)) return fehler.push(`${wo}: ungültiges Datum "${s.datum}"`);
     if (!plan.faecher?.[s.fach]) return fehler.push(`${wo}: Fach "${s.fach}" ist im Stundenplan nicht definiert`);
+    if (!ARTEN.includes(art)) return fehler.push(`${wo}: Art "${art}" ist unbekannt (erlaubt: ${ARTEN.join(', ')})`);
     if (gesehen.has(s.datum + s.fach)) return fehler.push(`${wo}: ${s.fach} am ${s.datum} steht doppelt drin`);
     gesehen.add(s.datum + s.fach);
-    sa.push(klon(s));
+    sa.push({ ...klon(s), art });
     const w = alle.find(x => x.von <= s.datum && s.datum <= x.bis);
     if (!w) return warnungen.push(`${wo} (${s.fach}, ${s.datum}): liegt außerhalb des hinterlegten Stundenplans, daher nicht markiert`);
     const treffer = (w.tage[tagKey(s.datum)] || []).filter(b => b.fach === s.fach);
@@ -103,7 +106,7 @@ export function baue(quelle, portal = [], schularbeiten = []) {
       warnungen.push(`${wo} (${s.fach}, ${s.datum}): laut Stundenplan gibt es an diesem Tag kein ${s.fach}, daher nicht markiert`);
       return;
     }
-    treffer.forEach(b => { b.status = 'pruefung'; b.hinweis = s.titel || 'Schularbeit'; });
+    treffer.forEach(b => { b.status = 'pruefung'; b.hinweis = art; });
   });
   sa.sort((a, b) => a.datum.localeCompare(b.datum));
   if (fehler.length) return { plan: null, schularbeiten: [], fehler, warnungen };

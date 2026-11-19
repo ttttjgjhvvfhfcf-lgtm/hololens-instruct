@@ -45,10 +45,14 @@ t('Freie Tage: 8.12., Weihnachtsferien 24.12.–6.1.', () => {
   assert.equal(alleBloecke(woche('2026-12-29')).length, 0); assert.equal(woche('2027-01-06').frei.mi, 'Weihnachtsferien');
   assert.equal(woche('2027-01-07').tage.do.length, 4);
 });
-t('Schularbeiten: genau die zwei AWL-Blöcke sind markiert', () => {
+t('Schularbeiten und Tests: genau diese fünf Blöcke sind markiert, mit ihrer Art als Hinweis', () => {
   const m = []; plan.wochen.forEach(w => Object.entries(w.tage).forEach(([k, l]) => l.forEach(b => { if (b.status === 'pruefung') m.push(w.von + ' ' + k + ' ' + b.fach + ' ' + b.ab + '-' + b.bis + ' ' + b.hinweis); })));
-  assert.deepEqual(m, ['2026-12-14 do AWL 3-4 Schularbeit', '2027-01-25 do AWL 3-4 Schularbeit']);
-  assert.deepEqual(r.schularbeiten, [{ datum: '2026-12-17', fach: 'AWL' }, { datum: '2027-01-28', fach: 'AWL' }]);
+  assert.deepEqual(m, ['2026-12-07 do AEE 6-8 Test', '2026-12-14 do AWL 3-4 Schularbeit', '2027-01-25 mi AM 4-5 Test', '2027-01-25 do AWL 3-4 Schularbeit', '2027-01-25 do AEE 6-8 Test']);
+  assert.deepEqual(r.schularbeiten, [
+    { datum: '2026-12-10', fach: 'AEE', art: 'Test' }, { datum: '2026-12-17', fach: 'AWL', art: 'Schularbeit' }, { datum: '2027-01-27', fach: 'AM', art: 'Test' },
+    { datum: '2027-01-28', fach: 'AWL', art: 'Schularbeit' }, { datum: '2027-01-28', fach: 'AEE', art: 'Test' }]);
+  // ohne Angabe gilt „Schularbeit“
+  assert.deepEqual(baue(quelle, portal, [{ datum: '2026-12-17', fach: 'AWL' }]).schularbeiten, [{ datum: '2026-12-17', fach: 'AWL', art: 'Schularbeit' }]);
 });
 t('Fehler in den Daten werden erkannt', () => {
   let q = klon(quelle); q.vorlage.tage.mo[0].gruppen[0].lehrer = 'XX';
@@ -58,6 +62,7 @@ t('Fehler in den Daten werden erkannt', () => {
   q = klon(quelle); q.frei.push({ von: '2026-13-01', bis: '2026-13-02', grund: 'x' });
   assert.match(baue(q, portal, sa).fehler.join(), /ungültiger Zeitraum/);
   assert.match(baue(quelle, portal, [{ datum: '2026-12-17', fach: 'XYZ' }]).fehler.join(), /nicht definiert/);
+  assert.match(baue(quelle, portal, [{ datum: '2026-12-17', fach: 'AWL', art: 'Quiz' }]).fehler.join(), /Art "Quiz" ist unbekannt/);
   assert.match(baue(quelle, portal, [sa[0], sa[0]]).fehler.join(), /doppelt/);
 });
 t('Warnungen: kein Fach an dem Tag / außerhalb des Plans', () => {
@@ -141,7 +146,15 @@ t('Do 17.12.: Schularbeit AWL', () => {
   assert.equal(txt('2026-12-17 10:00').haupt, 'AWL Schularbeit · noch 1 h 30 min'); assert.equal(txt('2026-12-17 10:00').neben, 'Fach bis 11:30 · Danach 12:20 AEE');
   assert.equal(txt('2026-12-17 09:40').neben, 'Danach 09:50 AWL Schularbeit');
 });
-t('Do 28.1.2027: zweite Schularbeit', () => { assert.equal(txt('2027-01-28 10:30').haupt, 'AWL Schularbeit · noch 1 h'); });
+t('Do 28.1.2027: zweite Schularbeit am Vormittag, danach der AEE-Test', () => {
+  assert.equal(txt('2027-01-28 10:30').haupt, 'AWL Schularbeit · noch 1 h');
+  assert.equal(txt('2027-01-28 13:00').haupt, 'AEE Test · noch 1 h 50 min'); assert.equal(txt('2027-01-28 13:00').neben, 'Fach bis 14:50 · Danach 15:00 AM');
+});
+t('Tests: Do 10.12. AEE, Mi 27.1. AM — die Anzeige nennt „Test“', () => {
+  assert.equal(txt('2026-12-10 12:30').haupt, 'AEE Test · noch 2 h 20 min'); assert.equal(txt('2026-12-10 12:30').kurz, 'AEE Test · noch 2 h 20 min');
+  assert.equal(txt('2027-01-27 10:50').haupt, 'AM Test · noch 1 h 30 min');
+  assert.equal(txt('2026-12-03 13:00').haupt, 'AEE · noch 1 h 50 min');               // eine Woche vorher: normale Stunde ohne Zusatz
+});
 t('Mi 23.12. 12:00 noch Unterricht, Do 24.12. Weihnachtsferien bis zum nächsten Schultag Do 7.1.', () => {
   assert.equal(at('2026-12-23 12:00').jetzt.block.fach, 'AM');
   const s = at('2026-12-24 10:00'); assert.equal(s.state, 'frei'); assert.equal(s.grund, 'Weihnachtsferien');

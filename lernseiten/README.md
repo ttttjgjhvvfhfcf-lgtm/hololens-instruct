@@ -6,8 +6,8 @@ Startseite: `index.html`. Fächer, Themenindex A–Z und Suche über alle Lernse
 index.html            Portal (Menüzeile mit Live-Anzeige, Jahr-Umschalter, Fächer, Index, Suche)
 stundenplan.html      Stundenplan (Live-Karte, Wochenraster, Tagesansicht, Lehrkräfte)
 stundenplan.json      Stundenplan-Daten (Einheiten, Lehrkräfte, Fächer, Vorlage, Einzelwochen, freie Tage)
-schularbeiten.html    Schularbeitenplan (nächste Schularbeit mit Countdown, alle Termine)
-schularbeiten.json    Schularbeiten-Termine
+schularbeiten.html    Schularbeitenplan (nächster Termin mit Countdown, alle Schularbeiten und Tests)
+schularbeiten.json    Termine der Schularbeiten und Tests
 portal.json           aktuelles Schuljahr und Klassennamen
 faecher.json          Liste der Fächer und Seiten (mit Schuljahr)
 faecher/<fach>/*.html die Lernseiten
@@ -90,9 +90,11 @@ Einzelwochen und freien Tagen die konkreten Wochen zusammen und erzeugt `shared/
   die Seite läuft dann ab diesem Zeitpunkt weiter.
 - **Grenzen:** Der Plan wird von Hand gepflegt. Entfall, Vertretungen und Ferien, die nicht eingetragen sind, kennt er nicht.
 
-## Schularbeiten
+## Schularbeiten und Tests
 
-`schularbeiten.json` enthält die Termine (`datum`, `fach`, optional `titel` und `stoff`). Der Build markiert den Block
-des Fachs an diesem Tag im Stundenplan als Schularbeit (gelb), die Live-Anzeige nennt sie („AWL Schularbeit · noch 1 h 30 min“),
-und `schularbeiten.html` zeigt die nächste Schularbeit mit Countdown und die Stunde laut Stundenplan. Hat das Fach an dem
+`schularbeiten.json` enthält die Termine (`datum`, `fach`, optional `art`, `titel` und `stoff`). `art` ist `Schularbeit`
+(Standard) oder `Test`. Der Build markiert den Block des Fachs an diesem Tag im Stundenplan gelb mit der Art
+(„Schularbeit“ oder „Test“), die Live-Anzeige nennt sie („AWL Schularbeit · noch 1 h 30 min“, „AEE Test · noch 2 h 20 min“),
+und `schularbeiten.html` zeigt den nächsten Termin mit Countdown und die Stunde laut Stundenplan. Liegen an einem Tag
+mehrere Termine (zum Beispiel Schularbeit und Test), stehen sie in der Reihenfolge der Datei. Hat das Fach an dem
 Tag laut Plan keinen Unterricht oder liegt der Tag außerhalb des Plans, gibt der Build einen Hinweis aus.

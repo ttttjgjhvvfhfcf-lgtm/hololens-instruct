@@ -244,7 +244,7 @@ td.k { font: 700 0.8rem var(--mono); width: 1%; white-space: nowrap; }
         </table></div>
     </section>
 
-    <p class="hinweis">Der Stundenplan wird von Hand nachgetragen. Schulfreie Tage und kurzfristige Änderungen der Schule (Entfall, Vertretung, Raumwechsel) erscheinen erst, wenn sie eingetragen sind. Maßgeblich ist immer der Plan der Schule. Grün markierte Einträge sind laut Schulplan geändert, gelb markierte sind Schularbeiten.</p>
+    <p class="hinweis">Der Stundenplan wird von Hand nachgetragen. Schulfreie Tage und kurzfristige Änderungen der Schule (Entfall, Vertretung, Raumwechsel) erscheinen erst, wenn sie eingetragen sind. Maßgeblich ist immer der Plan der Schule. Grün markierte Einträge sind laut Schulplan geändert, gelb markierte sind Schularbeiten und Tests.</p>
 </div>
 </main>
 
@@ -402,9 +402,13 @@ function renderLehrer(w) {
     }).join('');
 }
 function renderLegende(w) {
-    var s = {};
-    TAGE.forEach(function (t) { (w.tage[t] || []).forEach(function (b) { if (b.status) s[b.status] = statusText(b); }); });
-    $('legende').innerHTML = Object.keys(s).map(function (k) { return '<span class="lg-' + k + '"><i></i>' + esc(s[k]) + '</span>'; }).join('');
+    var s = {};   // je Status alle vorkommenden Bezeichnungen, z. B. „Schularbeit / Test“, wenn beides in der Woche liegt
+    TAGE.forEach(function (t) { (w.tage[t] || []).forEach(function (b) {
+        if (!b.status) return;
+        var l = s[b.status] = s[b.status] || [], x = statusText(b);
+        if (l.indexOf(x) < 0) l.push(x);
+    }); });
+    $('legende').innerHTML = Object.keys(s).map(function (k) { return '<span class="lg-' + k + '"><i></i>' + esc(s[k].join(' / ')) + '</span>'; }).join('');
 }
 
 /* ── Live-Karte ── */

@@ -7,8 +7,8 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap">
 <style>
-/* Layout: gleicher Kopf wie Portal und Stundenplan; darunter eine große Karte für die nächste Schularbeit
-   (Datum, Countdown, Stunde laut Stundenplan) und die Liste aller Termine. */
+/* Layout: gleicher Kopf wie Portal und Stundenplan; darunter eine große Karte für den nächsten Termin (Schularbeit oder Test:
+   Datum, Countdown, Stunde laut Stundenplan) und die Liste aller Termine. */
 :root {
     --bg: #f1f4fb; --card: #ffffff; --ink: #0f172a; --muted: #55627c; --line: #dfe5f1;
     --soft: #f6f8fd; --brand: #1e3a8a; --dot: rgba(148,163,184,0.24);
@@ -77,6 +77,7 @@ h2.sec { font-size: 0.74rem; font-weight: 700; text-transform: uppercase; letter
 .dat span { display: block; padding: 0 0 0.35rem; font: 700 0.7rem var(--mono); text-transform: uppercase; letter-spacing: 0.08em; color: var(--muted); }
 .sa-top { display: flex; align-items: center; flex-wrap: wrap; gap: 0.4rem 0.8rem; }
 .sa .fach { font-size: 1.7rem; font-weight: 800; letter-spacing: -0.4px; line-height: 1.15; }
+.art { font: 700 0.7rem var(--mono); text-transform: uppercase; letter-spacing: 0.07em; padding: 0.15rem 0.65rem; border-radius: 999px; background: color-mix(in srgb, var(--gelb) 30%, transparent); border: 1.5px solid var(--gelb); color: var(--ink); white-space: nowrap; }
 .cd { font: 700 0.78rem var(--mono); padding: 0.15rem 0.7rem; border-radius: 999px; background: var(--ink); color: var(--card); white-space: nowrap; }
 .cd.bald { background: var(--gelb); color: var(--gelb-ink); }
 .wt { font-size: 1rem; font-weight: 600; }
@@ -128,7 +129,7 @@ h2.sec { font-size: 0.74rem; font-weight: 700; text-transform: uppercase; letter
 <main class="gutter" id="inhalt">
 <div class="col">
     <section aria-labelledby="h-next">
-        <h2 class="sec" id="h-next">Nächste Schularbeit</h2>
+        <h2 class="sec" id="h-next">Nächster Termin</h2>
         <div id="naechste"></div>
     </section>
     <section aria-labelledby="h-alle">
@@ -180,6 +181,15 @@ var countdown = function (n) { return n === 0 ? 'heute' : n === 1 ? 'morgen' : n
 var teile = function (d) { return { t: +d.slice(8, 10), m: +d.slice(5, 7) - 1, j: d.slice(0, 4) }; };
 var langDatum = function (d) { var p = teile(d); return L.LANG[L.dayKey(d)] + ', ' + p.t + '. ' + MONAT[p.m] + ' ' + p.j; };
 var tag = function (e) { return L.dayKey(e.datum); };
+// Art des Termins: Schularbeit (Standard) oder Test
+var artVon = function (e) { return e.art || 'Schularbeit'; };
+var ARTEN = { 'Schularbeit': ['Schularbeit', 'Schularbeiten'], 'Test': ['Test', 'Tests'] };
+function anzahlText(list) {   // „2 Schularbeiten, 3 Tests“
+    return Object.keys(ARTEN).map(function (a) {
+        var n = list.filter(function (e) { return artVon(e) === a; }).length;
+        return n ? n + ' ' + ARTEN[a][n === 1 ? 0 : 1] : '';
+    }).filter(Boolean).join(', ');
+}
 
 // Die Stunde(n) des Fachs an diesem Tag laut Stundenplan (leer, wenn der Tag außerhalb des Plans liegt)
 function stunden(e) {
@@ -189,7 +199,7 @@ function stunden(e) {
 function karte(e, heute) {
     var n = tageBis(e.datum, heute), p = teile(e.datum), f = plan.faecher[e.fach] || {}, st = stunden(e);
     return '<article class="sa next fc" ' + fcStyle(e.fach) + '><div class="dat"><b>' + p.t + '</b><span>' + KURZ[p.m] + '</span></div>' +
-        '<div class="sa-top"><span class="fach">' + esc(e.fach) + '</span><span class="cd' + (n <= 7 ? ' bald' : '') + '">' + countdown(n) + '</span></div>' +
+        '<div class="sa-top"><span class="fach">' + esc(e.fach) + '</span><span class="art">' + esc(artVon(e)) + '</span><span class="cd' + (n <= 7 ? ' bald' : '') + '">' + countdown(n) + '</span></div>' +
         '<div class="wt">' + esc(langDatum(e.datum)) + '</div>' +
         '<div>' + (st.length ? '<div class="unt">Stunde laut Stundenplan: ' + st.join('<br>') + '</div>' : '') +
         (e.stoff ? '<div class="stoff">Stoff: ' + esc(e.stoff) + '</div>' : '') +
@@ -200,7 +210,7 @@ function zeile(e, heute, istNaechste) {
     var zeit = st.length ? st[0].replace(/<[^>]+>/g, '').split(' · ')[0] : '';
     return '<li class="row fc' + (n < 0 ? ' vorbei' : '') + (istNaechste ? ' naechste' : '') + '" ' + fcStyle(e.fach) + '>' +
         '<div class="d">' + String(p.t).padStart(2, '0') + '.' + String(p.m + 1).padStart(2, '0') + '.<small>' + p.j + '</small></div>' +
-        '<div class="f"><b>' + esc(e.fach) + '</b><span>' + esc(L.LANG[tag(e)]) + (zeit ? ' · ' + zeit : '') + (e.titel ? ' · ' + esc(e.titel) : '') + '</span></div>' +
+        '<div class="f"><b>' + esc(e.fach) + '</b><span>' + esc(L.LANG[tag(e)]) + (zeit ? ' · ' + zeit : '') + ' · ' + esc(artVon(e)) + (e.titel ? ' · ' + esc(e.titel) : '') + '</span></div>' +
         '<span class="cd' + (n >= 0 && n <= 7 ? ' bald' : '') + '">' + countdown(n) + '</span></li>';
 }
 function render() {
@@ -208,9 +218,9 @@ function render() {
     var simu = L.simuliert() ? '<p class="simu">Testzeit: ' + L.ddmm(heute) + heute.slice(0, 4) + ' (aus der Adresse)</p>' : '';
     var liste = SA.slice().sort(function (a, b) { return a.datum.localeCompare(b.datum); });
     var kommende = liste.filter(function (e) { return e.datum >= heute; });
-    $('sub').textContent = plan.klasse + ' · ' + (kommende.length ? kommende.length + (kommende.length === 1 ? ' Schularbeit' : ' Schularbeiten') + ' ausstehend' : (liste.length ? 'alle Schularbeiten vorbei' : 'noch keine Termine'));
+    $('sub').textContent = plan.klasse + ' · ' + (kommende.length ? kommende.length + (kommende.length === 1 ? ' Termin' : ' Termine') + ' ausstehend (' + anzahlText(kommende) + ')' : (liste.length ? 'alle Termine vorbei' : 'noch keine Termine'));
     var naechste = kommende[0];
-    $('naechste').innerHTML = naechste ? karte(naechste, heute) + simu : '<div class="leer">' + (liste.length ? 'Keine weitere Schularbeit eingetragen.' : 'Noch keine Schularbeiten eingetragen.') + '</div>' + simu;
+    $('naechste').innerHTML = naechste ? karte(naechste, heute) + simu : '<div class="leer">' + (liste.length ? 'Kein weiterer Termin eingetragen.' : 'Noch keine Termine eingetragen.') + '</div>' + simu;
     $('liste').innerHTML = liste.map(function (e) { return zeile(e, heute, e === naechste); }).join('') || '<li class="leer">Noch keine Termine.</li>';
 }
 render();

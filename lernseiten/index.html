@@ -362,7 +362,14 @@ if (active !== 'alle' && !fach[active]) active = 'alle';
 (function () {
     var m = /[?&]fach=([a-z0-9_-]+)/i.exec(location.search);
     if (!m) return;
-    if (fach[m[1]]) { active = m[1]; store.set('lern-fach', active); }
+    if (fach[m[1]]) {
+        active = m[1]; store.set('lern-fach', active);
+        // Hat das Fach im angezeigten Jahr noch keine Seiten, zum neuesten Jahr wechseln, in dem es welche hat
+        if (!fachHat(fach[m[1]])) {
+            var voll = JAHRE.filter(function (x) { return fach[m[1]].seiten.some(function (s) { return s.jahr === x.nr; }); })[0];
+            if (voll) jahr = voll.nr;
+        }
+    }
     try { history.replaceState(null, '', location.pathname + location.hash); } catch (e) {}
 })();
 
