@@ -37,6 +37,21 @@ mark.hub-hit.hub-cur { background: #f97316; color: #fff; }
 }
 #hub-find button:hover { background: color-mix(in srgb, currentColor 18%, transparent); }
 
+/* ── Live-Chip: laufendes Fach (nur während der Unterrichtszeit sichtbar) ───── */
+#hub-live {
+    display: inline-flex; align-items: center; gap: 0.4rem; flex: none; padding: 0.33rem 0.7rem; border-radius: 9px;
+    font: 600 0.78rem/1.3 Inter, system-ui, sans-serif; font-variant-numeric: tabular-nums; text-decoration: none; white-space: nowrap;
+    color: var(--text, #0f172a); background: var(--card, #fff); border: 1px solid var(--border, #e2e8f0);
+}
+#hub-live[hidden] { display: none !important; }
+#hub-live:hover { border-color: var(--primary, #1e3a8a); }
+#hub-live:focus-visible { outline: 3px solid #f59e0b; outline-offset: 2px; }
+.hub-live-dot { width: 0.55rem; height: 0.55rem; border-radius: 50%; background: #94a3b8; flex: none; }
+#hub-live.hub-live-unterricht .hub-live-dot { background: #10b981; }
+#hub-live.hub-live-pause .hub-live-dot { background: #f59e0b; }
+@media (prefers-reduced-motion: no-preference) { #hub-live.hub-live-unterricht .hub-live-dot { animation: hubpulse 2s ease-in-out infinite; } }
+@keyframes hubpulse { 50% { box-shadow: 0 0 0 4px rgba(16, 185, 129, 0.25); } }
+
 /* ── Platzhalter für Bilder, die nicht geladen werden konnten ─────── */
 .hub-noimg {
     display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 0.2rem;
@@ -89,6 +104,13 @@ mark.hub-hit.hub-cur { background: #f97316; color: #fff; }
     body > nav.hub-navmore:not(.toc-sidebar) { -webkit-mask-image: linear-gradient(to right, #000 calc(100% - 34px), transparent); mask-image: linear-gradient(to right, #000 calc(100% - 34px), transparent); }
 }
 
+/* Inhaltsspalten dürfen schmaler werden als ihr breitester Inhalt (sonst wächst die ganze Seite mit) */
+main > *, .page-layout > *, .main-content, .toc-main { min-width: 0; }
+
+/* ── Tablet und schmale Fenster: Werkzeugleisten umbrechen, statt die Seite zu verbreitern ──────── */
+@media (max-width: 1100px) { .formula-nav, .toolbar { flex-wrap: wrap; row-gap: 0.4rem; } }
+@media (min-width: 769px) and (max-width: 1100px) { body > nav:not(.toc-sidebar) { flex-wrap: wrap; row-gap: 0.4rem; } }
+
 /* ── Handy: nichts darf die Seite seitlich verbreitern ────────────── */
 @media (max-width: 768px) {
     /* Werkzeugleisten bleiben einzeilig und lassen sich seitlich wischen; „Alle Fächer“ bleibt dabei stehen */
@@ -100,8 +122,6 @@ mark.hub-hit.hub-cur { background: #f97316; color: #fff; }
     body > nav:not(.toc-sidebar):not(.ls-nav) > .nav-label { display: none; }
     body > nav:not(.toc-sidebar):not(.ls-nav) > #hub-back { position: sticky; left: 0; z-index: 2; }
 
-    /* Inhaltsspalten dürfen schmaler werden als ihr breitestes Kind */
-    main > *, .page-layout > *, .main-content, .toc-main { min-width: 0; }
     .page-layout { align-items: stretch; }
     /* Lange zusammengesetzte Wörter in Überschriften trennen statt überlaufen lassen; die Seitentitel bleiben ungetrennt */
     h2, h3, h4, .section-title, .sum-title, .card-title { overflow-wrap: anywhere; hyphens: auto; }
@@ -113,4 +133,4 @@ mark.hub-hit.hub-cur { background: #f97316; color: #fff; }
     #hub-rel { padding-left: 1rem; padding-right: 1rem; }
 }
 
-@media print { #hub-back, #hub-find, #hub-rel { display: none !important; } mark.hub-hit { background: none; color: inherit; } }
+@media print { #hub-back, #hub-find, #hub-rel, #hub-live { display: none !important; } mark.hub-hit { background: none; color: inherit; } }
