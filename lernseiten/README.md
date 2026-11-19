@@ -48,10 +48,12 @@ tools/seiten.py       baut Lernseiten aus den Rohdateien in quellen/
 
 `python3 tools/seiten.py` baut aus den Vorlagen in `quellen/` (Markdown, einfache HTML-Seiten) Lernseiten im
 einheitlichen Stil: MET-Lernübersicht, AEE2-Formelübersicht, AEE2-Merksätze und die Mathematik-Probeschularbeit.
-Auch die AEE-Seiten der 3Mb entstehen dort (`aee3()`): „Einheit 1: Drehstrom“ (Text und Bilder aus den Unterrichtsnotizen)
-und das Arbeitsblatt „Dreiphasenwechselspannung“ mit Lösungsvorschlägen und eigenen Diagrammen (Liniendiagramm und Zeigerbild
-werden als SVG gezeichnet und passen sich dem hellen und dunklen Design an). `python3 tools/seiten.py aee3` baut nur diese
-beiden Seiten. Danach `node tools/build.mjs` ausführen, damit die Suche die neuen Seiten kennt.
+Auch die Seiten der 3Mb entstehen dort: AEE „Einheit 1: Drehstrom“ (Text und Bilder aus den Unterrichtsnotizen) und das
+Arbeitsblatt „Dreiphasenwechselspannung“ mit Lösungsvorschlägen und eigenen Diagrammen (Liniendiagramm und Zeigerbild werden
+als SVG gezeichnet und passen sich dem hellen und dunklen Design an), beides in `aee3()`, sowie AM „Pneumatik: Grundlagen“
+mit Beispielen und Übungen samt Lösungsvorschlägen in `pneu()`. Die Rechenwerte der Lösungen werden dabei im Skript berechnet,
+nicht von Hand getippt. `python3 tools/seiten.py aee3` oder `... pneu` baut nur die jeweiligen Seiten. Danach
+`node tools/build.mjs` ausführen, damit die Suche die neuen Seiten kennt.
 
 ## Schuljahre
 

@@ -100,6 +100,8 @@ body.dark .bild{background:#000}
 body.dark .fig.hell img{filter:invert(1) hue-rotate(180deg)}
 body:not(.dark) .fig.dunkel img{filter:invert(1) hue-rotate(180deg)}
 .fig figcaption{font-size:.8rem;color:var(--muted);margin:.4rem auto 0;line-height:1.4;max-width:34rem}
+/* Lösungstabellen (zwei Spalten): auf schmalen Bildschirmen steht die Beschriftung über der Rechnung */
+@media(max-width:560px){table.lsg,table.lsg tbody,table.lsg tr,table.lsg td{display:block;width:auto}table.lsg tr{border-top:1px solid var(--border);padding:.4rem 0}table.lsg tr:first-child{border-top:0}table.lsg td{border:0;padding:.05rem .5rem}details.loesung table.lsg td:first-child{width:auto;white-space:normal;font-size:.72rem;text-transform:uppercase;letter-spacing:.05em}}
 /* eigene Diagramme (SVG) */
 .fig.svg .bild,body.dark .fig.svg .bild{display:block;background:var(--card)}
 .fig-row .fig.svg{flex:1 1 230px;max-width:330px}
