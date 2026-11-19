@@ -29,8 +29,22 @@
     "kurz": "AEE",
     "farbe": "#1d4ed8",
     "farbeDunkel": "#60a5fa",
-    "info": "Wechselstromtechnik, RLC-Schaltungen, Leistung",
+    "info": "Wechselstromtechnik, RLC-Schaltungen, Leistung, Drehstrom",
     "seiten": [
+      {
+        "datei": "faecher/aee/drehstrom-einheit-1.html",
+        "titel": "AEE3 — Einheit 1: Drehstrom",
+        "art": "Lernseite",
+        "info": "Entstehung, 120° Phasenverschiebung, Zeigerbild, Stern- und Dreieckschaltung, Vorteile",
+        "jahr": 3
+      },
+      {
+        "datei": "faecher/aee/dreiphasenwechselspannung.html",
+        "titel": "AEE3 — Dreiphasenwechselspannung",
+        "art": "Arbeitsblatt",
+        "info": "6 Aufgaben mit Lösungsvorschlägen: Entstehung, u₃, Liniendiagramm und Zeigerbild, Momentanwerte, Verkettung",
+        "jahr": 3
+      },
       {
         "datei": "faecher/aee/kompensation.html",
         "titel": "Kompensation — RLC-Schaltungen",

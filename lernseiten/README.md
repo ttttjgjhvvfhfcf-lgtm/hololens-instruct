@@ -11,6 +11,7 @@ schularbeiten.json    Schularbeiten-Termine
 portal.json           aktuelles Schuljahr und Klassennamen
 faecher.json          Liste der Fächer und Seiten (mit Schuljahr)
 faecher/<fach>/*.html die Lernseiten
+faecher/<fach>/bilder/ Abbildungen der Lernseiten (relativ eingebunden, Klick öffnet sie in voller Größe)
 shared/hub.css        gemeinsame Schicht für alle Fachseiten (Handy-Korrekturen, Tabellen, Treffer-Leiste)
 shared/hub.js         Zurück-Link, Design-Übernahme, Sprung zum Treffer, Bildplatzhalter, Querverweise
 shared/live.js        Rechenlogik: was läuft gerade, was kommt danach, wie lange noch
@@ -47,7 +48,10 @@ tools/seiten.py       baut Lernseiten aus den Rohdateien in quellen/
 
 `python3 tools/seiten.py` baut aus den Vorlagen in `quellen/` (Markdown, einfache HTML-Seiten) Lernseiten im
 einheitlichen Stil: MET-Lernübersicht, AEE2-Formelübersicht, AEE2-Merksätze und die Mathematik-Probeschularbeit.
-Danach `node tools/build.mjs` ausführen, damit die Suche die neuen Seiten kennt.
+Auch die AEE-Seiten der 3Mb entstehen dort (`aee3()`): „Einheit 1: Drehstrom“ (Text und Bilder aus den Unterrichtsnotizen)
+und das Arbeitsblatt „Dreiphasenwechselspannung“ mit Lösungsvorschlägen und eigenen Diagrammen (Liniendiagramm und Zeigerbild
+werden als SVG gezeichnet und passen sich dem hellen und dunklen Design an). `python3 tools/seiten.py aee3` baut nur diese
+beiden Seiten. Danach `node tools/build.mjs` ausführen, damit die Suche die neuen Seiten kennt.
 
 ## Schuljahre
 
