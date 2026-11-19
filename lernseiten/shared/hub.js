@@ -325,8 +325,44 @@
     upd();
   }
 
+  /* ── 8) Live-Chip: laufendes Fach, nur während der Unterrichtszeit sichtbar ─────────── */
+  function loadScripts(urls, done) {
+    var i = 0;
+    (function next() {
+      if (i >= urls.length) return done();
+      var el = doc.createElement('script');
+      el.src = urls[i++];
+      el.onload = next;   // fehlt eine Datei, bleibt der Chip einfach aus
+      doc.head.appendChild(el);
+    })();
+  }
+  function addLive() {
+    var bar = doc.querySelector('.formula-nav, .toolbar, nav:not(.toc-sidebar)');
+    if (!bar || doc.getElementById('hub-live')) return;
+    var a = doc.createElement('a');
+    a.id = 'hub-live'; a.href = SHARED + '../stundenplan.html'; a.hidden = true;
+    a.innerHTML = '<span class="hub-live-dot" aria-hidden="true"></span><span class="hub-live-t"></span>';
+    var back = doc.getElementById('hub-back');
+    if (back && back.parentNode === bar) back.insertAdjacentElement('afterend', a); else bar.insertBefore(a, bar.firstChild);
+    loadScripts([SHARED + 'stundenplan.js', SHARED + 'live.js'], function () {
+      var P = window.STUNDENPLAN, L = window.LernLive;
+      if (!P || !L) return;
+      function upd() {
+        var st = L.status(P, L.jetzt()), t = L.text(st, P), show = st.state === 'unterricht' || st.state === 'pause';
+        if (a.hidden === show) { a.hidden = !show; navHint(); }
+        if (!show) return;
+        a.className = 'hub-live-' + st.state;
+        a.querySelector('.hub-live-t').textContent = t.kurz;
+        a.title = t.haupt + ' · ' + t.neben + ' (Stundenplan ' + P.klasse + ')';
+      }
+      upd();
+      setInterval(upd, 10000);
+    });
+  }
+
   /* ── Start ───────────────────────────────────────────────────────────── */
   addBackLink();
+  addLive();
   loadMap();
   function ready() {
     syncTheme();   // manche Seiten binden ihren Umschalter erst beim Laden

@@ -64,6 +64,22 @@ button { font-family: inherit; }
 .skip { position: absolute; left: -999px; top: 0; z-index: 100; background: var(--ink); color: var(--card); padding: 0.5rem 0.9rem; border-radius: 0 0 10px 0; font-weight: 600; text-decoration: none; }
 .skip:focus { left: 0; }
 
+/* ── Menüzeile mit Live-Anzeige ── */
+.topnav { display: flex; align-items: center; flex-wrap: wrap; gap: 0.4rem 0.5rem; margin-bottom: 1rem; position: relative; z-index: 1; }
+.topnav a.nav { font: 600 0.84rem var(--font); color: rgba(255,255,255,0.86); text-decoration: none; padding: 0.38rem 0.85rem; border-radius: 999px; border: 1px solid transparent; }
+.topnav a.nav:hover { background: rgba(255,255,255,0.14); }
+.topnav a.nav[aria-current="page"] { background: rgba(255,255,255,0.16); border-color: rgba(255,255,255,0.28); color: #fff; }
+.live { margin-left: auto; display: grid; grid-template-columns: auto minmax(0, 1fr); column-gap: 0.6rem; align-items: center; min-width: 0; max-width: 100%; text-decoration: none; color: #fff; background: rgba(255,255,255,0.12); border: 1px solid rgba(255,255,255,0.22); border-radius: 14px; padding: 0.4rem 0.85rem; }
+.live:hover { background: rgba(255,255,255,0.2); }
+.live-dot { grid-row: 1 / span 2; width: 0.65rem; height: 0.65rem; border-radius: 50%; background: rgba(255,255,255,0.55); }
+.live-unterricht .live-dot { background: #34d399; }
+.live-pause .live-dot { background: #fbbf24; }
+.live-main { font: 700 0.88rem var(--font); line-height: 1.25; font-variant-numeric: tabular-nums; overflow-wrap: anywhere; }
+.live-sub { font: 500 0.76rem var(--font); line-height: 1.25; opacity: 0.85; overflow-wrap: anywhere; }
+.live-sub:empty { display: none; }
+@media (prefers-reduced-motion: no-preference) { .live-unterricht .live-dot { animation: livepulse 2s ease-in-out infinite; } }
+@keyframes livepulse { 50% { box-shadow: 0 0 0 5px rgba(52,211,153,0.28); } }
+
 /* ── Kopf ── */
 .top { background: linear-gradient(135deg, var(--head-a) 0%, var(--head-b) 55%, var(--head-c) 100%); color: var(--head-ink); padding-block: 1.5rem 1.35rem; position: relative; overflow: hidden; }
 .top::after { content: 'Σ § ⚡'; position: absolute; right: 1.5rem; bottom: 0.3rem; font-size: 3.4rem; font-style: italic; letter-spacing: 0.5rem; opacity: 0.06; pointer-events: none; white-space: nowrap; }
@@ -194,6 +210,7 @@ footer { margin-top: 2.5rem; font-size: 0.78rem; color: var(--muted); text-align
     .top { padding-block: 1.2rem 1.1rem; }
     .top h1 { font-size: 1.7rem; } .top::after { display: none; } .kbd { display: none; }
     .top-ctl { width: 100%; }
+    .live { margin-left: 0; width: 100%; }
     .seg { flex: 1; } .seg button { flex: 1; padding-inline: 0.5rem; }
     .search input { padding-right: 1rem; font-size: 1rem; } .search.has-q input { padding-right: 5.5rem; }
     .letter { grid-template-columns: 1.8rem 1fr; }
@@ -208,6 +225,11 @@ footer { margin-top: 2.5rem; font-size: 0.78rem; color: var(--muted); text-align
 <a class="skip" href="#inhalt">Zum Inhalt</a>
 <header class="top gutter">
     <div class="col">
+        <nav class="topnav" aria-label="Hauptmenü">
+            <a class="nav" href="index.html" aria-current="page">Lernseiten</a>
+            <a class="nav" href="stundenplan.html">Stundenplan</a>
+            <a class="live" id="live" href="stundenplan.html" hidden><span class="live-dot" aria-hidden="true"></span><span class="live-main"></span><span class="live-sub"></span></a>
+        </nav>
         <div class="top-row">
             <div>
                 <h1>Lernportal</h1>
@@ -270,6 +292,8 @@ footer { margin-top: 2.5rem; font-size: 0.78rem; color: var(--muted); text-align
 <button class="up" id="up" type="button" aria-label="Nach oben"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 19V5M5 12l7-7 7 7"/></svg></button>
 
 <script src="shared/daten.js"></script>
+<script src="shared/stundenplan.js"></script>
+<script src="shared/live.js"></script>
 <script>
 (function () {
 'use strict';
@@ -332,6 +356,13 @@ var imJahr = function (j) { return jahr === 'alle' || j === jahr; };
 var fachHat = function (f) { return f.seiten.some(function (s) { return imJahr(s.jahr); }); };
 var active = store.get('lern-fach', 'alle');
 if (active !== 'alle' && !fach[active]) active = 'alle';
+// Verweis von der Stundenplan-Seite: index.html?fach=met zeigt direkt dieses Fach (die Adresse wird danach wieder bereinigt)
+(function () {
+    var m = /[?&]fach=([a-z0-9_-]+)/i.exec(location.search);
+    if (!m) return;
+    if (fach[m[1]]) { active = m[1]; store.set('lern-fach', active); }
+    try { history.replaceState(null, '', location.pathname + location.hash); } catch (e) {}
+})();
 
 function renderJahre() {
     $('jahre').innerHTML = JAHRE.map(function (j) {
@@ -660,6 +691,22 @@ window.addEventListener('scroll', function () { up.classList.toggle('show', wind
 up.addEventListener('click', function () { window.scrollTo({ top: 0 }); $('q').focus({ preventScroll: true }); });
 window.addEventListener('resize', function () { measure(); moreHint($('chips')); moreHint($('az')); });
 if (document.fonts && document.fonts.ready) document.fonts.ready.then(measure);
+
+/* ── Live-Anzeige im Menü: laufendes Fach, Restzeit, nächstes Fach ── */
+var PLAN = window.STUNDENPLAN, LIVE = window.LernLive, liveEl = $('live');
+function renderLive() {
+    if (!PLAN || !LIVE || !liveEl) return;
+    var st = LIVE.status(PLAN, LIVE.jetzt()), t = LIVE.text(st, PLAN);
+    liveEl.hidden = false;
+    liveEl.className = 'live live-' + st.state;
+    liveEl.querySelector('.live-main').textContent = t.haupt;
+    liveEl.querySelector('.live-sub').textContent = t.neben;
+    liveEl.title = (LIVE.simuliert() ? 'Testzeit · ' : '') + 'Laut gespeichertem Stundenplan ' + PLAN.klasse + '. Klick für die Wochenansicht.';
+    measure();
+}
+renderLive();
+setInterval(renderLive, 5000);
+document.addEventListener('visibilitychange', function () { if (!document.hidden) renderLive(); });
 
 $('foot').textContent = 'Index-Stand ' + D.stand.split('-').reverse().join('.');
 update();
