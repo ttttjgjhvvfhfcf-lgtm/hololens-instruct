@@ -5,7 +5,9 @@ Startseite: `index.html`. Fächer, Themenindex A–Z und Suche über alle Lernse
 ```
 index.html            Portal (Menüzeile mit Live-Anzeige, Jahr-Umschalter, Fächer, Index, Suche)
 stundenplan.html      Stundenplan (Live-Karte, Wochenraster, Tagesansicht, Lehrkräfte)
-stundenplan.json      Stundenplan-Daten (Einheiten, Lehrkräfte, Fächer, Wochen)
+stundenplan.json      Stundenplan-Daten (Einheiten, Lehrkräfte, Fächer, Vorlage, Einzelwochen, freie Tage)
+schularbeiten.html    Schularbeitenplan (nächste Schularbeit mit Countdown, alle Termine)
+schularbeiten.json    Schularbeiten-Termine
 portal.json           aktuelles Schuljahr und Klassennamen
 faecher.json          Liste der Fächer und Seiten (mit Schuljahr)
 faecher/<fach>/*.html die Lernseiten
@@ -15,8 +17,10 @@ shared/live.js        Rechenlogik: was läuft gerade, was kommt danach, wie lang
 shared/daten.js       Suchindex          – wird erzeugt, nicht von Hand ändern
 shared/seiten.js      Seitenliste        – wird erzeugt, nicht von Hand ändern
 shared/stundenplan.js Stundenplan        – wird erzeugt, nicht von Hand ändern
-tools/build.mjs       erzeugt daten.js, seiten.js und stundenplan.js (prüft den Plan) und bindet hub.css/hub.js ein
-tools/test-live.mjs   Tests für die Stundenplan-Logik (node tools/test-live.mjs)
+shared/schularbeiten.js Schularbeiten    – wird erzeugt, nicht von Hand ändern
+tools/build.mjs       erzeugt daten.js, seiten.js, stundenplan.js, schularbeiten.js und bindet hub.css/hub.js ein
+tools/plan.mjs        prüft und bereitet Stundenplan und Schularbeiten auf (wird von build.mjs und den Tests benutzt)
+tools/test-live.mjs   Tests für Aufbereitung und Live-Logik (node tools/test-live.mjs)
 tools/seiten.py       baut Lernseiten aus den Rohdateien in quellen/
 ```
 
@@ -54,18 +58,33 @@ Zum Schuljahreswechsel: neuen Eintrag in `jahre` ergänzen und `aktuell` hochzä
 
 ## Stundenplan
 
-`stundenplan.json` enthält die Zeiten der Einheiten, die Lehrkräfte mit vollem Namen, die Fächer und die Wochen mit ihren
-Blöcken. `node tools/build.mjs` prüft den Plan (unbekannte Kürzel, doppelt belegte Einheiten, ungültige Zeiten) und
-erzeugt `shared/stundenplan.js`.
+`stundenplan.json` enthält die Zeiten der Einheiten, die Lehrkräfte mit vollem Namen, die Fächer und den Plan selbst:
+
+- `vorlage`: der Plan, der Woche für Woche gilt. `von`/`bis` ist die Gültigkeit, `tage` enthält die Blöcke je Wochentag.
+  Zum Verlängern genügt es, `bis` zu ändern.
+- `wochen`: einzelne Wochen, die von der Vorlage abweichen (zum Beispiel mit Änderungen der Schule). Eine solche Woche
+  ersetzt die Vorlage in dieser Kalenderwoche.
+- `frei`: schulfreie Tage mit Grund (`von`, `bis`, `grund`). An diesen Tagen entfallen alle Blöcke, der Grund steht
+  im Plan und in der Live-Anzeige.
+
+Ein Block hat `ab`/`bis` (Nummern der Einheiten, 1 bis 10), `fach` und `gruppen` (Lehrerkürzel und Raum; mehrere Gruppen
+laufen parallel). Optional `status`: `aenderung` (grün), `entfall` (wird bei „jetzt/danach“ übersprungen) oder `pruefung`.
+Neue Lehrkräfte kommen unter `lehrer` dazu, neue Fächer unter `faecher`.
+
+`node tools/build.mjs` prüft alles (unbekannte Kürzel, doppelt belegte Einheiten, ungültige Zeiten), setzt aus Vorlage,
+Einzelwochen und freien Tagen die konkreten Wochen zusammen und erzeugt `shared/stundenplan.js`.
 
 - **Menü:** Im Portal zeigt die Menüzeile oben das laufende Fach mit der Restzeit der aktuellen Einheit und das nächste
-  Fach. Auf den Lernseiten erscheint während der Unterrichtszeit ein kleiner Chip in der Werkzeugleiste. Beides
-  führt zur Seite `stundenplan.html`.
-- **Neue Woche eintragen:** Unter `wochen` einen Eintrag mit `von`/`bis` (Montag bis Freitag) anlegen. Jeder Block hat
-  `ab`/`bis` (Nummern der Einheiten, 1 bis 10), `fach` und `gruppen` (Lehrerkürzel und Raum; mehrere Gruppen laufen
-  parallel). Optional `status`: `aenderung`, `entfall` (wird bei „jetzt/danach“ übersprungen) oder `pruefung`.
-  Neue Lehrkräfte kommen unter `lehrer` dazu, neue Fächer unter `faecher`.
-- **Außerhalb der hinterlegten Wochen** zeigt die Anzeige „Kein aktueller Stundenplan“ und nennt das Ende der letzten Woche.
+  Fach. Auf den Lernseiten erscheint während der Unterrichtszeit ein kleiner Chip in der Werkzeugleiste.
+- **Stundenplan-Seite:** Wochenraster (Handy: Tagesansicht), Blättern nach Kalenderwoche, „Heute“-Knopf, freie Tage mit Grund.
+- **Außerhalb des hinterlegten Plans** zeigt die Anzeige „Kein aktueller Stundenplan“ und nennt das Ende der Gültigkeit.
 - **Zeit:** Gerechnet wird mit der Wiener Ortszeit. Zum Ausprobieren hängt man `?zeit=2026-11-24T10:15` an die Adresse,
   die Seite läuft dann ab diesem Zeitpunkt weiter.
-- **Grenzen:** Der Plan wird von Hand gepflegt. Entfall und Vertretungen der Schule sind erst nach einem Update sichtbar.
+- **Grenzen:** Der Plan wird von Hand gepflegt. Entfall, Vertretungen und Ferien, die nicht eingetragen sind, kennt er nicht.
+
+## Schularbeiten
+
+`schularbeiten.json` enthält die Termine (`datum`, `fach`, optional `titel` und `stoff`). Der Build markiert den Block
+des Fachs an diesem Tag im Stundenplan als Schularbeit (gelb), die Live-Anzeige nennt sie („AWL Schularbeit · noch 40 min“),
+und `schularbeiten.html` zeigt die nächste Schularbeit mit Countdown und die Stunde laut Stundenplan. Hat das Fach an dem
+Tag laut Plan keinen Unterricht oder liegt der Tag außerhalb des Plans, gibt der Build einen Hinweis aus.

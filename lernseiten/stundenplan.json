@@ -23,15 +23,52 @@
     "ST": "Johann Stöckl"
   },
   "faecher": {
-    "AEE": { "portal": "aee" },
-    "AM": { "portal": "mathematik" },
-    "AWL": { "portal": "awl" },
-    "MET": { "portal": "met" },
-    "BFE": { "farbe": "#0891b2", "farbeDunkel": "#22d3ee" },
-    "DUK": { "farbe": "#c026d3", "farbeDunkel": "#e879f9" },
-    "MLA": { "farbe": "#db2777", "farbeDunkel": "#f472b6" },
-    "PB": { "farbe": "#65a30d", "farbeDunkel": "#a3e635" },
-    "TD": { "farbe": "#64748b", "farbeDunkel": "#94a3b8" }
+    "AEE": {"portal": "aee"},
+    "AM": {"portal": "mathematik"},
+    "AWL": {"portal": "awl"},
+    "MET": {"portal": "met"},
+    "BFE": {"farbe": "#0891b2", "farbeDunkel": "#22d3ee"},
+    "DUK": {"farbe": "#c026d3", "farbeDunkel": "#e879f9"},
+    "MLA": {"farbe": "#db2777", "farbeDunkel": "#f472b6"},
+    "PB": {"farbe": "#65a30d", "farbeDunkel": "#a3e635"},
+    "TD": {"farbe": "#64748b", "farbeDunkel": "#94a3b8"}
+  },
+  "vorlage": {
+    "von": "2026-11-19",
+    "bis": "2027-02-28",
+    "tage": {
+      "mo": [
+        {"ab": 1, "bis": 3, "fach": "MET", "gruppen": [{"lehrer": "ST", "raum": "305"}]},
+        {"ab": 4, "bis": 5, "fach": "PB", "gruppen": [{"lehrer": "BA", "raum": "305"}]},
+        {"ab": 7, "bis": 8, "fach": "AWL", "gruppen": [{"lehrer": "RM", "raum": "305"}]},
+        {"ab": 9, "bis": 10, "fach": "DUK", "gruppen": [{"lehrer": "BA", "raum": "305"}]}
+      ],
+      "di": [
+        {"ab": 1, "bis": 4, "fach": "MLA", "gruppen": [{"lehrer": "KM", "raum": "229"}, {"lehrer": "ST", "raum": "116"}]},
+        {"ab": 6, "bis": 7, "fach": "AWL", "gruppen": [{"lehrer": "RM", "raum": "305"}]},
+        {"ab": 8, "bis": 8, "fach": "DUK", "gruppen": [{"lehrer": "BA", "raum": "305"}]},
+        {"ab": 9, "bis": 10, "fach": "BFE", "gruppen": [{"lehrer": "RM", "raum": "305"}]}
+      ],
+      "mi": [
+        {"ab": 1, "bis": 2, "fach": "MET", "gruppen": [{"lehrer": "ST", "raum": "305"}]},
+        {"ab": 3, "bis": 3, "fach": "BFE", "gruppen": [{"lehrer": "RM", "raum": "305"}]},
+        {"ab": 4, "bis": 5, "fach": "AM", "gruppen": [{"lehrer": "GW", "raum": "305"}]},
+        {"ab": 7, "bis": 10, "fach": "MLA", "gruppen": [{"lehrer": "MJ", "raum": "E54"}, {"lehrer": "ST", "raum": "116"}]}
+      ],
+      "do": [
+        {"ab": 1, "bis": 2, "fach": "TD", "gruppen": [{"lehrer": "ST", "raum": "305"}]},
+        {"ab": 3, "bis": 4, "fach": "AWL", "gruppen": [{"lehrer": "RM", "raum": "305"}]},
+        {"ab": 6, "bis": 8, "fach": "AEE", "gruppen": [{"lehrer": "GW", "raum": "305"}]},
+        {"ab": 9, "bis": 10, "fach": "AM", "gruppen": [{"lehrer": "GW", "raum": "305"}]}
+      ],
+      "fr": [
+        {"ab": 1, "bis": 2, "fach": "MET", "gruppen": [{"lehrer": "ST", "raum": "305"}]},
+        {"ab": 3, "bis": 4, "fach": "MLA", "gruppen": [{"lehrer": "KM", "raum": "229"}, {"lehrer": "ST", "raum": "116"}]},
+        {"ab": 6, "bis": 7, "fach": "MLA", "gruppen": [{"lehrer": "KM", "raum": "229"}, {"lehrer": "ST", "raum": "116"}]},
+        {"ab": 8, "bis": 8, "fach": "PB", "gruppen": [{"lehrer": "BA", "raum": "305"}]},
+        {"ab": 9, "bis": 10, "fach": "TD", "gruppen": [{"lehrer": "ST", "raum": "305"}]}
+      ]
+    }
   },
   "wochen": [
     {
@@ -39,37 +76,41 @@
       "bis": "2026-11-27",
       "tage": {
         "mo": [
-          { "ab": 1, "bis": 3, "fach": "MET", "gruppen": [{ "lehrer": "ST", "raum": "305" }] },
-          { "ab": 4, "bis": 5, "fach": "PB", "gruppen": [{ "lehrer": "BA", "raum": "305" }] },
-          { "ab": 7, "bis": 8, "fach": "AWL", "gruppen": [{ "lehrer": "RM", "raum": "305" }] },
-          { "ab": 9, "bis": 10, "fach": "DUK", "gruppen": [{ "lehrer": "BA", "raum": "305" }] }
+          {"ab": 1, "bis": 3, "fach": "MET", "gruppen": [{"lehrer": "ST", "raum": "305"}]},
+          {"ab": 4, "bis": 5, "fach": "PB", "gruppen": [{"lehrer": "BA", "raum": "305"}]},
+          {"ab": 7, "bis": 8, "fach": "AWL", "gruppen": [{"lehrer": "RM", "raum": "305"}]},
+          {"ab": 9, "bis": 10, "fach": "DUK", "gruppen": [{"lehrer": "BA", "raum": "305"}]}
         ],
         "di": [
-          { "ab": 1, "bis": 4, "fach": "MLA", "status": "aenderung", "gruppen": [{ "lehrer": "KM", "raum": "229" }, { "lehrer": "ST", "raum": "116" }] },
-          { "ab": 6, "bis": 7, "fach": "AWL", "gruppen": [{ "lehrer": "RM", "raum": "305" }] },
-          { "ab": 8, "bis": 8, "fach": "DUK", "gruppen": [{ "lehrer": "BA", "raum": "305" }] },
-          { "ab": 9, "bis": 10, "fach": "BFE", "gruppen": [{ "lehrer": "RM", "raum": "305" }] }
+          {"ab": 1, "bis": 4, "fach": "MLA", "status": "aenderung", "gruppen": [{"lehrer": "KM", "raum": "229"}, {"lehrer": "ST", "raum": "116"}]},
+          {"ab": 6, "bis": 7, "fach": "AWL", "gruppen": [{"lehrer": "RM", "raum": "305"}]},
+          {"ab": 8, "bis": 8, "fach": "DUK", "gruppen": [{"lehrer": "BA", "raum": "305"}]},
+          {"ab": 9, "bis": 10, "fach": "BFE", "gruppen": [{"lehrer": "RM", "raum": "305"}]}
         ],
         "mi": [
-          { "ab": 1, "bis": 2, "fach": "MET", "gruppen": [{ "lehrer": "ST", "raum": "305" }] },
-          { "ab": 3, "bis": 3, "fach": "BFE", "gruppen": [{ "lehrer": "RM", "raum": "305" }] },
-          { "ab": 4, "bis": 5, "fach": "AM", "gruppen": [{ "lehrer": "GW", "raum": "305" }] },
-          { "ab": 7, "bis": 10, "fach": "MLA", "status": "aenderung", "gruppen": [{ "lehrer": "MJ", "raum": "E54" }, { "lehrer": "ST", "raum": "116" }] }
+          {"ab": 1, "bis": 2, "fach": "MET", "gruppen": [{"lehrer": "ST", "raum": "305"}]},
+          {"ab": 3, "bis": 3, "fach": "BFE", "gruppen": [{"lehrer": "RM", "raum": "305"}]},
+          {"ab": 4, "bis": 5, "fach": "AM", "gruppen": [{"lehrer": "GW", "raum": "305"}]},
+          {"ab": 7, "bis": 10, "fach": "MLA", "status": "aenderung", "gruppen": [{"lehrer": "MJ", "raum": "E54"}, {"lehrer": "ST", "raum": "116"}]}
         ],
         "do": [
-          { "ab": 1, "bis": 2, "fach": "TD", "gruppen": [{ "lehrer": "ST", "raum": "305" }] },
-          { "ab": 3, "bis": 4, "fach": "AWL", "gruppen": [{ "lehrer": "RM", "raum": "305" }] },
-          { "ab": 6, "bis": 8, "fach": "AEE", "gruppen": [{ "lehrer": "GW", "raum": "305" }] },
-          { "ab": 9, "bis": 10, "fach": "AM", "gruppen": [{ "lehrer": "GW", "raum": "305" }] }
+          {"ab": 1, "bis": 2, "fach": "TD", "gruppen": [{"lehrer": "ST", "raum": "305"}]},
+          {"ab": 3, "bis": 4, "fach": "AWL", "gruppen": [{"lehrer": "RM", "raum": "305"}]},
+          {"ab": 6, "bis": 8, "fach": "AEE", "gruppen": [{"lehrer": "GW", "raum": "305"}]},
+          {"ab": 9, "bis": 10, "fach": "AM", "gruppen": [{"lehrer": "GW", "raum": "305"}]}
         ],
         "fr": [
-          { "ab": 1, "bis": 2, "fach": "MET", "gruppen": [{ "lehrer": "ST", "raum": "305" }] },
-          { "ab": 3, "bis": 4, "fach": "MLA", "status": "aenderung", "gruppen": [{ "lehrer": "KM", "raum": "229" }, { "lehrer": "ST", "raum": "116" }] },
-          { "ab": 6, "bis": 7, "fach": "MLA", "status": "aenderung", "gruppen": [{ "lehrer": "KM", "raum": "229" }, { "lehrer": "ST", "raum": "116" }] },
-          { "ab": 8, "bis": 8, "fach": "PB", "gruppen": [{ "lehrer": "BA", "raum": "305" }] },
-          { "ab": 9, "bis": 10, "fach": "TD", "gruppen": [{ "lehrer": "ST", "raum": "305" }] }
+          {"ab": 1, "bis": 2, "fach": "MET", "gruppen": [{"lehrer": "ST", "raum": "305"}]},
+          {"ab": 3, "bis": 4, "fach": "MLA", "status": "aenderung", "gruppen": [{"lehrer": "KM", "raum": "229"}, {"lehrer": "ST", "raum": "116"}]},
+          {"ab": 6, "bis": 7, "fach": "MLA", "status": "aenderung", "gruppen": [{"lehrer": "KM", "raum": "229"}, {"lehrer": "ST", "raum": "116"}]},
+          {"ab": 8, "bis": 8, "fach": "PB", "gruppen": [{"lehrer": "BA", "raum": "305"}]},
+          {"ab": 9, "bis": 10, "fach": "TD", "gruppen": [{"lehrer": "ST", "raum": "305"}]}
         ]
       }
     }
+  ],
+  "frei": [
+    {"von": "2026-12-08", "bis": "2026-12-08", "grund": "Feiertag (Mariä Empfängnis)"},
+    {"von": "2026-12-24", "bis": "2027-01-06", "grund": "Weihnachtsferien"}
   ]
 }
