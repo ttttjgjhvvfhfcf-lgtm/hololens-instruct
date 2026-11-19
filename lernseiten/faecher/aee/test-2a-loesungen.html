@@ -82,9 +82,11 @@ td { padding: 0.55rem 0.8rem; border-top: 1px solid var(--border); vertical-alig
 .opt { display: grid; grid-template-columns: auto 1fr; gap: 0.6rem; padding: 0.55rem 0.8rem; border: 1px solid var(--border); border-radius: var(--radius-sm); margin-bottom: 0.5rem; }
 .opt.yes { background: var(--ok-bg); } .opt.yes .box { color: var(--ok); } .opt .box { font-weight: 800; color: var(--muted); }
 .key { text-align: center; color: var(--muted); font-size: 0.82rem; margin-top: 2rem; font-variant-numeric: tabular-nums; }
+@media (max-width: 480px) { .tf { grid-template-columns: 1fr; gap: 0.4rem; } .tf-tag { justify-self: start; } }
 @media (max-width: 600px) { header { padding: 1.1rem 1.1rem 1rem; } header h1 { font-size: 1.7rem; } .h-deco { display: none; } nav { padding: 0.5rem 1rem; } .aufgabe-body, .aufgabe-head { padding-left: 1rem; padding-right: 1rem; } }
 @media print { nav, #top-progress-bar { display: none; } .aufgabe { break-inside: avoid; box-shadow: none; } }
 </style>
+<link rel="stylesheet" href="../../shared/hub.css">
 </head>
 <body>
 <div id="top-progress-bar"></div>

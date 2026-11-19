@@ -1,0 +1,116 @@
+/* Lernportal – gemeinsame Schicht für alle Fachseiten.
+   Wird nach dem eigenen CSS der Seite geladen. Farben kommen aus den Variablen der jeweiligen
+   Seite (--card, --border, --text, --muted, --primary), damit alles zum Fach und zum Dunkelmodus passt. */
+
+/* ── Zurück zur Übersicht ─────────────────────────────────────────── */
+#hub-back {
+    display: inline-flex; align-items: center; gap: 0.35rem; flex: none;
+    padding: 0.33rem 0.7rem; border-radius: 9px;
+    font: 600 0.78rem/1.3 Inter, system-ui, sans-serif; text-decoration: none; white-space: nowrap;
+    color: var(--primary, #1e3a8a); background: var(--card, #fff); border: 1px solid var(--border, #e2e8f0);
+}
+#hub-back:hover { border-color: var(--primary, #1e3a8a); }
+#hub-back:focus-visible, #hub-find button:focus-visible, #hub-rel a:focus-visible { outline: 3px solid #f59e0b; outline-offset: 2px; }
+#hub-back.hub-float {
+    position: fixed; z-index: 60; box-shadow: 0 4px 14px rgba(0, 0, 0, 0.18);
+    left: max(12px, env(safe-area-inset-left, 0px)); bottom: max(12px, env(safe-area-inset-bottom, 0px));
+}
+
+/* ── Suchtreffer aus dem Portal ───────────────────────────────────── */
+mark.hub-hit { background: #fde047; color: #111; border-radius: 3px; padding: 0 2px; }
+mark.hub-hit.hub-cur { background: #f97316; color: #fff; }
+.hub-target { outline: 3px solid #f59e0b; outline-offset: 4px; border-radius: 6px; }
+#hub-find {
+    position: fixed; z-index: 700; left: 50%; transform: translateX(-50%);
+    bottom: max(14px, env(safe-area-inset-bottom, 0px));
+    display: flex; align-items: center; gap: 0.35rem; max-width: calc(100vw - 24px);
+    padding: 0.35rem 0.4rem 0.35rem 0.9rem; border-radius: 999px;
+    background: var(--text, #0f172a); color: var(--card, #fff);
+    font: 500 0.8rem/1.2 Inter, system-ui, sans-serif; box-shadow: 0 8px 28px rgba(0, 0, 0, 0.3);
+}
+#hub-find .hub-find-q { font-weight: 700; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 11rem; }
+#hub-find .hub-find-n { opacity: 0.8; white-space: nowrap; font-variant-numeric: tabular-nums; margin-right: 0.25rem; }
+#hub-find button {
+    width: 1.9rem; height: 1.9rem; flex: none; border-radius: 50%; cursor: pointer;
+    font: 600 0.9rem/1 Inter, system-ui, sans-serif; color: inherit; background: transparent;
+    border: 1px solid color-mix(in srgb, currentColor 35%, transparent);
+}
+#hub-find button:hover { background: color-mix(in srgb, currentColor 18%, transparent); }
+
+/* ── Platzhalter für Bilder, die nicht geladen werden konnten ─────── */
+.hub-noimg {
+    display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 0.2rem;
+    min-height: 7rem; padding: 1rem; text-align: center; border-radius: 10px;
+    border: 1.5px dashed var(--border, #cbd5e1); color: var(--muted, #64748b);
+    font: 500 0.82rem/1.4 Inter, system-ui, sans-serif;
+}
+.hub-noimg b { color: var(--text, #0f172a); font-weight: 700; }
+.hub-noimg code { font: 0.72rem 'JetBrains Mono', ui-monospace, monospace; word-break: break-all; opacity: 0.85; }
+
+/* ── Weitere Seiten im selben Fach ────────────────────────────────── */
+#hub-rel { max-width: 900px; margin: 0 auto; padding: 0 1.25rem 3rem; font-family: Inter, system-ui, sans-serif; }
+.toc-main > #hub-rel { padding: 2rem 0 0; margin: 0; max-width: none; }
+.hub-rel-box { border: 1px solid var(--border, #e2e8f0); background: var(--card, #fff); border-radius: 16px; padding: 1rem 1.15rem 1.1rem; }
+.hub-rel-title { font-size: 0.72rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.07em; color: var(--muted, #64748b); margin: 0 0 0.65rem; }
+.hub-rel-list { display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: 0.55rem; }
+.hub-rel-list a {
+    display: flex; flex-direction: column; gap: 0.1rem; min-width: 0; padding: 0.6rem 0.8rem; text-decoration: none;
+    border: 1px solid var(--border, #e2e8f0); border-radius: 10px; color: var(--text, #0f172a);
+}
+.hub-rel-list a:hover { border-color: var(--primary, #1e3a8a); }
+.hub-rel-list b { font-size: 0.9rem; font-weight: 600; line-height: 1.35; color: var(--primary, #1e3a8a); }
+.hub-rel-list small { font-size: 0.74rem; color: var(--muted, #64748b); }
+.hub-rel-home { display: inline-block; margin-top: 0.85rem; font-size: 0.82rem; font-weight: 600; color: var(--primary, #1e3a8a); text-decoration: none; }
+.hub-rel-home:hover { text-decoration: underline; }
+
+/* KaTeX legt für Screenreader ein unsichtbares, absolut positioniertes MathML-Element an. Ohne eigenen Bezugsrahmen
+   entkommt es dem Scroll-Container einer breiten Tabelle und verbreitert auf dem Handy die ganze Seite. */
+.katex { position: relative; }
+
+/* ── Breite Tabellen scrollen in sich, nicht die ganze Seite ────────
+   Ein weicher Randschatten zeigt, auf welcher Seite noch Inhalt liegt. Er nimmt die Textfarbe der Seite,
+   wirkt also im hellen Design als Schatten und im dunklen als Schimmer. */
+.hub-sw { position: relative; max-width: 100%; }
+.hub-nw { white-space: nowrap; }
+.hub-scroll { overflow-x: auto; max-width: 100%; -webkit-overflow-scrolling: touch; }
+.hub-sw::before, .hub-sw::after {
+    content: ''; position: absolute; top: 0; bottom: 0; width: 20px; z-index: 2; pointer-events: none;
+    opacity: 0; transition: opacity 0.15s;
+}
+.hub-sw::before { left: 0; background: linear-gradient(to right, color-mix(in srgb, var(--text, #0f172a) 16%, transparent), transparent); }
+.hub-sw::after { right: 0; background: linear-gradient(to left, color-mix(in srgb, var(--text, #0f172a) 16%, transparent), transparent); }
+.hub-sw.hub-l::before, .hub-sw.hub-r::after { opacity: 1; }
+
+/* Aktiver Abschnitt in den Sprungleisten (wird beim Scrollen mitgeführt) */
+.nav-jump a.hub-on { background: var(--primary, #1d4ed8); color: var(--card, #fff); border-color: var(--primary, #1d4ed8); }
+
+/* Hinweis auf weitere Knöpfe in wischbaren Leisten (nur Handy) */
+@media (max-width: 768px) {
+    body > nav.hub-navmore:not(.toc-sidebar) { -webkit-mask-image: linear-gradient(to right, #000 calc(100% - 34px), transparent); mask-image: linear-gradient(to right, #000 calc(100% - 34px), transparent); }
+}
+
+/* ── Handy: nichts darf die Seite seitlich verbreitern ────────────── */
+@media (max-width: 768px) {
+    /* Werkzeugleisten bleiben einzeilig und lassen sich seitlich wischen; „Alle Fächer“ bleibt dabei stehen */
+    body > nav:not(.toc-sidebar):not(.ls-nav) {
+        flex-wrap: nowrap; overflow-x: auto; scrollbar-width: none; padding-left: 0.9rem; padding-right: 0.9rem; gap: 0.5rem;
+    }
+    body > nav:not(.toc-sidebar):not(.ls-nav)::-webkit-scrollbar { display: none; }
+    body > nav:not(.toc-sidebar):not(.ls-nav) > * { flex-shrink: 0; }
+    body > nav:not(.toc-sidebar):not(.ls-nav) > .nav-label { display: none; }
+    body > nav:not(.toc-sidebar):not(.ls-nav) > #hub-back { position: sticky; left: 0; z-index: 2; }
+
+    /* Inhaltsspalten dürfen schmaler werden als ihr breitestes Kind */
+    main > *, .page-layout > *, .main-content, .toc-main { min-width: 0; }
+    .page-layout { align-items: stretch; }
+    /* Lange zusammengesetzte Wörter in Überschriften trennen statt überlaufen lassen; die Seitentitel bleiben ungetrennt */
+    h2, h3, h4, .section-title, .sum-title, .card-title { overflow-wrap: anywhere; hyphens: auto; }
+    h1 { overflow-wrap: break-word; hyphens: manual; }
+    .def-item { flex-wrap: wrap; }
+    main img { max-width: 100%; height: auto; }
+    main svg { max-width: 100%; }
+
+    #hub-rel { padding-left: 1rem; padding-right: 1rem; }
+}
+
+@media print { #hub-back, #hub-find, #hub-rel { display: none !important; } mark.hub-hit { background: none; color: inherit; } }

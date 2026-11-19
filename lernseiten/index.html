@@ -9,10 +9,11 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap">
 <style>
-/* Layout: dunkles Kopfband mit der Suche als Hauptwerkzeug, darunter eine Spalte (max. 980px):
-   Fächer als Karten in Fachfarbe, danach der Themenindex A–Z. Bei aktiver Suche ersetzt die Trefferliste beides. */
+/* Layout: dunkles Kopfband mit Schuljahr-Umschalter und Suche, darunter eine klebende Fachleiste und eine
+   Spalte (max. 980px): Fächer als Karten in Fachfarbe, dann der Themenindex A–Z mit klebender Buchstabenleiste.
+   Bei aktiver Suche ersetzt die Trefferliste beides. */
 :root {
-    --bg: #f1f4fb; --card: #ffffff; --ink: #0f172a; --muted: #5b6780; --line: #dfe5f1;
+    --bg: #f1f4fb; --card: #ffffff; --ink: #0f172a; --muted: #55627c; --line: #dfe5f1;
     --soft: #f6f8fd; --brand: #1e3a8a; --brand-2: #3b5bdb; --dot: rgba(148,163,184,0.24);
     --head-a: #0b1533; --head-b: #1e2f6b; --head-c: #3b2a82; --head-ink: #ffffff;
     --mark: #fde047; --mark-ink: #1a1a1a; --focus: #f59e0b;
@@ -44,62 +45,88 @@
 :root[data-theme="dark"] .fc { --fc: var(--fc-d); }
 
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+[hidden] { display: none !important; }
+html { scroll-behavior: smooth; }
+@media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
 body {
     font-family: var(--font); font-size: 15px; line-height: 1.55; color: var(--ink);
     background: var(--bg);
     background-image: radial-gradient(circle, var(--dot) 0.85px, transparent 0.85px);
     background-size: 22px 22px; min-height: 100vh;
 }
+/* Streifen über der klebenden Leiste, falls das Telefon dort eine Systemleiste einblendet */
+body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-area-inset-top, 0px); z-index: 10; background: var(--bg); }
 a { color: inherit; }
+button { font-family: inherit; }
 :focus-visible { outline: 3px solid var(--focus); outline-offset: 2px; border-radius: 6px; }
 .gutter { padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
 .col { max-width: 980px; margin: 0 auto; }
+.skip { position: absolute; left: -999px; top: 0; z-index: 100; background: var(--ink); color: var(--card); padding: 0.5rem 0.9rem; border-radius: 0 0 10px 0; font-weight: 600; text-decoration: none; }
+.skip:focus { left: 0; }
 
 /* ── Kopf ── */
-.top { background: linear-gradient(135deg, var(--head-a) 0%, var(--head-b) 55%, var(--head-c) 100%); color: var(--head-ink); padding-block: 1.6rem 1.5rem; position: relative; overflow: hidden; }
-.top::after { content: 'Σ § ⚡'; position: absolute; right: 2rem; top: 0.6rem; font-size: 3.4rem; font-style: italic; letter-spacing: 0.5rem; opacity: 0.07; pointer-events: none; white-space: nowrap; }
-.top-row { display: flex; align-items: flex-start; gap: 1rem; }
+.top { background: linear-gradient(135deg, var(--head-a) 0%, var(--head-b) 55%, var(--head-c) 100%); color: var(--head-ink); padding-block: 1.5rem 1.35rem; position: relative; overflow: hidden; }
+.top::after { content: 'Σ § ⚡'; position: absolute; right: 1.5rem; bottom: 0.3rem; font-size: 3.4rem; font-style: italic; letter-spacing: 0.5rem; opacity: 0.06; pointer-events: none; white-space: nowrap; }
+.top-row { display: flex; align-items: flex-start; justify-content: space-between; gap: 0.9rem 1.5rem; flex-wrap: wrap; }
 .top h1 { font-size: 2.2rem; font-weight: 800; letter-spacing: -0.7px; line-height: 1.15; text-wrap: balance; }
-.top .sub { font-size: 0.9rem; opacity: 0.75; margin-top: 0.3rem; font-variant-numeric: tabular-nums; }
-.theme-btn { margin-left: auto; flex: none; background: rgba(255,255,255,0.12); border: 1px solid rgba(255,255,255,0.22); color: var(--head-ink); font: 600 0.78rem var(--font); padding: 0.4rem 0.8rem; border-radius: 9px; cursor: pointer; position: relative; z-index: 1; }
-.theme-btn:hover { background: rgba(255,255,255,0.2); }
+.top .sub { font-size: 0.88rem; opacity: 0.78; margin-top: 0.3rem; font-variant-numeric: tabular-nums; }
+.top-ctl { display: flex; align-items: center; gap: 0.6rem; position: relative; z-index: 1; }
+.seg { display: inline-flex; padding: 3px; gap: 2px; border-radius: 12px; background: rgba(255,255,255,0.12); border: 1px solid rgba(255,255,255,0.2); }
+.seg button { font: 600 0.82rem var(--font); color: rgba(255,255,255,0.88); background: transparent; border: 0; border-radius: 9px; padding: 0.4rem 0.8rem; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; gap: 0.4rem; white-space: nowrap; }
+.seg button:hover { background: rgba(255,255,255,0.14); }
+.seg button[aria-pressed="true"] { background: #ffffff; color: var(--head-a); }
+.seg button.leer:not([aria-pressed="true"]) { opacity: 0.6; }
+.seg .dot { width: 0.45rem; height: 0.45rem; border-radius: 50%; background: var(--focus); flex: none; }
+.icon-btn { width: 2.45rem; height: 2.45rem; flex: none; display: grid; place-items: center; border-radius: 12px; background: rgba(255,255,255,0.12); border: 1px solid rgba(255,255,255,0.2); color: #fff; cursor: pointer; }
+.icon-btn:hover { background: rgba(255,255,255,0.2); }
+.icon-btn svg { width: 1.1rem; height: 1.1rem; stroke: currentColor; fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
 
-.search { margin-top: 1.15rem; position: relative; }
+.search { margin-top: 1.1rem; position: relative; }
 .search input { width: 100%; font: 500 1.05rem var(--font); color: var(--ink); background: var(--card); border: 2px solid transparent; border-radius: 14px; padding: 0.95rem 6.2rem 0.95rem 3rem; box-shadow: var(--shadow-lg); }
 .search input::-webkit-search-cancel-button { display: none; }
 .search input:focus { outline: none; border-color: var(--focus); }
 .search input::placeholder { color: var(--muted); }
-.search svg { position: absolute; left: 1rem; top: 50%; transform: translateY(-50%); width: 1.2rem; height: 1.2rem; stroke: var(--muted); fill: none; stroke-width: 2.2; stroke-linecap: round; }
+.search > svg { position: absolute; left: 1rem; top: 50%; transform: translateY(-50%); width: 1.2rem; height: 1.2rem; stroke: var(--muted); fill: none; stroke-width: 2.2; stroke-linecap: round; pointer-events: none; }
 .search .kbd, .search .clear { position: absolute; right: 0.9rem; top: 50%; transform: translateY(-50%); }
 .kbd { font: 500 0.7rem var(--mono); color: var(--muted); border: 1px solid var(--line); background: var(--soft); border-radius: 6px; padding: 0.2rem 0.45rem; pointer-events: none; }
 .clear { font: 600 0.78rem var(--font); color: var(--muted); background: var(--soft); border: 1px solid var(--line); border-radius: 8px; padding: 0.3rem 0.6rem; cursor: pointer; }
+.sugg { margin-top: 0.8rem; display: flex; flex-wrap: wrap; align-items: center; gap: 0.4rem; font-size: 0.78rem; color: rgba(255,255,255,0.75); }
+.sugg:empty { display: none; }
+.sugg button { font: 500 0.78rem var(--font); color: #fff; background: rgba(255,255,255,0.12); border: 1px solid rgba(255,255,255,0.2); border-radius: 999px; padding: 0.22rem 0.7rem; cursor: pointer; }
+.sugg button:hover { background: rgba(255,255,255,0.22); }
+.sugg .x { padding: 0.22rem 0.55rem; opacity: 0.8; }
 
-/* ── Filterleiste ── */
-.bar { position: sticky; top: env(safe-area-inset-top, 0px); z-index: 20; background: var(--card); border-bottom: 1px solid var(--line); box-shadow: 0 1px 12px rgba(30,58,138,0.06); }
-.bar .col { display: flex; align-items: center; gap: 0.5rem; padding-block: 0.55rem; flex-wrap: wrap; }
-.bar-label { font-size: 0.7rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.07em; color: var(--muted); margin-right: 0.2rem; }
-.chip { font: 600 0.8rem var(--font); color: var(--ink); background: var(--soft); border: 1px solid var(--line); border-radius: 999px; padding: 0.32rem 0.8rem; cursor: pointer; display: inline-flex; align-items: center; gap: 0.4rem; }
+/* ── Fachleiste ── */
+.bar { position: sticky; top: env(safe-area-inset-top, 0px); z-index: 20; background: color-mix(in srgb, var(--card) 94%, transparent); -webkit-backdrop-filter: blur(10px); backdrop-filter: blur(10px); border-bottom: 1px solid var(--line); box-shadow: 0 1px 12px rgba(30,58,138,0.06); }
+.bar .col { display: flex; align-items: center; gap: 0.7rem; padding-block: 0.5rem; }
+.bar-label { flex: none; font-size: 0.7rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.07em; color: var(--muted); }
+.chips, .az { display: flex; gap: 0.4rem; overflow-x: auto; scrollbar-width: none; min-width: 0; }
+.chips::-webkit-scrollbar, .az::-webkit-scrollbar { display: none; }
+.chips { flex: 1; padding: 2px 1px; }
+.chips.more, .az.more { -webkit-mask-image: linear-gradient(to right, #000 calc(100% - 28px), transparent); mask-image: linear-gradient(to right, #000 calc(100% - 28px), transparent); }
+.chip { flex: none; white-space: nowrap; font: 600 0.8rem var(--font); color: var(--ink); background: var(--soft); border: 1px solid var(--line); border-radius: 999px; padding: 0.32rem 0.8rem; cursor: pointer; display: inline-flex; align-items: center; gap: 0.4rem; }
+.chip:hover { border-color: var(--muted); }
 .chip i { width: 0.55rem; height: 0.55rem; border-radius: 50%; background: var(--fc, var(--brand-2)); }
+.chip small { font: 500 0.7rem var(--mono); color: var(--muted); }
 .chip[aria-pressed="true"] { background: var(--ink); color: var(--card); border-color: var(--ink); }
-.bar-sep { width: 1px; align-self: stretch; background: var(--line); margin: 0 0.3rem; }
-.chip small { font: 500 0.68rem var(--mono); opacity: 0.75; }
-.chip .now { font: 600 0.6rem var(--mono); text-transform: uppercase; letter-spacing: 0.05em; background: var(--focus); color: var(--mark-ink); border-radius: 4px; padding: 0.05rem 0.3rem; }
-.hinweis { background: var(--card); border: 1px solid var(--line); border-left: 4px solid var(--focus); border-radius: var(--radius-sm); padding: 0.7rem 1rem; margin-bottom: 1.6rem; font-size: 0.88rem; }
-.jtag { font: 600 0.62rem var(--mono); color: var(--muted); border: 1px solid var(--line); border-radius: 5px; padding: 0.05rem 0.35rem; flex: none; white-space: nowrap; }
-.count { margin-left: auto; font-size: 0.78rem; color: var(--muted); font-variant-numeric: tabular-nums; }
+.chip[aria-pressed="true"] small { color: inherit; opacity: 0.8; }
+.chip.dim:not([aria-pressed="true"]) { opacity: 0.5; }
 
-main { padding-block: 1.6rem 4rem; }
+main { padding-block: 1.5rem 4rem; }
+main:focus { outline: none; }
 .sec-title { font-size: 0.74rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; color: var(--muted); margin: 0 0 0.8rem; }
+.pill { font: 600 0.66rem var(--mono); text-transform: none; letter-spacing: 0; color: var(--muted); border: 1px solid var(--line); border-radius: 999px; padding: 0.05rem 0.5rem; margin-left: 0.4rem; vertical-align: 0.05em; }
 section + section { margin-top: 2.4rem; }
+.hinweis { background: var(--card); border: 1px solid var(--line); border-left: 4px solid var(--focus); border-radius: var(--radius-sm); padding: 0.7rem 1rem; margin-bottom: 1.6rem; font-size: 0.88rem; }
 
 /* ── Fächer ── */
-.faecher { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1rem; }
-.fach { background: var(--card); border: 1px solid var(--line); border-radius: var(--radius); box-shadow: var(--shadow); overflow: hidden; display: flex; flex-direction: column; min-width: 0; }
+.faecher { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1rem; align-items: start; }
+.fach { background: var(--card); border: 1px solid var(--line); border-radius: var(--radius); box-shadow: var(--shadow); overflow: hidden; min-width: 0; }
 .fach-head { display: flex; gap: 0.85rem; align-items: center; padding: 1rem 1.1rem; border-bottom: 1px solid var(--line); background: linear-gradient(135deg, color-mix(in srgb, var(--fc) 11%, var(--card)), var(--card)); }
 .mono { flex: none; min-width: 3rem; height: 3rem; padding: 0 0.5rem; border-radius: 12px; background: var(--fc); color: var(--card); font: 600 0.92rem var(--mono); display: grid; place-items: center; letter-spacing: 0.02em; }
 .fach-name { font-size: 1.06rem; font-weight: 700; line-height: 1.25; }
 .fach-info { font-size: 0.8rem; color: var(--muted); }
-.seiten { list-style: none; display: flex; flex-direction: column; }
+.seiten { list-style: none; }
 .seite { display: grid; grid-template-columns: 1fr auto; gap: 0.2rem 0.75rem; padding: 0.8rem 1.1rem; text-decoration: none; border-top: 1px solid var(--line); }
 .seiten li:first-child .seite { border-top: 0; }
 .seite:hover { background: var(--soft); }
@@ -112,13 +139,23 @@ section + section { margin-top: 2.4rem; }
 .recent a { text-decoration: none; font-size: 0.84rem; font-weight: 500; background: var(--card); border: 1px solid var(--line); border-left: 4px solid var(--fc); border-radius: 8px; padding: 0.4rem 0.75rem; }
 .recent a:hover { background: var(--soft); }
 
+/* ── Leerer Jahrgang ── */
+.leer-card { background: var(--card); border: 1px dashed var(--muted); border-radius: var(--radius); padding: 2.2rem 1.4rem; text-align: center; }
+.leer-card svg { width: 2.6rem; height: 2.6rem; stroke: var(--muted); fill: none; stroke-width: 1.6; stroke-linecap: round; stroke-linejoin: round; }
+.leer-card h2 { font-size: 1.15rem; margin-top: 0.7rem; text-wrap: balance; }
+.leer-card p { color: var(--muted); margin: 0.4rem auto 0; max-width: 34rem; font-size: 0.9rem; }
+.leer-btns { display: flex; justify-content: center; flex-wrap: wrap; gap: 0.5rem; margin-top: 1.1rem; }
+.btn { font: 600 0.84rem var(--font); padding: 0.5rem 1rem; border-radius: 10px; border: 1px solid var(--line); background: var(--soft); color: var(--ink); cursor: pointer; }
+.btn:hover { border-color: var(--muted); }
+.btn.primary { background: var(--ink); color: var(--card); border-color: var(--ink); }
+
 /* ── Themenindex ── */
-.az { display: flex; flex-wrap: wrap; gap: 0.25rem; margin-bottom: 1rem; }
-.az a, .az span { font: 600 0.8rem var(--mono); width: 1.9rem; height: 1.9rem; display: grid; place-items: center; border-radius: 7px; text-decoration: none; }
+.az { position: sticky; top: calc(var(--bar-h, 3rem) + env(safe-area-inset-top, 0px)); z-index: 15; gap: 0.25rem; padding: 0.45rem 0; margin-bottom: 0.4rem; background: color-mix(in srgb, var(--bg) 94%, transparent); -webkit-backdrop-filter: blur(8px); backdrop-filter: blur(8px); }
+.az a, .az span { flex: none; font: 600 0.8rem var(--mono); width: 2rem; height: 2rem; display: grid; place-items: center; border-radius: 7px; text-decoration: none; }
 .az a { background: var(--card); border: 1px solid var(--line); color: var(--brand); }
 .az a:hover { background: var(--ink); color: var(--card); }
 .az span { color: var(--line); }
-.letter { display: grid; grid-template-columns: 2.6rem 1fr; gap: 0.5rem; padding: 0.7rem 0; border-top: 1px solid var(--line); scroll-margin-top: 4.5rem; }
+.letter { display: grid; grid-template-columns: 2.6rem 1fr; gap: 0.5rem; padding: 0.7rem 0; border-top: 1px solid var(--line); scroll-margin-top: calc(var(--bar-h, 3rem) + 3.4rem); }
 .letter > b { font: 800 1.5rem var(--font); color: var(--brand); line-height: 1.2; }
 .letter ul { list-style: none; columns: 2 17rem; column-gap: 1.6rem; min-width: 0; }
 .letter li { break-inside: avoid; padding: 0.16rem 0; }
@@ -128,6 +165,9 @@ section + section { margin-top: 2.4rem; }
 .letter .tag { font: 600 0.62rem var(--mono); color: var(--fc); flex: none; }
 
 /* ── Treffer ── */
+.res-head { display: flex; align-items: baseline; justify-content: space-between; gap: 0.3rem 1rem; flex-wrap: wrap; margin-bottom: 0.8rem; }
+.res-head .sec-title { margin: 0; text-transform: none; letter-spacing: 0; font-size: 0.95rem; color: var(--ink); overflow-wrap: anywhere; }
+.res-count { font-size: 0.8rem; color: var(--muted); font-variant-numeric: tabular-nums; }
 .results { display: flex; flex-direction: column; gap: 0.6rem; }
 .res { display: block; text-decoration: none; background: var(--card); border: 1px solid var(--line); border-left: 4px solid var(--fc); border-radius: var(--radius-sm); padding: 0.75rem 1rem; box-shadow: var(--shadow); }
 .res:hover, .res.sel { border-color: var(--fc); background: var(--soft); }
@@ -136,15 +176,28 @@ section + section { margin-top: 2.4rem; }
 .res-h { font-weight: 700; font-size: 0.98rem; min-width: 0; overflow-wrap: anywhere; }
 .res-path { font-size: 0.76rem; color: var(--muted); }
 .res-tag { font: 600 0.64rem var(--mono); color: var(--card); background: var(--fc); border-radius: 5px; padding: 0.1rem 0.4rem; flex: none; }
+.jtag { font: 600 0.62rem var(--mono); color: var(--muted); border: 1px solid var(--line); border-radius: 5px; padding: 0.05rem 0.35rem; flex: none; white-space: nowrap; }
 .res-snip { font-size: 0.85rem; color: var(--muted); margin-top: 0.25rem; overflow-wrap: anywhere; }
 mark { background: var(--mark); color: var(--mark-ink); border-radius: 3px; padding: 0 2px; }
-.empty { background: var(--card); border: 1px dashed var(--line); border-radius: var(--radius); padding: 1.6rem; text-align: center; color: var(--muted); }
-.empty button { font: 600 0.82rem var(--font); margin: 0.25rem; padding: 0.3rem 0.7rem; border-radius: 999px; border: 1px solid var(--line); background: var(--soft); color: var(--ink); cursor: pointer; }
+.empty { background: var(--card); border: 1px dashed var(--muted); border-radius: var(--radius); padding: 1.6rem 1.2rem; text-align: center; color: var(--muted); }
+.empty p + p { margin-top: 0.7rem; }
+.empty button { font: 600 0.82rem var(--font); margin: 0.2rem; padding: 0.35rem 0.8rem; border-radius: 999px; border: 1px solid var(--line); background: var(--soft); color: var(--ink); cursor: pointer; }
+.empty button:hover { border-color: var(--muted); }
+.empty .meint b { color: var(--ink); }
 footer { margin-top: 2.5rem; font-size: 0.78rem; color: var(--muted); text-align: center; }
+
+.up { position: fixed; z-index: 30; right: max(16px, env(safe-area-inset-right, 0px)); bottom: max(16px, env(safe-area-inset-bottom, 0px)); width: 2.8rem; height: 2.8rem; border-radius: 50%; border: 0; background: var(--ink); color: var(--card); display: grid; place-items: center; cursor: pointer; box-shadow: var(--shadow-lg); opacity: 0; transform: translateY(10px); pointer-events: none; transition: opacity 0.18s, transform 0.18s; }
+.up.show { opacity: 1; transform: none; pointer-events: auto; }
+.up svg { width: 1.2rem; height: 1.2rem; stroke: currentColor; fill: none; stroke-width: 2.4; stroke-linecap: round; stroke-linejoin: round; }
+
 @media (max-width: 600px) {
+    .top { padding-block: 1.2rem 1.1rem; }
     .top h1 { font-size: 1.7rem; } .top::after { display: none; } .kbd { display: none; }
+    .top-ctl { width: 100%; }
+    .seg { flex: 1; } .seg button { flex: 1; padding-inline: 0.5rem; }
     .search input { padding-right: 1rem; font-size: 1rem; } .search.has-q input { padding-right: 5.5rem; }
-    .letter { grid-template-columns: 1.8rem 1fr; } .count { width: 100%; margin-left: 0; }
+    .letter { grid-template-columns: 1.8rem 1fr; }
+    .bar-label { display: none; }
 }
 @media (prefers-reduced-motion: no-preference) { .fach, .res { transition: box-shadow .18s, background .18s; } .fach:hover { box-shadow: var(--shadow-lg); } }
 </style>
@@ -152,36 +205,37 @@ footer { margin-top: 2.5rem; font-size: 0.78rem; color: var(--muted); text-align
 </head>
 <body>
 <!--ARTIFACT-BODY-START-->
-<div class="top gutter">
+<a class="skip" href="#inhalt">Zum Inhalt</a>
+<header class="top gutter">
     <div class="col">
         <div class="top-row">
             <div>
                 <h1>Lernportal</h1>
                 <p class="sub" id="stats">Alle Fächer, alle Lernseiten</p>
             </div>
-            <button class="theme-btn" id="theme-btn" type="button">Dunkel</button>
+            <div class="top-ctl">
+                <div class="seg" id="jahre" role="group" aria-label="Schuljahr"></div>
+                <button class="icon-btn" id="theme-btn" type="button" aria-label="Dunkles Design einschalten" title="Design wechseln"></button>
+            </div>
         </div>
-        <div class="search" id="search-box">
+        <div class="search" id="search-box" role="search">
             <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.8-3.8"/></svg>
-            <input type="search" id="q" autocomplete="off" spellcheck="false" placeholder="In allen Fächern suchen, z. B. Resonanz, Leasing, Sinus" aria-label="In allen Fächern suchen">
+            <input type="search" id="q" autocomplete="off" autocapitalize="off" spellcheck="false" enterkeyhint="search" placeholder="Alle Fächer durchsuchen" aria-label="Alle Fächer durchsuchen">
             <span class="kbd" id="kbd">Strg K</span>
             <button class="clear" id="clear" type="button" hidden>Löschen</button>
         </div>
+        <div class="sugg" id="sugg"></div>
     </div>
-</div>
+</header>
 
-<div class="bar gutter">
+<div class="bar gutter" id="bar">
     <div class="col">
-        <span class="bar-label">Jahr</span>
-        <span id="jahre" style="display:contents"></span>
-        <span class="bar-sep" aria-hidden="true"></span>
         <span class="bar-label">Fach</span>
-        <span id="chips" style="display:contents"></span>
-        <span class="count" id="count" aria-live="polite"></span>
+        <div class="chips" id="chips" role="group" aria-label="Nach Fach filtern"></div>
     </div>
 </div>
 
-<main class="gutter">
+<main class="gutter" id="inhalt" tabindex="-1">
 <div class="col">
     <div id="view-home">
         <div class="hinweis" id="hinweis" hidden></div>
@@ -189,67 +243,77 @@ footer { margin-top: 2.5rem; font-size: 0.78rem; color: var(--muted); text-align
             <h2 class="sec-title">Zuletzt geöffnet</h2>
             <div class="recent" id="recent"></div>
         </section>
-        <section>
-            <h2 class="sec-title">Fächer</h2>
-            <div class="faecher" id="faecher"></div>
-        </section>
-        <section>
-            <h2 class="sec-title">Themenindex A–Z</h2>
-            <div class="az" id="az"></div>
-            <div id="index"></div>
-        </section>
+        <div id="leer" hidden></div>
+        <div id="home-body">
+            <section>
+                <h2 class="sec-title">Fächer</h2>
+                <div class="faecher" id="faecher"></div>
+            </section>
+            <section>
+                <h2 class="sec-title">Themenindex A–Z <span class="pill" id="idx-count"></span></h2>
+                <div class="az" id="az" aria-label="Zu Buchstabe springen"></div>
+                <div id="index"></div>
+            </section>
+        </div>
     </div>
     <div id="view-search" hidden>
-        <h2 class="sec-title" id="res-title">Treffer</h2>
+        <div class="res-head">
+            <h2 class="sec-title" id="res-title">Treffer</h2>
+            <span class="res-count" id="res-count" aria-live="polite"></span>
+        </div>
         <div class="results" id="results"></div>
     </div>
     <footer id="foot"></footer>
 </div>
 </main>
 
+<button class="up" id="up" type="button" aria-label="Nach oben"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 19V5M5 12l7-7 7 7"/></svg></button>
+
 <script src="shared/daten.js"></script>
 <script>
 (function () {
 'use strict';
-var D = window.LERN || { faecher: [], sektionen: [], stand: '' };
+var D = window.LERN || { faecher: [], sektionen: [], jahre: [], aktuell: 0, stand: '' };
 var $ = function (id) { return document.getElementById(id); };
 var esc = function (s) { return String(s).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); };
-// Kleinschreibung, ä→a, ß→ss: gleiche Länge wie das Original bleibt bis auf ß erhalten
-var fold = function (s) { return s.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/ß/g, 'ss'); };
+// Kleinschreibung, ä→a, ß→ss
+var fold = function (s) { return s.toLowerCase().normalize('NFD').replace(/\p{M}/gu, '').replace(/ß/g, 'ss'); };
 var plain = function (h) { return h.replace(/^[^\p{L}\p{N}]+/u, '').trim(); };
-var store = { get: function (k, d) { try { return JSON.parse(localStorage.getItem(k)) || d; } catch (e) { return d; } },
+var store = { get: function (k, d) { try { var v = JSON.parse(localStorage.getItem(k)); return v === null || v === undefined ? d : v; } catch (e) { return d; } },
               set: function (k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) {} } };
 
 var fach = {}, seite = {};
 D.faecher.forEach(function (f) { fach[f.id] = f; f.seiten.forEach(function (s) { seite[s.datei] = { s: s, f: f }; }); });
 var fc = function (f) { return 'style="--fc-l:' + f.farbe + ';--fc-d:' + f.farbeDunkel + '"'; };
-D.sektionen.forEach(function (x) { x.H = fold(x.h); x.K = fold((x.k || '') + ' ' + seite[x.d].s.titel + ' ' + seite[x.d].f.name); x.T = fold(x.t); });
+D.sektionen.forEach(function (x) { var p = seite[x.d]; x.H = fold(x.h); x.K = fold((x.k || '') + ' ' + p.s.titel + ' ' + p.f.name); x.T = fold(x.t); });
 
 function link(x, q) {
-    var j = { q: q || '', at: x.h, k: x.k || '' };
-    return x.d + '#hub:' + encodeURIComponent(JSON.stringify(j));
+    return x.d + '#hub:' + encodeURIComponent(JSON.stringify({ q: q || '', at: x.h, k: x.k || '' }));
 }
-// Sprungziel zusätzlich im sessionStorage ablegen (falls der #-Teil unterwegs verloren geht) + Verlauf merken
-document.addEventListener('click', function (e) {
-    var a = e.target.closest('a[data-d]');
-    if (!a) return;
-    try { sessionStorage.setItem('lern-jump', JSON.stringify({ p: a.dataset.d.split('/').pop(), q: a.dataset.q || '', at: a.dataset.at || '', k: a.dataset.k || '', ts: Date.now() })); } catch (err) {}
-    var r = store.get('lern-recent', []).filter(function (d) { return d !== a.dataset.d; });
-    r.unshift(a.dataset.d); store.set('lern-recent', r.slice(0, 4));
+var focusOnce = function (container, sel) { var el = container.querySelector(sel); if (el) el.focus({ preventScroll: true }); };
+
+/* ── Design (hell/dunkel); die Fachseiten übernehmen die Wahl ── */
+var root = document.documentElement, tbtn = $('theme-btn');
+var ICON = {
+    moon: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20.5 14.2A8.5 8.5 0 0 1 9.8 3.5a8.5 8.5 0 1 0 10.7 10.7z"/></svg>',
+    sun: '<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2.5v2.2M12 19.3v2.2M2.5 12h2.2M19.3 12h2.2M5.3 5.3l1.6 1.6M17.1 17.1l1.6 1.6M18.7 5.3l-1.6 1.6M6.9 17.1l-1.6 1.6"/></svg>'
+};
+var isDark = function () { var t = root.getAttribute('data-theme'); return t ? t === 'dark' : matchMedia('(prefers-color-scheme: dark)').matches; };
+function themeUi() {
+    var d = isDark();
+    tbtn.innerHTML = d ? ICON.sun : ICON.moon;
+    tbtn.setAttribute('aria-label', d ? 'Helles Design einschalten' : 'Dunkles Design einschalten');
+    tbtn.title = d ? 'Helles Design' : 'Dunkles Design';
+}
+var savedTheme = store.get('lern-theme', null);
+if (savedTheme === 'dark' || savedTheme === 'light') root.setAttribute('data-theme', savedTheme);
+themeUi();
+tbtn.addEventListener('click', function () {
+    var t = isDark() ? 'light' : 'dark';
+    root.setAttribute('data-theme', t); store.set('lern-theme', t); themeUi();
 });
+try { matchMedia('(prefers-color-scheme: dark)').addEventListener('change', themeUi); } catch (e) {}
 
-/* ── Theme ── */
-(function () {
-    var root = document.documentElement, btn = $('theme-btn');
-    var isDark = function () { var t = root.getAttribute('data-theme'); return t ? t === 'dark' : matchMedia('(prefers-color-scheme: dark)').matches; };
-    var label = function () { btn.textContent = isDark() ? 'Hell' : 'Dunkel'; };
-    var saved = store.get('lern-theme', null);
-    if (saved) root.setAttribute('data-theme', saved);
-    label();
-    btn.addEventListener('click', function () { var t = isDark() ? 'light' : 'dark'; root.setAttribute('data-theme', t); store.set('lern-theme', t); label(); });
-})();
-
-/* ── Startansicht ── */
 /* ── Schuljahre: jedes Jahr hat seinen eigenen Index; das aktuelle ist Standard ── */
 var JAHRE = D.jahre || [], AKT = D.aktuell;
 var klasse = function (nr) { for (var i = 0; i < JAHRE.length; i++) if (JAHRE[i].nr === nr) return JAHRE[i].klasse; return ''; };
@@ -266,35 +330,58 @@ if (jahr === null) {
 }
 var imJahr = function (j) { return jahr === 'alle' || j === jahr; };
 var fachHat = function (f) { return f.seiten.some(function (s) { return imJahr(s.jahr); }); };
-function renderJahre() {
-    var h = JAHRE.map(function (j) {
-        return '<button class="chip" type="button" data-j="' + j.nr + '" aria-pressed="' + (jahr === j.nr) + '">' + j.nr + '. Jahr · ' + esc(j.klasse) +
-            (j.nr === AKT ? ' <span class="now">aktuell</span>' : '') + ' <small>' + seitenIm(j.nr) + '</small></button>';
-    }).join('');
-    $('jahre').innerHTML = h + '<button class="chip" type="button" data-j="alle" aria-pressed="' + (jahr === 'alle') + '">Alle Jahre</button>';
-    var leer = jahr !== 'alle' && !seitenIm(jahr);
-    $('hinweis').hidden = !(ausweich || leer);
-    if (ausweich) $('hinweis').textContent = 'Für das ' + AKT + '. Jahr (' + klasse(AKT) + ') gibt es noch keine Lernseiten. Du siehst deshalb das ' + jahr + '. Jahr (' + klasse(jahr) + ').';
-    else if (leer) $('hinweis').textContent = 'Für das ' + jahr + '. Jahr (' + klasse(jahr) + ') gibt es noch keine Lernseiten. Neue Seiten erscheinen hier automatisch.';
-}
 var active = store.get('lern-fach', 'alle');
 if (active !== 'alle' && !fach[active]) active = 'alle';
 
-function renderChips() {
-    var h = '<button class="chip" type="button" data-f="alle" aria-pressed="' + (active === 'alle') + '">Alle</button>';
-    if (active !== 'alle' && !fachHat(fach[active])) active = 'alle';
-    D.faecher.filter(fachHat).forEach(function (f) {
-        h += '<button class="chip fc" type="button" ' + fc(f) + ' data-f="' + f.id + '" aria-pressed="' + (active === f.id) + '"><i></i>' + esc(f.kurz) + '</button>';
-    });
-    $('chips').innerHTML = h;
+function renderJahre() {
+    $('jahre').innerHTML = JAHRE.map(function (j) {
+        var n = seitenIm(j.nr);
+        return '<button type="button" data-j="' + j.nr + '" aria-pressed="' + (jahr === j.nr) + '"' + (n ? '' : ' class="leer"') +
+            ' aria-label="' + j.nr + '. Jahr, ' + esc(j.klasse) + (j.nr === AKT ? ', aktuelles Schuljahr' : '') + (n ? '' : ', noch leer') + '"' +
+            ' title="' + j.nr + '. Jahr · ' + esc(j.klasse) + (j.nr === AKT ? ' (aktuell)' : '') + ' · ' + n + (n === 1 ? ' Seite' : ' Seiten') + '">' +
+            esc(j.klasse) + (j.nr === AKT ? '<span class="dot" aria-hidden="true"></span>' : '') + '</button>';
+    }).join('') + '<button type="button" data-j="alle" aria-pressed="' + (jahr === 'alle') + '" title="Alle Schuljahre zusammen">Alle</button>';
 }
+function renderHinweis() {
+    var el = $('hinweis');
+    el.hidden = !ausweich;
+    if (ausweich) el.textContent = 'Für das ' + AKT + '. Jahr (' + klasse(AKT) + ') gibt es noch keine Lernseiten. Angezeigt wird das ' + jahr + '. Jahr (' + klasse(jahr) + ').';
+}
+function renderStats() {
+    var n = seitenIm(jahr);
+    var wer = jahr === 'alle' ? 'Alle Schuljahre' : jahr + '. Jahr · ' + klasse(jahr);
+    if (!n) { $('stats').textContent = wer + ' — noch keine Lernseiten'; return; }
+    var nF = D.faecher.filter(fachHat).length, nA = D.sektionen.filter(function (x) { return imJahr(x.j); }).length;
+    $('stats').textContent = wer + ' — ' + nF + (nF === 1 ? ' Fach, ' : ' Fächer, ') + n + (n === 1 ? ' Seite, ' : ' Seiten, ') + nA + ' durchsuchbare Abschnitte';
+}
+
+/* Fachfilter und Buchstabenleiste: rechts ausblenden, solange noch etwas seitlich zu wischen ist */
+function moreHint(el) {
+    var upd = function () { el.classList.toggle('more', el.scrollWidth - el.clientWidth - el.scrollLeft > 4); };
+    if (!el.dataset.hint) { el.dataset.hint = '1'; el.addEventListener('scroll', upd, { passive: true }); }
+    upd();
+}
+function renderChips(counts) {
+    if (active !== 'alle' && !fachHat(fach[active])) active = 'alle';
+    var h = '<button class="chip' + (counts && !counts.alle ? ' dim' : '') + '" type="button" data-f="alle" aria-pressed="' + (active === 'alle') + '">Alle' + (counts ? ' <small>' + counts.alle + '</small>' : '') + '</button>';
+    D.faecher.filter(fachHat).forEach(function (f) {
+        var n = counts ? (counts[f.id] || 0) : 0;
+        h += '<button class="chip fc' + (counts && !n ? ' dim' : '') + '" type="button" ' + fc(f) + ' data-f="' + f.id + '" aria-pressed="' + (active === f.id) + '" title="' + esc(f.name) + '"><i></i>' + esc(f.kurz) + (counts ? ' <small>' + n + '</small>' : '') + '</button>';
+    });
+    var c = $('chips'), sl = c.scrollLeft;
+    c.innerHTML = h; c.scrollLeft = sl;
+    moreHint(c);
+}
+
+/* ── Startansicht ── */
 function renderFaecher() {
     $('faecher').innerHTML = D.faecher.filter(function (f) { return fachHat(f) && (active === 'alle' || f.id === active); }).map(function (f) {
-        return '<article class="fach fc" ' + fc(f) + '><div class="fach-head"><div class="mono">' + esc(f.kurz) + '</div><div><div class="fach-name">' + esc(f.name) +
-            '</div><div class="fach-info">' + esc(f.info) + '</div></div></div><ul class="seiten">' +
+        return '<article class="fach fc" ' + fc(f) + '><div class="fach-head"><div class="mono">' + esc(f.kurz) + '</div><div><h3 class="fach-name">' + esc(f.name) +
+            '</h3><div class="fach-info">' + esc(f.info) + '</div></div></div><ul class="seiten">' +
             f.seiten.filter(function (s) { return imJahr(s.jahr); }).map(function (s) {
                 return '<li><a class="seite" href="' + s.datei + '" data-d="' + s.datei + '"><span class="seite-titel">' + esc(s.titel) + '</span><span class="art">' + esc(s.art) +
-                    '</span><span class="seite-info">' + esc(s.info) + '</span><span class="seite-meta">' + (s.themen || 0) + ' Abschnitte im Index' + (jahr === 'alle' ? ' · ' + s.jahr + '. Jahr (' + esc(klasse(s.jahr)) + ')' : '') + '</span></a></li>';
+                    '</span><span class="seite-info">' + esc(s.info) + '</span><span class="seite-meta">' + (s.themen || 0) + ' Themen' +
+                    (jahr === 'alle' ? ' · ' + s.jahr + '. Jahr · ' + esc(klasse(s.jahr)) : '') + '</span></a></li>';
             }).join('') + '</ul></article>';
     }).join('');
 }
@@ -302,6 +389,18 @@ function renderRecent() {
     var r = store.get('lern-recent', []).filter(function (d) { return seite[d]; });
     $('recent-sec').hidden = !r.length;
     $('recent').innerHTML = r.map(function (d) { var p = seite[d]; return '<a class="fc" ' + fc(p.f) + ' href="' + d + '" data-d="' + d + '">' + esc(p.f.kurz + ' · ' + p.s.titel) + '</a>'; }).join('');
+}
+function renderLeer() {
+    var leer = jahr !== 'alle' && !seitenIm(jahr);
+    $('leer').hidden = !leer; $('home-body').hidden = leer;
+    if (!leer) return false;
+    var anderes = JAHRE.filter(function (j) { return j.nr !== jahr && seitenIm(j.nr); })[0];
+    $('leer').innerHTML = '<div class="leer-card"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 13l3-8h12l3 8v6a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1z"/><path d="M3 13h5l1 2.5h6l1-2.5h5"/></svg>' +
+        '<h2>Noch keine Lernseiten für das ' + jahr + '. Jahr (' + esc(klasse(jahr)) + ')</h2>' +
+        '<p>Sobald hier Lernseiten angelegt sind, erscheinen sie in den Fächern, im Themenindex und in der Suche.</p>' +
+        '<div class="leer-btns">' + (anderes ? '<button class="btn primary" type="button" data-j="' + anderes.nr + '">Zum ' + anderes.nr + '. Jahr (' + esc(anderes.klasse) + ')</button>' : '') +
+        '<button class="btn" type="button" data-j="alle">Alle Jahre</button></div></div>';
+    return true;
 }
 function renderIndex() {
     // Hauptabschnitte immer; Unterabschnitte nur, wenn ihr Titel im ganzen Portal einmalig ist
@@ -316,13 +415,15 @@ function renderIndex() {
     var groups = {};
     list.forEach(function (e) { var c = fold(e.p.charAt(0)).toUpperCase(); if (!/[A-Z]/.test(c)) c = '#'; (groups[c] = groups[c] || []).push(e); });
     var letters = '#ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('');
-    $('az').innerHTML = letters.map(function (c) { return groups[c] ? '<a href="#idx-' + (c === '#' ? 'num' : c) + '">' + c + '</a>' : '<span>' + c + '</span>'; }).join('');
+    $('az').innerHTML = letters.map(function (c) { return groups[c] ? '<a href="#idx-' + (c === '#' ? 'num' : c) + '" aria-label="Einträge mit ' + c + '">' + c + '</a>' : '<span aria-hidden="true">' + c + '</span>'; }).join('');
     $('index').innerHTML = letters.filter(function (c) { return groups[c]; }).map(function (c) {
         return '<div class="letter" id="idx-' + (c === '#' ? 'num' : c) + '"><b>' + c + '</b><ul>' + groups[c].map(function (e) {
             var x = e.x, f = fach[x.f];
             return '<li><a class="fc" ' + fc(f) + ' href="' + link(x) + '" data-d="' + x.d + '" data-at="' + esc(x.h) + '" data-k="' + esc(x.k || '') + '"><span class="t">' + esc(e.p) + '</span><span class="tag">' + esc(f.kurz) + '</span></a></li>';
         }).join('') + '</ul></div>';
     }).join('');
+    $('idx-count').textContent = list.length + ' Einträge';
+    moreHint($('az'));
     return list.length;
 }
 // Buchstabenleiste: im Dokument scrollen statt den Hash zu ändern
@@ -334,12 +435,14 @@ $('az').addEventListener('click', function (e) {
 });
 
 /* ── Suche ── */
-var sel = -1, lastHits = [];
-function search(q, jedesJahr) {
+var sel = -1, lastHits = [], vocab = null;
+// opts.alleJahre / opts.alleFaecher heben den jeweiligen Filter für diese Suche auf
+function search(q, opts) {
+    opts = opts || {};
     var words = fold(q).split(/\s+/).filter(Boolean);
     var hits = [];
     D.sektionen.forEach(function (x) {
-        if ((!jedesJahr && !imJahr(x.j)) || (active !== 'alle' && x.f !== active)) return;
+        if ((!opts.alleJahre && !imJahr(x.j)) || (!opts.alleFaecher && active !== 'alle' && x.f !== active)) return;
         var score = 0;
         for (var i = 0; i < words.length; i++) {
             var w = words[i], inH = x.H.indexOf(w), inK = x.K.indexOf(w), inT = x.T.indexOf(w);
@@ -353,6 +456,11 @@ function search(q, jedesJahr) {
     });
     hits.sort(function (a, b) { return b.score - a.score; });
     return { hits: hits, words: words };
+}
+function countsFor(q) {
+    var c = { alle: 0 };
+    search(q, { alleFaecher: true }).hits.forEach(function (h) { c.alle++; c[h.x.f] = (c[h.x.f] || 0) + 1; });
+    return c;
 }
 function markUp(text, words) {
     // Treffer auf der gefalteten Fassung finden, im Original markieren (ß verschiebt Positionen → zeichenweise abbilden)
@@ -372,19 +480,77 @@ function snippet(x, words) {
     var s = x.t.slice(from, from + 210);
     return (from > 0 ? '… ' : '') + markUp(s, words) + (from + 210 < x.t.length ? ' …' : '');
 }
+
+/* „Meintest du …?“: Wortschatz aus allen Überschriften und Texten, Vergleich mit begrenzter Editierdistanz */
+function buildVocab() {
+    var m = Object.create(null);
+    D.sektionen.forEach(function (x) {
+        (x.h + ' ' + x.t).replace(/[\p{L}\p{N}]{4,}/gu, function (tok) {
+            var k = fold(tok), e = m[k];
+            if (!e) e = m[k] = { n: 0, cap: 0, s: tok.toLowerCase() };
+            e.n++; if (tok.charAt(0) !== tok.charAt(0).toLowerCase()) e.cap++;
+        });
+    });
+    vocab = Object.keys(m).map(function (k) {
+        var e = m[k];
+        return { k: k, n: e.n, s: e.cap * 2 > e.n ? e.s.charAt(0).toUpperCase() + e.s.slice(1) : e.s };
+    });
+}
+function lev(a, b, max) {
+    var la = a.length, lb = b.length;
+    if (Math.abs(la - lb) > max) return max + 1;
+    var prev = [], cur = [], i, j;
+    for (j = 0; j <= lb; j++) prev[j] = j;
+    for (i = 1; i <= la; i++) {
+        cur[0] = i; var rowMin = i;
+        for (j = 1; j <= lb; j++) {
+            cur[j] = Math.min(prev[j] + 1, cur[j - 1] + 1, prev[j - 1] + (a.charCodeAt(i - 1) === b.charCodeAt(j - 1) ? 0 : 1));
+            if (cur[j] < rowMin) rowMin = cur[j];
+        }
+        if (rowMin > max) return max + 1;
+        var t = prev; prev = cur; cur = t;
+    }
+    return prev[lb];
+}
+function meinteDu(q) {
+    if (!vocab) buildVocab();
+    var changed = false;
+    var out = q.trim().split(/\s+/).map(function (w) {
+        var k = fold(w), i;
+        if (k.length < 4) return w;
+        for (i = 0; i < vocab.length; i++) if (vocab[i].k.indexOf(k) >= 0) return w;   // Wort kommt vor
+        var max = k.length <= 5 ? 1 : k.length <= 9 ? 2 : 3, best = null, bd = 99;
+        for (i = 0; i < vocab.length; i++) {
+            var v = vocab[i], d = lev(k, v.k, max);
+            if (d <= max && (d < bd || (d === bd && v.n > best.n))) { best = v; bd = d; }
+        }
+        if (best) { changed = true; return best.s; }
+        return w;
+    });
+    if (!changed) return null;
+    var nq = out.join(' ');
+    return search(nq).hits.length ? nq : null;
+}
+
 function renderSearch(q) {
     var r = search(q), shown = r.hits.slice(0, 60);
     lastHits = shown; sel = -1;
     $('res-title').textContent = 'Treffer für „' + q.trim() + '“';
-    $('count').textContent = r.hits.length ? r.hits.length + (r.hits.length === 1 ? ' Treffer' : ' Treffer') + (r.hits.length > 60 ? ', die besten 60 angezeigt' : '') : 'Keine Treffer';
+    $('res-count').textContent = r.hits.length ? r.hits.length + ' Treffer' + (r.hits.length > 60 ? ', die besten 60 angezeigt' : '') : 'Keine Treffer';
     if (!shown.length) {
-        var tipps = ['Resonanz', 'Leasing', 'Blindleistung', 'Pythagoras', 'Zahlungsverzug'];
-        var woanders = jahr !== 'alle' ? search(q, true).hits.length : 0;
-        var text, knopf;
-        if (woanders) { text = 'Im ' + jahr + '. Jahr (' + esc(klasse(jahr)) + ') nichts gefunden. In anderen Jahren gibt es ' + woanders + ' Treffer.'; knopf = '<button type="button" data-jahre="1">In allen Jahren suchen</button>'; }
-        else if (active !== 'alle') { text = 'Nichts gefunden in ' + esc(fach[active].name) + '. Der Fachfilter ist aktiv.'; knopf = '<button type="button" data-all="1">In allen Fächern suchen</button>'; }
-        else { text = 'Nichts gefunden. Prüfe die Schreibweise oder suche nach einem kürzeren Wort.'; knopf = tipps.map(function (t) { return '<button type="button" data-tip="' + t + '">' + t + '</button>'; }).join(''); }
-        $('results').innerHTML = '<div class="empty"><p>' + text + '</p><p style="margin-top:.6rem">' + knopf + '</p></div>';
+        var text, knopf = '', n;
+        if (jahr !== 'alle' && (n = search(q, { alleJahre: true }).hits.length)) {
+            text = 'Im ' + jahr + '. Jahr (' + esc(klasse(jahr)) + ') nichts gefunden. In anderen Jahren gibt es ' + n + (n === 1 ? ' Treffer.' : ' Treffer.');
+            knopf = '<button type="button" data-jahre="1">In allen Jahren suchen</button>';
+        } else if (active !== 'alle' && (n = search(q, { alleFaecher: true }).hits.length)) {
+            text = 'Nichts gefunden in ' + esc(fach[active].name) + '. In anderen Fächern gibt es ' + n + (n === 1 ? ' Treffer.' : ' Treffer.');
+            knopf = '<button type="button" data-all="1">In allen Fächern suchen</button>';
+        } else {
+            var m = meinteDu(q);
+            text = 'Nichts gefunden. Prüfe die Schreibweise oder suche nach einem kürzeren Wort.';
+            if (m) { text = 'Nichts gefunden.'; knopf = '<span class="meint">Meintest du <button type="button" data-tip="' + esc(m) + '"><b>' + esc(m) + '</b></button>?</span>'; }
+        }
+        $('results').innerHTML = '<div class="empty"><p>' + text + '</p>' + (knopf ? '<p>' + knopf + '</p>' : '') + '</div>';
         return;
     }
     $('results').innerHTML = shown.map(function (h, i) {
@@ -395,25 +561,58 @@ function renderSearch(q) {
             (x.t ? '<div class="res-snip">' + snippet(x, r.words) + '</div>' : '') + '</a>';
     }).join('');
 }
+
+/* Vorschläge unter dem Suchfeld: zuletzt gesucht, sonst vier Beispiele aus dem gewählten Jahr */
+function beispiele() {
+    var seen = {}, list = [];
+    D.sektionen.forEach(function (x) {
+        if (x.k || !imJahr(x.j)) return;
+        var p = plain(x.h);
+        if (p.length < 6 || p.length > 22 || !/^[A-Za-zÄÖÜäöüß][A-Za-zÄÖÜäöüß\- ]*$/.test(p)) return;
+        var f = fold(p); if (seen[f]) return; seen[f] = 1; list.push(p);
+    });
+    list.sort(function (a, b) { return a.localeCompare(b, 'de'); });
+    var n = list.length, k = Math.min(4, n), out = [];
+    for (var i = 0; i < k; i++) out.push(list[Math.floor((i + 0.5) * n / k)]);
+    return out;
+}
+function renderSugg() {
+    var v = store.get('lern-suche', []).filter(function (t) { return typeof t === 'string'; });
+    var items = v.length ? v : beispiele();
+    $('sugg').innerHTML = items.length ? '<span>' + (v.length ? 'Zuletzt gesucht' : 'Zum Beispiel') + '</span>' +
+        items.map(function (t) { return '<button type="button" data-tip="' + esc(t) + '">' + esc(t) + '</button>'; }).join('') +
+        (v.length ? '<button type="button" class="x" data-clearhist="1" aria-label="Suchverlauf löschen" title="Suchverlauf löschen">✕</button>' : '') : '';
+}
+function merkeSuche(q) {
+    q = (q || '').trim(); if (!q) return;
+    var v = store.get('lern-suche', []).filter(function (t) { return fold(t) !== fold(q); });
+    v.unshift(q); store.set('lern-suche', v.slice(0, 5));
+}
+
 function update() {
-    var q = $('q').value, has = q.trim().length > 0;
+    var q = $('q').value, has = q.trim().length > 0, counts = has ? countsFor(q) : null;
     $('view-home').hidden = has; $('view-search').hidden = !has;
-    $('clear').hidden = !has; $('kbd').hidden = has;
+    $('clear').hidden = !has; $('kbd').hidden = has; $('sugg').hidden = has;
     $('search-box').classList.toggle('has-q', has);
-    renderJahre(); renderChips(); renderStats();
+    renderJahre(); renderChips(counts); renderStats();
+    // Fachfilter nur anbieten, wenn es überhaupt etwas zu filtern gibt
+    $('bar').hidden = D.faecher.filter(fachHat).length < 2;
     if (has) renderSearch(q);
     else {
-        renderRecent(); renderFaecher();
-        var n = renderIndex();
-        $('count').textContent = n + ' Einträge im Index';
+        renderHinweis(); renderRecent(); renderSugg();
+        if (!renderLeer()) { renderFaecher(); renderIndex(); }
     }
+    measure();
 }
+function measure() { root.style.setProperty('--bar-h', $('bar').offsetHeight + 'px'); }
 function move(d) {
     if (!lastHits.length) return;
     sel = (sel + d + lastHits.length) % lastHits.length;
     document.querySelectorAll('.res.sel').forEach(function (e) { e.classList.remove('sel'); });
     var el = $('res-' + sel); el.classList.add('sel'); el.scrollIntoView({ block: 'nearest' });
 }
+
+/* ── Eingaben ── */
 var timer;
 $('q').addEventListener('input', function () { clearTimeout(timer); timer = setTimeout(update, 90); });
 $('q').addEventListener('keydown', function (e) {
@@ -423,30 +622,45 @@ $('q').addEventListener('keydown', function (e) {
     else if (e.key === 'Escape') { $('q').value = ''; update(); }
 });
 $('clear').addEventListener('click', function () { $('q').value = ''; update(); $('q').focus(); });
+$('jahre').addEventListener('click', function (e) {
+    var b = e.target.closest('button'); if (!b) return;
+    jahr = b.dataset.j === 'alle' ? 'alle' : +b.dataset.j; ausweich = false; merkeJahr(); update();
+    focusOnce($('jahre'), '[data-j="' + b.dataset.j + '"]');
+});
 $('chips').addEventListener('click', function (e) {
     var b = e.target.closest('.chip'); if (!b) return;
     active = b.dataset.f; store.set('lern-fach', active); update();
+    focusOnce($('chips'), '[data-f="' + b.dataset.f + '"]');
 });
-$('results').addEventListener('click', function (e) {
-    var b = e.target.closest('button'); if (!b) return;
-    if (b.dataset.all) { active = 'alle'; store.set('lern-fach', active); }
-    if (b.dataset.jahre) { jahr = 'alle'; ausweich = false; merkeJahr(); }
-    if (b.dataset.tip) $('q').value = b.dataset.tip;
-    update();
+// Alles weitere, was in Hinweisen, Vorschlägen und Leerzuständen angeklickt werden kann
+document.addEventListener('click', function (e) {
+    var t = e.target, b;
+    if ((b = t.closest('button[data-tip]'))) { $('q').value = b.dataset.tip; update(); $('q').focus(); return; }
+    if ((b = t.closest('button[data-all]'))) { active = 'alle'; store.set('lern-fach', active); update(); return; }
+    if ((b = t.closest('button[data-jahre]'))) { jahr = 'alle'; ausweich = false; merkeJahr(); update(); return; }
+    if ((b = t.closest('#leer button[data-j]'))) { jahr = b.dataset.j === 'alle' ? 'alle' : +b.dataset.j; ausweich = false; merkeJahr(); update(); return; }
+    if ((b = t.closest('button[data-clearhist]'))) { store.set('lern-suche', []); renderSugg(); return; }
+    // Seite oder Treffer geöffnet: Sprungziel zusätzlich im sessionStorage ablegen (falls der #-Teil unterwegs verloren geht), Verlauf merken
+    var a = t.closest('a[data-d]');
+    if (a) {
+        try { sessionStorage.setItem('lern-jump', JSON.stringify({ p: a.dataset.d.split('/').pop(), q: a.dataset.q || '', at: a.dataset.at || '', k: a.dataset.k || '', ts: Date.now() })); } catch (err) {}
+        var r = store.get('lern-recent', []).filter(function (d) { return d !== a.dataset.d; });
+        r.unshift(a.dataset.d); store.set('lern-recent', r.slice(0, 4));
+        if (a.dataset.q) merkeSuche(a.dataset.q);
+    }
 });
 document.addEventListener('keydown', function (e) {
     if ((e.key === 'k' && (e.ctrlKey || e.metaKey)) || (e.key === '/' && document.activeElement !== $('q'))) { e.preventDefault(); $('q').focus(); $('q').select(); }
 });
 window.addEventListener('pageshow', renderRecent);
 
-$('jahre').addEventListener('click', function (e) {
-    var b = e.target.closest('.chip'); if (!b) return;
-    jahr = b.dataset.j === 'alle' ? 'alle' : +b.dataset.j; ausweich = false; merkeJahr(); update();
-});
-function renderStats() {
-    var nF = D.faecher.filter(fachHat).length, nA = D.sektionen.filter(function (x) { return imJahr(x.j); }).length;
-    $('stats').textContent = (jahr === 'alle' ? 'Alle Jahre' : jahr + '. Jahr · ' + klasse(jahr)) + ' · ' + nF + ' Fächer · ' + seitenIm(jahr) + ' Seiten · ' + nA + ' durchsuchbare Abschnitte';
-}
+/* Nach-oben-Knopf */
+var up = $('up');
+window.addEventListener('scroll', function () { up.classList.toggle('show', window.scrollY > 700); }, { passive: true });
+up.addEventListener('click', function () { window.scrollTo({ top: 0 }); $('q').focus({ preventScroll: true }); });
+window.addEventListener('resize', function () { measure(); moreHint($('chips')); moreHint($('az')); });
+if (document.fonts && document.fonts.ready) document.fonts.ready.then(measure);
+
 $('foot').textContent = 'Index-Stand ' + D.stand.split('-').reverse().join('.');
 update();
 })();
