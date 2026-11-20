@@ -35,6 +35,9 @@ klar/                   Klartext des Portals – NICHT im Git (nur .gitignore), 
 
 Der Klartext liegt nur in `klar/` und wird nie committet. Dort sieht alles aus wie früher (`klar/README.md`: Stundenplan, Schularbeiten, Lernseiten, Build).
 
+Das Passwort steht als Umgebungsvariable `LERNPORTAL_PASSWORT` in den Einstellungen der Cloud-Umgebung (Umgebungsmenü in der Titelleiste der Sitzung → Bearbeiten → Umgebungsvariablen),
+nicht im Repository und nicht im Chat. Fehlt sie, den Nutzer bitten, sie dort einzutragen; ohne Passwort lässt sich `klar/` nicht wiederherstellen.
+
 ```bash
 export LERNPORTAL_PASSWORT='xxxx-xxxx-xxxx'                 # in der Umgebung der Sitzung hinterlegt, nie im Repo
 node lernseiten/zugang/zugang.mjs auspacken                 # inhalt/ -> klar/
