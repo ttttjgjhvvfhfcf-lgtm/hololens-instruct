@@ -67,7 +67,7 @@ const seiten = dateien.filter((p) => p.endsWith('.html'));
 const titelVon = (p) => /<title>([^<]*)<\/title>/i.exec(fs.readFileSync(path.join(KLAR, p), 'utf8'))?.[1];
 
 /* ── Browser ─────────────────────────────────────────────────────────────── */
-const browser = await chromium.launch();
+const browser = await chromium.launch(LIVE && process.env.HTTPS_PROXY ? { proxy: { server: process.env.HTTPS_PROXY } } : {});   // in Sandboxen mit Ausgangs-Proxy
 const BEKANNT = /faecher\/MET\/(%C3%96VE-Sicherheitskonzept|Grundregeln_elektrische)|favicon/;   // zwei Bilder der MET-Seite fehlen seit jeher
 const neuerKontext = async () => {
   const ctx = await browser.newContext({ viewport: { width: 1280, height: 800 } });
