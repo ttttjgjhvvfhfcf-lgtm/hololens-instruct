@@ -5,7 +5,7 @@ Startseite: `index.html`. Fächer, Themenindex A–Z und Suche über alle Lernse
 ```
 index.html            Portal (Menüzeile mit Live-Anzeige, Jahr-Umschalter, Fächer, Index, Suche)
 stundenplan.html      Stundenplan (Live-Karte, Wochenraster, Tagesansicht, Lehrkräfte)
-stundenplan.json      Stundenplan-Daten (Einheiten, Lehrkräfte, Fächer, Vorlage, Einzelwochen, freie Tage)
+stundenplan.json      Stundenplan-Daten (Einheiten, Lehrkräfte, Fächer, Vorlage, Einzelwochen, freie Tage, Lernzielkontrollen)
 schularbeiten.html    Schularbeitenplan (nächster Termin mit Countdown, alle Schularbeiten und Tests)
 schularbeiten.json    Termine der Schularbeiten und Tests
 portal.json           aktuelles Schuljahr und Klassennamen
@@ -15,7 +15,8 @@ faecher/<fach>/bilder/ Abbildungen der Lernseiten (relativ eingebunden, Klick ö
 shared/hub.css        gemeinsame Schicht für alle Fachseiten (Handy-Korrekturen, Tabellen, Treffer-Leiste)
 shared/hub.js         Zurück-Link, Design-Übernahme, Sprung zum Treffer, Bildplatzhalter, Querverweise
 shared/icons/         Seiten-Symbole (Tab-Icon, Startbildschirm): Buch für Portal und Lernseiten, Uhr für den Stundenplan, Blatt für die Schularbeiten
-shared/live.js        Rechenlogik: was läuft gerade, was kommt danach, wie lange noch
+shared/live.js        Rechenlogik: was läuft gerade, was kommt danach, wie lange noch, nächste Lernzielkontrolle
+shared/erinnerung.js  Erinnerungs-Pille (nächste Lernzielkontrolle) in der Menüzeile von Portal, Stundenplan und Schularbeiten
 shared/daten.js       Suchindex          – wird erzeugt, nicht von Hand ändern
 shared/seiten.js      Seitenliste        – wird erzeugt, nicht von Hand ändern
 shared/stundenplan.js Stundenplan        – wird erzeugt, nicht von Hand ändern
@@ -102,3 +103,22 @@ Einzelwochen und freien Tagen die konkreten Wochen zusammen und erzeugt `shared/
 und `schularbeiten.html` zeigt den nächsten Termin mit Countdown und die Stunde laut Stundenplan. Liegen an einem Tag
 mehrere Termine (zum Beispiel Schularbeit und Test), stehen sie in der Reihenfolge der Datei. Hat das Fach an dem
 Tag laut Plan keinen Unterricht oder liegt der Tag außerhalb des Plans, gibt der Build einen Hinweis aus.
+
+## Lernzielkontrollen
+
+Die wöchentlichen Lernzielkontrollen stehen in `stundenplan.json` unter `lernzielkontrollen`: je Regel `fach`, `tag` (`mi`, `do`, …),
+optional `ab` und `bis` (Datum), `name` (Standard „Lernzielkontrolle“) und `seite` (Zusammenfassung, muss in `faecher.json` stehen).
+Aktuell: AM am Mittwoch und AEE am Donnerstag, ab 20.11.2026.
+
+- **Stundenplan:** Der Build kennzeichnet den Block des Fachs an diesem Wochentag mit „LZK“ (türkis, gestrichelt). An Tagen mit Test
+  oder Schularbeit im selben Fach, bei Entfall und an freien Tagen entfällt die Kennzeichnung (der Test ersetzt die Kontrolle).
+  Unter „Jetzt und danach“ stehen die nächsten drei Kontrollen mit Countdown und Link zur Zusammenfassung, die Live-Karte zeigt
+  „Lernzielkontrolle“, wenn gerade eine läuft.
+- **Menü:** Die Pille mit der Glocke zeigt die nächste Kontrolle. Sie ist ruhig, wenn die Kontrolle weiter weg ist, und gelb, wenn sie
+  heute oder morgen ist; heute zählt, bis die Stunde zu Ende ist. Ein Klick führt zur Zusammenfassung. Mit `?zeit=2026-11-24T18:00`
+  an der Adresse lässt sich ein anderer Zeitpunkt ausprobieren.
+- **Zusammenfassung und Beispielaufgaben:** `faecher/mathematik/lzk-am3.html` und `faecher/aee/lzk-aee3.html` entstehen in
+  `tools/seiten.py` (`lzk_am()` und `lzk_aee()`). Für die nächste Woche einen neuen Eintrag in der jeweiligen Funktion ergänzen
+  (Lernziele, Zusammenfassung, typische Fehler, Aufgaben mit Lösung; die Rechenwerte werden im Skript berechnet) und
+  `python3 tools/seiten.py lzk` sowie `node tools/build.mjs` ausführen. Die Seiten fassen die Unterlagen der letzten Einheiten zusammen,
+  was genau abgefragt wird, entscheidet die Lehrkraft.

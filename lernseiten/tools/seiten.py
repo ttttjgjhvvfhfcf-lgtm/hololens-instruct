@@ -694,11 +694,158 @@ def pneu():
           'Die Lösungen sind eigene Lösungsvorschläge, bei Abweichungen gilt die Lösung aus dem Unterricht.</div>\n' + b, jump, 'Abschnitt',
           extra_nav='<button class="btn" id="sol-toggle" type="button">Alle Lösungen zeigen</button>', extra_css=FIG_CSS)
 
+
+# ───────────────────────── Lernzielkontrollen (3Mb): Zusammenfassung, typische Fehler, Beispielaufgaben ─────────────────────────
+# Je Fach eine Seite, je Kontrolle ein Eintrag (neueste zuerst). Neue Woche = neuen Eintrag oben in LZK_AM bzw. LZK_AEE ergänzen.
+def lzk_body(e):
+    """Abschnitte einer Lernzielkontrolle: Lernziele, Zusammenfassung, typische Fehler, Beispielaufgaben (mit aufklappbarer Lösung)"""
+    k, note = e['id'], e['kurz_datum']
+    b = wrap('1', 'Das solltest du können', '<ul class="ziele">%s</ul>' % ''.join('<li>%s</li>' % z for z in e['ziele']), note, anker=k + '-ziele')
+    b += wrap('2', 'Zusammenfassung', '<div class="tbl-wrap"><table>%s</table></div>%s' % (
+        ''.join('<tr><td><strong>%s</strong></td><td>%s</td></tr>' % kv for kv in e['kurz']), e.get('mehr', '')), note, anker=k + '-kurz')
+    b += wrap('3', 'Typische Fehler', '<ul>%s</ul>' % ''.join('<li>%s</li>' % f for f in e['fehler']), note, anker=k + '-fehler')
+    jump = [(k + '-ziele', 'Lernziele'), (k + '-kurz', 'Zusammenfassung'), (k + '-fehler', 'Fehler')]
+    for n, (titel, text, lsg) in enumerate(e['aufgaben'], 1):
+        b += wrap('A%d' % n, titel, text + loesung(lsg), 'Beispielaufgabe', anker='%s-a%d' % (k, n)); jump.append(('%s-a%d' % (k, n), 'A%d' % n))
+    return b, jump
+
+def lzk_am():
+    kreis = lambda D: math.pi / 4 * D * D
+    ring = lambda D, d: math.pi / 4 * (D * D - d * d)
+    PA = lambda bar: bar / 10
+    # A3 Kolbenkraft einfach wirkend, A4 Aus- und Einfahren, A5 Durchmesser gesucht, A6 Spannvorrichtung mit Hebel
+    a3 = kreis(40); f3th = PA(6) * a3; f3 = f3th * .9
+    a4k = kreis(50); a4r = ring(50, 20); f4a = PA(5) * a4k * .92; f4e = PA(5) * a4r * .92
+    a5 = 500 / (PA(6) * .85); d5 = math.sqrt(4 * a5 / math.pi)
+    a6 = kreis(63); f6a = PA(5) * a6 * .85; f6b = f6a * 3
+    print('Kontrollwerte LZK-AM  A3 F=%.2f  A4 %.2f/%.2f  A5 A=%.2f D=%.2f  A6 F1=%.2f F2=%.2f' % (f3, f4a, f4e, a5, d5, f6a, f6b))
+    sub = lambda t, i: '%s<sub>%s</sub>' % (t, i)
+    eintrag = dict(
+        id='k1', kurz_datum='Mi 25.11.2026',
+        ziele=['Die Größen der Pneumatik mit Formelzeichen und Einheit nennen (p, F, A, V, T, Q, s, v)',
+               'Den Druck mit p = F / A berechnen und zwischen Pa, kPa, MPa und bar umrechnen',
+               'Die theoretische und die wirksame Kolbenkraft berechnen: %s = pe · A und F = pe · A · η' % sub('F', 'th'),
+               'Kolbenfläche und Ringfläche unterscheiden: Ausfahren mit A = π/4 · D², Einfahren mit A = π/4 · (D² − d²)',
+               'Rückwärts rechnen: Durchmesser oder Druck aus einer vorgegebenen Kraft bestimmen',
+               'Bei der Spannvorrichtung den Hebel einbeziehen: %s = %s · %s / %s' % (sub('F', '2'), sub('F', '1'), sub('l', '1'), sub('l', '2')),
+               'Vor- und Nachteile der Pneumatik nennen'],
+        kurz=[('Pneumatik', 'Erzeugung, Aufbereitung, Steuerung und Nutzung von Druckluft; sie erzeugt Bewegungen und Kräfte (spannen, transportieren, Werkzeuge antreiben)'),
+              ('Vorteile', 'Druckluft einfach verfügbar · hohe Arbeitsgeschwindigkeiten · robust · einfache Steuerung und Automatisierung · keine elektrische Energie am Antrieb'),
+              ('Nachteile', 'teuer in der Erzeugung · Luft ist kompressibel · Bewegungen schwer exakt zu positionieren · Geräusch durch ausströmende Luft · Kraft im Vergleich zur Hydraulik begrenzt'),
+              ('Druck', 'p = F / A &nbsp;·&nbsp; 1 bar = 100 000 Pa = 100 kPa = 0,1 MPa = 10 N/cm² = 0,1 N/mm²'),
+              ('Kolbenkraft', '%s = pe · A (theoretisch) &nbsp;·&nbsp; F = pe · A · η (wirksam; η berücksichtigt die Reibungsverluste)' % sub('F', 'th')),
+              ('Flächen', 'Ausfahren: A = π/4 · D² &nbsp;·&nbsp; Einfahren (doppelt wirkend): A = π/4 · (D² − d²)'),
+              ('Hebel', '%s · %s = %s · %s' % (sub('F', '1'), sub('l', '1'), sub('F', '2'), sub('l', '2'))),
+              ('Rechenweg', '① Druck in N/mm² (bar ÷ 10), Längen in mm &nbsp;② passende Fläche &nbsp;③ %s = pe · A &nbsp;④ mal η' % sub('F', 'th'))],
+        mehr='<div class="info-box"><strong>Ausführlich:</strong> <a href="pneumatik-grundlagen.html">AM3 — Pneumatik: Grundlagen</a> mit allen Beispielen und Übungen des Arbeitsblatts.</div>',
+        fehler=['bar nicht in N/mm² umgerechnet: Das Ergebnis ist um den Faktor 10 zu groß',
+                'Durchmesser statt Fläche eingesetzt (A = π/4 · D² vergessen)',
+                'Beim Einfahren die volle Kolbenfläche statt der Ringfläche genommen',
+                'Wirkungsgrad vergessen oder als 92 statt 0,92 eingesetzt',
+                'mm² und cm² oder Radius und Durchmesser verwechselt',
+                'Zwischenergebnisse zu früh gerundet'],
+        aufgaben=[
+            ('Umrechnen', '<p>Rechne um: a) 6,3 bar in Pa und in kPa · b) 250 kPa in bar · c) 0,8 MPa in bar</p>',
+             zeilen([('a)', '6,3 bar = 6,3 · 100 000 Pa = 630 000 Pa = 630 kPa'), ('b)', '250 kPa = 250 / 100 bar = 2,5 bar'), ('c)', '0,8 MPa = 0,8 · 10 bar = 8 bar', 'erg')])),
+            ('Druck aus Kraft und Fläche', '<p>Auf einen Kolben mit der Fläche 12 cm² wirkt die Kraft 900 N. Wie groß ist der Druck in bar?</p>',
+             zeilen([('Formel', 'p = F / A'), ('Rechnung', 'p = 900 N / 12 cm² = 75 N/cm²'), ('Ergebnis', '1 bar = 10 N/cm² → p = 7,5 bar', 'erg')])),
+            ('Kolbenkraft eines einfach wirkenden Zylinders',
+             '<p>Ein einfach wirkender Zylinder mit Kolbendurchmesser 40 mm wird mit einem Überdruck von 6 bar beaufschlagt. Der Wirkungsgrad beträgt 90 %. Wie groß ist die wirksame Kolbenkraft?</p>',
+             zeilen([('Fläche', 'A = π/4 · (40 mm)² = %s mm²' % de(a3)), ('Theoretisch', '%s = pe · A = 0,6 N/mm² · %s mm² = %s N' % (sub('F', 'th'), de(a3), de(f3th))),
+                     ('Ergebnis', 'F = %s N · 0,9 ≈ %s N' % (de(f3th), de(f3, 0)), 'erg')])),
+            ('Ausfahren und Einfahren',
+             '<p>Ein doppelt wirkender Zylinder hat den Kolbendurchmesser D = 50 mm und den Kolbenstangendurchmesser d = 20 mm. Der Überdruck beträgt 5 bar, der Wirkungsgrad 0,92. Berechne die Kraft a) beim Ausfahren und b) beim Einfahren.</p>',
+             zeilen([('a) Ausfahren', 'A = π/4 · 50² = %s mm² → F = 0,5 N/mm² · %s mm² · 0,92 ≈ %s N' % (de(a4k), de(a4k), de(f4a, 0)), 'erg'),
+                     ('b) Einfahren', 'Ringfläche A = π/4 · (50² − 20²) = %s mm² → F = 0,5 N/mm² · %s mm² · 0,92 ≈ %s N' % (de(a4r), de(a4r), de(f4e, 0)), 'erg'),
+                     ('Hinweis', 'Beim Einfahren ist die Kraft kleiner, weil die Kolbenstange Fläche wegnimmt.')])),
+            ('Kolbendurchmesser gesucht',
+             '<p>Ein einfach wirkender Zylinder soll mit einem Überdruck von 6 bar bei einem Wirkungsgrad von 0,85 eine Kraft von 500 N aufbringen. Welchen Kolbendurchmesser braucht er mindestens?</p>',
+             zeilen([('Fläche', 'A = F / (pe · η) = 500 N / (0,6 N/mm² · 0,85) = %s mm²' % de(a5)), ('Durchmesser', 'D = √(4A / π) = √(4 · %s mm² / π)' % de(a5)),
+                     ('Ergebnis', 'D ≈ %s mm. In der Praxis wählt man den nächstgrößeren Normdurchmesser, hier 40 mm.' % de(d5), 'erg')])),
+            ('Spannvorrichtung mit Hebel',
+             '<p>Eine pneumatische Spannvorrichtung hat einen Kolben mit D = 63 mm und wird mit pe = 5,0 bar beaufschlagt. Der Wirkungsgrad beträgt 0,85, das Hebelverhältnis l1 : l2 = 3 : 1. Berechne die Kolbenkraft F1 und die Spannkraft F2.</p>' +
+             fig('pneumatisch-spannen.jpg', 'Pneumatische Spannvorrichtung: Zylinder drückt mit F1 auf den Hebel mit den Armen l1 und l2, am kurzen Arm entsteht die Spannkraft F2', 'Spannvorrichtung (Bild aus dem Arbeitsblatt)', 'hell', breite=380, w=745, h=566),
+             zeilen([('Fläche', 'A = π/4 · (63 mm)² = %s mm²' % de(a6)), ('Kolbenkraft', '%s = pe · A · η = 0,5 N/mm² · %s mm² · 0,85 = %s N' % (sub('F', '1'), de(a6), de(f6a, 0))),
+                     ('Ergebnis', '%s = %s · %s / %s = %s N · 3 ≈ %s N' % (sub('F', '2'), sub('F', '1'), sub('l', '1'), sub('l', '2'), de(f6a, 0), de(f6b, 0)), 'erg')])),
+            ('Verständnisfragen', '<p>a) Nenne zwei Vorteile und zwei Nachteile der Pneumatik. b) Warum ist die wirksame Kolbenkraft kleiner als die theoretische?</p>',
+             '<ul><li><strong>a)</strong> Vorteile zum Beispiel: Druckluft ist einfach verfügbar, hohe Arbeitsgeschwindigkeiten, robust, einfache Steuerung. Nachteile zum Beispiel: teuer in der Erzeugung, Luft ist kompressibel (exaktes Positionieren schwierig), Geräusch, begrenzte Kraft.</li>'
+             '<li><strong>b)</strong> Zwischen Kolben, Kolbenstange, Dichtungen und Zylinderwand entstehen Reibungsverluste. Sie werden durch den Wirkungsgrad η (kleiner als 1) berücksichtigt: F = %s · η.</li></ul>' % sub('F', 'th')),
+        ])
+    body, jump = lzk_body(eintrag)
+    kopf = ('<div class="notice-box"><strong>Hinweis:</strong> Zusammenstellung aus den Unterlagen der letzten Einheiten (bis 19.11.2026), damit du dich auf die wöchentliche Lernzielkontrolle '
+            'am Mittwoch vorbereiten kannst. Was genau abgefragt wird, entscheidet die Lehrkraft. Die Aufgaben sind Übungsbeispiele in der Art des Arbeitsblatts, die Lösungen eigene Lösungsvorschläge.</div>\n')
+    seite('faecher/mathematik/lzk-am3.html', 'am', 'AM3 — Lernzielkontrolle (Mittwoch)', '📝 Wöchentlich am Mittwoch · aktuell: Pneumatik',
+          'Lernziele · Zusammenfassung · typische Fehler · Beispielaufgaben mit Lösungen', 'LZK', kopf + body, jump, 'Springe zu',
+          extra_nav='<button class="btn" id="sol-toggle" type="button">Alle Lösungen zeigen</button>', extra_css=FIG_CSS)
+
+def lzk_aee():
+    sub = lambda t, i: '%s<sub>%s</sub>' % (t, i)
+    U = 325; al = 210
+    u1 = U * math.sin(math.radians(al)); u2 = U * math.sin(math.radians(al - 120)); u3 = U * math.sin(math.radians(al - 240))
+    print('Kontrollwerte LZK-AEE  u1=%.2f u2=%.2f u3=%.2f Summe=%.6f' % (u1, u2, u3, u1 + u2 + u3))
+    eintrag = dict(
+        id='k1', kurz_datum='Do 26.11.2026',
+        ziele=['Erklären, wie eine Dreiphasenwechselspannung entsteht (Polrad im Ständer mit drei um 120° versetzten Spulen, Induktion)',
+               'Die Eigenschaften der drei Strangspannungen nennen',
+               'Die Spannungsgleichungen aufstellen: u₁ = Û · sin α, u₂ = Û · sin(α − 120°), u₃ = Û · sin(α − 240°)',
+               'Liniendiagramm und Zeigerbild der drei Spannungen zeichnen und lesen',
+               'Momentanwerte berechnen und zeigen, dass ihre Summe 0 ist',
+               'Sternschaltung und Dreieckschaltung unterscheiden und beschreiben, wie die Spulen verkettet werden',
+               'Die Vorteile des Drehstroms nennen'],
+        kurz=[('Erzeugung', 'Synchrongenerator: Das Polrad (Nord- und Südpol) dreht sich im Ständer mit drei Spulen und induziert in jeder eine Wechselspannung. Mit Wechselrichtern entsteht Drehstrom auch aus Gleichstrom (Photovoltaik, Batterien).'),
+              ('Phasenverschiebung', 'Spulen räumlich um 120° versetzt → Spannungen zeitlich um ⅓ Periode = 120° versetzt'),
+              ('Eigenschaften', 'gleich groß · gleiche Frequenz · gegeneinander um 120° verschoben · vollkommen gleichwertig · Summe zu jedem Zeitpunkt 0'),
+              ('Gleichungen', 'u₁ = Û · sin α &nbsp;·&nbsp; u₂ = Û · sin(α − 120°) &nbsp;·&nbsp; u₃ = Û · sin(α − 240°)'),
+              ('Zeigerbild', 'drei gleich lange Zeiger im Abstand von 120°; aneinandergelegt schließen sie sich zu einem Dreieck (Summe 0)'),
+              ('Verkettung', '<strong>Stern:</strong> die Enden U2, V2, W2 im Sternpunkt, die Anfänge U1, V1, W1 an L1, L2, L3 &nbsp;·&nbsp; <strong>Dreieck:</strong> Ende einer Spule an den Anfang der nächsten (U2–V1, V2–W1, W2–U1), an den Ecken L1, L2, L3'),
+              ('Drehstrom', 'ist ein verketteter Dreiphasenwechselstrom'),
+              ('Vorteile', 'kleinere Generatoren und Transformatoren · 50 % Leitungsmaterial sparen · günstige Drehstrommotoren · zwei Spannungen für einphasige und dreiphasige Verbraucher')],
+        mehr='<div class="info-box"><strong>Ausführlich:</strong> <a href="drehstrom-einheit-1.html">AEE3 — Einheit 1: Drehstrom</a> und das Arbeitsblatt <a href="dreiphasenwechselspannung.html">Dreiphasenwechselspannung</a>.</div>',
+        fehler=['Taschenrechner im RAD- statt im DEG-Modus',
+                'Klammer vergessen: sin(α − 120°) ist nicht sin α − 120°',
+                'Verschiebung verwechselt: u₂ eilt um 120° nach, u₃ um 240° (das entspricht 120° voraus)',
+                'Stern- und Dreieckschaltung vertauscht: beim Stern kommen alle Enden zusammen, beim Dreieck geht jedes Ende an den Anfang der nächsten Spule',
+                'Summe der Momentanwerte nicht 0, weil zu früh gerundet wurde: mit genauen Werten rechnen (zum Beispiel sin 30° = 0,5)',
+                'Im Zeigerbild die Zeiger verschieden lang gezeichnet oder nicht 120° auseinander'],
+        aufgaben=[
+            ('Entstehung erklären', '<p>Beschreibe in wenigen Sätzen, wie in einem Generator eine Dreiphasenwechselspannung entsteht.</p>',
+             '<ul><li>Im <strong>Ständer</strong> sitzen drei Spulen (U1–U2, V1–V2, W1–W2), räumlich um <strong>120°</strong> versetzt.</li>'
+             '<li>Das <strong>Polrad</strong> (Magnet mit Nord- und Südpol) wird angetrieben und dreht sich im Ständer.</li>'
+             '<li>Das umlaufende Magnetfeld induziert in jeder Spule eine Wechselspannung.</li>'
+             '<li>Weil die Spulen versetzt sind, erreichen die Spannungen ihren Höchstwert nacheinander: Sie sind um 120° (⅓ Periode) gegeneinander verschoben.</li></ul>'),
+            ('Eigenschaften nennen', '<p>Nenne vier Eigenschaften der drei Strangspannungen eines Drehstromsystems.</p>',
+             '<ul><li>gleich groß (gleicher Scheitelwert)</li><li>gleiche Frequenz</li><li>gegeneinander um 120° (⅓ Periode) phasenverschoben</li><li>die Summe der Augenblickswerte ist zu jedem Zeitpunkt 0 V</li><li>(außerdem: vollkommen gleichwertig)</li></ul>'),
+            ('Momentanwerte bei α = 210°', '<p>Gegeben ist Û = 325 V. Gib die Spannungsgleichungen für u₁, u₂ und u₃ an. Berechne die Momentanwerte bei α = 210° und ihre Summe.</p>',
+             '<div class="formula-box">u₁ = Û · sin α<br>u₂ = Û · sin(α − 120°)<br>u₃ = Û · sin(α − 240°)</div>' +
+             zeilen([('u₁', 'u₁ = 325 V · sin 210° = 325 V · (−0,5) = %s V' % de(u1)),
+                     ('u₂', 'u₂ = 325 V · sin(210° − 120°) = 325 V · sin 90° = %s V' % de(u2)),
+                     ('u₃', 'u₃ = 325 V · sin(210° − 240°) = 325 V · sin(−30°) = %s V' % de(u3)),
+                     ('Summe', 'u₁ + u₂ + u₃ = %s V + %s V − %s V = 0 V' % (de(u1).replace('−', '−'), de(u2), de(-u3)), 'erg')])),
+            ('Liniendiagramm und Zeigerbild', '<p>Zeichne die drei Spannungen mit Û = 325 V als Liniendiagramm (0° bis 360°) und als Zeigerbild.</p>',
+             '<div class="fig-row">' + fig_svg(diagramm_linien('k1-a4-l'), 'Liniendiagramm: u₂ ist um 120° nach rechts verschoben, u₃ um 240°', breit=True) +
+             fig_svg(diagramm_zeiger('k1-a4-z'), 'Zeigerbild: drei gleich lange Zeiger, jeweils 120° auseinander') + '</div>'),
+            ('Verkettungsarten erkennen', '<p>Welche Verkettungsart zeigen die beiden Schaltbilder? Beschreibe, wie die Spulen jeweils verbunden sind.</p><div class="fig-row">' +
+             fig('sternschaltung.png', 'Schaltbild 1: Spulenanfänge U1, V1, W1 an L1, L2, L3, Spulenenden U2, V2, W2 in einem Punkt verbunden', 'Schaltbild 1', 'hell', breite=250, w=715, h=671) +
+             fig('dreieckschaltung.png', 'Schaltbild 2: Die drei Spulen bilden ein Dreieck, an den Ecken liegen L1, L2, L3', 'Schaltbild 2', 'hell', breite=250, w=857, h=714) + '</div>',
+             '<ul><li><strong>Schaltbild 1 = Sternschaltung:</strong> Die Enden U2, V2, W2 sind im Sternpunkt verbunden, die Anfänge U1, V1, W1 liegen an L1, L2, L3.</li>'
+             '<li><strong>Schaltbild 2 = Dreieckschaltung:</strong> Das Ende jeder Spule ist mit dem Anfang der nächsten verbunden (U2–V1, V2–W1, W2–U1), an den drei Ecken liegen L1, L2, L3.</li></ul>'),
+            ('Vorteile des Drehstroms', '<p>Nenne vier Vorteile des Drehstroms.</p>',
+             '<ul><li>Generatoren und Transformatoren sind kleiner als Wechselstromgeräte gleicher Leistung.</li><li>Bei der Übertragung großer Leistungen spart man 50 % Leitungsmaterial.</li>'
+             '<li>Drehstrommotoren lassen sich besonders günstig herstellen.</li><li>Im Drehstromnetz stehen zwei Spannungen zur Verfügung: einphasige und dreiphasige Verbraucher können angeschlossen werden.</li></ul>'),
+        ])
+    body, jump = lzk_body(eintrag)
+    kopf = ('<div class="notice-box"><strong>Hinweis:</strong> Zusammenstellung aus den Unterlagen der letzten Einheiten (bis 19.11.2026), damit du dich auf die wöchentliche Lernzielkontrolle '
+            'am Donnerstag vorbereiten kannst. Was genau abgefragt wird, entscheidet die Lehrkraft. Die Aufgaben sind Übungsbeispiele in der Art des Arbeitsblatts, die Lösungen eigene Lösungsvorschläge.</div>\n')
+    seite('faecher/aee/lzk-aee3.html', 'aee', 'AEE3 — Lernzielkontrolle (Donnerstag)', '📝 Wöchentlich am Donnerstag · aktuell: Drehstrom',
+          'Lernziele · Zusammenfassung · typische Fehler · Beispielaufgaben mit Lösungen', 'LZK', kopf + body, jump, 'Springe zu',
+          extra_nav='<button class="btn" id="sol-toggle" type="button">Alle Lösungen zeigen</button>', extra_css=AEE3_CSS)
+
 if __name__ == '__main__':
     import sys
-    todo = sys.argv[1:] or ['met', 'aee', 'mathe', 'aee3', 'pneu']
+    todo = sys.argv[1:] or ['met', 'aee', 'mathe', 'aee3', 'pneu', 'lzk']
     if 'met' in todo: met()
     if 'aee' in todo: aee()
     if 'mathe' in todo: print('Punktesumme Mathe:', mathe())
     if 'aee3' in todo: aee3()
     if 'pneu' in todo: pneu()
+    if 'lzk' in todo: lzk_am(); lzk_aee()

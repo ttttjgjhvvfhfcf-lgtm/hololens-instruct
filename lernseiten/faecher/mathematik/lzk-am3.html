@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AM3 — Lernzielkontrolle (Mittwoch)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap">
+
+<style>
+:root { --primary:#5b21b6; --primary-light:#6d28d9; --bg:#f3f0ff; --soft:#f5f3ff; --soft2:#ede9fe; --border:#e4defc; --h1:#1e1b6b; --h2:#6d28d9;
+  --card:#ffffff; --text:#0f172a; --muted:#64748b; --ok:#047857; --ok-bg:#ecfdf5;
+  --warn-bg:#fffbeb; --warn-bd:#d97706; --warn-tx:#92400e; --dot:rgba(148,163,184,0.22);
+  --shadow-sm:0 2px 8px rgba(15,23,42,0.07),0 1px 3px rgba(15,23,42,0.04); --radius:16px; --radius-sm:10px; }
+body.dark { --primary:#a78bfa; --primary-light:#c4b5fd; --bg:#0b0818; --soft:#130f26; --soft2:#0d0a1c; --border:#2a2250; --h1:#07051a; --h2:#4c1d95;
+  --card:#0f1626; --text:#e2e8f0; --muted:#94a3b8; --ok:#34d399; --ok-bg:#052e22;
+  --warn-bg:#1a0f00; --warn-bd:#d97706; --warn-tx:#fbbf24; --dot:rgba(51,65,85,0.6);
+  --shadow-sm:0 2px 8px rgba(0,0,0,0.35); color-scheme:dark; }
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Inter',-apple-system,BlinkMacSystemFont,system-ui,sans-serif;background:var(--bg);
+  background-image:radial-gradient(circle,var(--dot) 0.85px,transparent 0.85px);background-size:22px 22px;
+  color:var(--text);min-height:100vh;font-size:15px;line-height:1.57}
+#top-progress-bar{position:fixed;top:0;left:0;height:3px;width:0%;background:var(--primary-light);z-index:9999;pointer-events:none}
+header{background:linear-gradient(135deg,var(--h1) 0%,var(--h2) 100%);color:#fff;padding:1.25rem 2.5rem 1.1rem;position:relative;overflow:hidden}
+.h-deco{position:absolute;right:2.5rem;top:50%;transform:translateY(-50%);font-size:3.5rem;opacity:.08;font-style:italic;user-select:none;white-space:nowrap}
+.h-content{position:relative}
+.h-badge{display:inline-flex;background:rgba(255,255,255,.11);border:1px solid rgba(255,255,255,.18);padding:.3rem .95rem;border-radius:999px;font-size:.75rem;font-weight:600;margin-bottom:.85rem}
+header h1{font-size:2.3rem;font-weight:800;letter-spacing:-.75px;line-height:1.15;margin-bottom:.35rem}
+.h-motto{font-size:.92rem;font-style:italic;color:rgba(255,255,255,.78);max-width:46rem}
+nav{background:var(--card);border-bottom:1px solid var(--border);padding:.55rem 1.75rem;display:flex;flex-wrap:wrap;align-items:center;gap:.6rem;position:sticky;top:0;z-index:50;box-shadow:0 1px 14px rgba(15,23,42,.07)}
+.nav-label{font-size:.72rem;font-weight:600;text-transform:uppercase;letter-spacing:.06em;color:var(--muted)}
+.nav-jump{display:flex;flex-wrap:wrap;gap:.3rem}
+.nav-jump a{font:600 .75rem 'JetBrains Mono',monospace;color:var(--primary);text-decoration:none;padding:.2rem .5rem;border-radius:7px;border:1px solid var(--border);background:var(--soft)}
+.nav-jump a:hover{background:var(--soft2)}
+.btn{display:inline-flex;align-items:center;padding:.33rem .7rem;border-radius:9px;font:500 .78rem Inter,sans-serif;cursor:pointer;background:var(--soft);color:var(--text);border:1px solid var(--border)}
+.btn:hover{background:var(--soft2)}
+.btn-dm{margin-left:auto;font-size:1.05rem;line-height:1}
+.nav-right{margin-left:auto;display:flex;gap:.5rem}.nav-right .btn-dm{margin-left:0}
+main{max-width:900px;margin:0 auto;padding:1.75rem 1.25rem 4rem}
+.sum-wrap{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);margin-bottom:1.5rem;box-shadow:var(--shadow-sm);scroll-margin-top:70px;overflow:hidden}
+.sum-header{display:flex;align-items:center;gap:.75rem;flex-wrap:wrap;padding:.9rem 1.5rem;background:linear-gradient(135deg,var(--soft),var(--soft2));border-bottom:1px solid var(--border)}
+.sum-num{font:600 .72rem 'JetBrains Mono',monospace;background:var(--primary);color:var(--card);padding:.2rem .6rem;border-radius:999px;white-space:nowrap}
+.sum-title{font-weight:700;font-size:1.05rem;flex:1;min-width:10rem}
+.sum-note{font-size:.72rem;font-weight:600;color:var(--primary);border:1px solid var(--border);background:var(--card);padding:.2rem .65rem;border-radius:999px;white-space:nowrap}
+.sum-body{padding:1.25rem 1.5rem 1.4rem}
+.md-out p{margin-bottom:.7rem}.md-out p:last-child{margin-bottom:0}
+.md-out ul{margin:.3rem 0 .8rem 1.3rem}.md-out li{margin-bottom:.3rem}
+.md-out strong{color:var(--primary)}
+.md-out h3{font-size:.95rem;font-weight:700;color:var(--primary);margin:1.2rem 0 .5rem;padding-bottom:.3rem;border-bottom:1px solid var(--border);scroll-margin-top:70px}
+.md-out h3:first-child{margin-top:0}
+.tbl-wrap{overflow-x:auto;margin:.5rem 0 1rem}
+table{border-collapse:collapse;width:100%;font-size:.9rem}
+th{text-align:left;background:var(--soft);color:var(--primary);padding:.5rem .8rem;border-bottom:2px solid var(--border);white-space:nowrap}
+td{padding:.5rem .8rem;border-top:1px solid var(--border);vertical-align:top}
+td.math{font-size:1rem}
+.formula-box,.formula-mini{background:var(--soft);border-left:4px solid var(--primary-light);border-radius:0 var(--radius-sm) var(--radius-sm) 0;padding:.6rem 1rem;margin:.5rem 0 .8rem;overflow-x:auto}
+.formula-box{font:500 .88rem/1.9 'JetBrains Mono',monospace}
+.notice-box,.info-box{background:var(--warn-bg);border-left:4px solid var(--warn-bd);border-radius:0 var(--radius-sm) var(--radius-sm) 0;padding:.7rem 1rem;margin:.6rem 0 1rem;font-size:.9rem}
+.notice-box strong,.info-box strong{color:var(--warn-tx)}
+/* Formelkarten */
+.formula-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:.7rem;margin:.5rem 0 1rem}
+.fcard{background:var(--soft);border:1px solid var(--border);border-radius:var(--radius-sm);padding:.7rem .9rem;min-width:0;overflow-x:auto}
+.flabel{font-size:.74rem;font-weight:600;text-transform:uppercase;letter-spacing:.04em;color:var(--muted);margin-bottom:.3rem}
+.feq{font-size:1.02rem;text-align:center;padding:.2rem 0}
+.fnote{font-size:.76rem;color:var(--muted);margin-top:.3rem;font-style:italic}
+/* Merksatz-Karten */
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(270px,1fr));gap:1rem}
+.card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);box-shadow:var(--shadow-sm);overflow:hidden;min-width:0;scroll-margin-top:70px}
+.card-head{padding:.7rem 1.1rem;font-weight:700;font-size:.95rem;display:flex;align-items:center;gap:.5rem;background:linear-gradient(135deg,var(--soft),var(--soft2));border-bottom:1px solid var(--border)}
+.card-head>span{display:flex;align-items:center;gap:.5rem;flex:1}
+.card-body{padding:.9rem 1.1rem}
+.quote{font-size:1rem;font-weight:700;font-style:italic;color:var(--primary);margin-bottom:.35rem;line-height:1.4}
+.explain{font-size:.86rem;color:var(--muted);margin-bottom:.6rem}.explain:last-child{margin-bottom:0}
+.explain strong{color:var(--text)}
+.divider{height:1px;background:var(--border);margin:.7rem 0}
+.big-letters{font:700 1.3rem 'JetBrains Mono',monospace;letter-spacing:.06em;color:var(--primary);margin:.1rem 0 .5rem}
+.tag{margin-left:auto;font-size:.68rem;font-weight:700;padding:.12rem .55rem;border-radius:999px;background:var(--warn-bg);color:var(--warn-tx);border:1px solid var(--warn-bd)}
+/* Aufgaben mit aufklappbarer Lösung */
+.meta-row{display:flex;flex-wrap:wrap;gap:.6rem;margin-bottom:1rem}
+.meta-row div{background:var(--card);border:1px solid var(--border);border-radius:var(--radius-sm);padding:.5rem .9rem;font-size:.85rem;box-shadow:var(--shadow-sm)}
+.meta-row b{display:block;font-size:.68rem;text-transform:uppercase;letter-spacing:.06em;color:var(--muted)}
+details.loesung{margin-top:.9rem;border:1px solid var(--border);border-radius:var(--radius-sm);overflow:hidden}
+details.loesung summary{cursor:pointer;padding:.55rem .9rem;font-weight:600;font-size:.86rem;color:var(--primary);background:var(--soft);list-style-position:inside}
+details.loesung[open] summary{border-bottom:1px solid var(--border)}
+details.loesung .tbl-wrap{margin:0}
+details.loesung td:first-child{font-weight:600;color:var(--muted);white-space:nowrap;width:1%}
+details.loesung tr.erg td{background:var(--ok-bg)}details.loesung tr.erg td:last-child{font-weight:700;color:var(--ok)}
+details.loesung tr:first-child td{border-top:0}
+:focus-visible{outline:3px solid var(--warn-bd);outline-offset:2px}
+@media(max-width:600px){header{padding:1.1rem 1.1rem 1rem}header h1{font-size:1.65rem}.h-deco{display:none}nav{padding:.5rem 1rem}.sum-body,.sum-header{padding-left:1rem;padding-right:1rem}}
+@media print{nav,#top-progress-bar{display:none}.sum-wrap,.card{break-inside:avoid;box-shadow:none}details.loesung>*{display:block}}
+
+/* Abbildungen: Bilder bekommen einen hellen (Dunkelmodus: dunklen) Rahmen, Tafelbilder auf Schwarz werden im Hellmodus umgekehrt */
+.fig{margin:.6rem auto 1rem;text-align:center}
+.fig-row{display:flex;flex-wrap:wrap;gap:.9rem 1.2rem;justify-content:center;align-items:flex-start;margin:.6rem 0 1rem}
+.fig-row .fig{margin:0;flex:0 1 auto;max-width:100%}
+.bild{display:block;line-height:0;border:1px solid var(--border);border-radius:10px;overflow:hidden;background:#fff}
+body.dark .bild{background:#000}
+.bild img,.bild svg,.bild a{display:block;width:100%;height:auto}
+body.dark .fig.hell img{filter:invert(1) hue-rotate(180deg)}
+body:not(.dark) .fig.dunkel img{filter:invert(1) hue-rotate(180deg)}
+.fig figcaption{font-size:.8rem;color:var(--muted);margin:.4rem auto 0;line-height:1.4;max-width:34rem}
+/* Lösungstabellen (zwei Spalten): auf schmalen Bildschirmen steht die Beschriftung über der Rechnung */
+@media(max-width:560px){table.lsg,table.lsg tbody,table.lsg tr,table.lsg td{display:block;width:auto}table.lsg tr{border-top:1px solid var(--border);padding:.4rem 0}table.lsg tr:first-child{border-top:0}table.lsg td{border:0;padding:.05rem .5rem}details.loesung table.lsg td:first-child{width:auto;white-space:normal;font-size:.72rem;text-transform:uppercase;letter-spacing:.05em}}
+</style>
+<link rel="stylesheet" href="../../shared/hub.css">
+<link rel="icon" href="../../shared/icons/lernportal.svg" type="image/svg+xml">
+<link rel="icon" href="../../shared/icons/lernportal-32.png" type="image/png" sizes="32x32">
+<link rel="apple-touch-icon" href="../../shared/icons/lernportal-180.png">
+</head>
+<body>
+<div id="top-progress-bar"></div>
+<header>
+    <div class="h-deco">LZK</div>
+    <div class="h-content">
+        <div class="h-badge">📝 Wöchentlich am Mittwoch · aktuell: Pneumatik</div>
+        <h1>AM3 — Lernzielkontrolle (Mittwoch)</h1>
+        <p class="h-motto">Lernziele · Zusammenfassung · typische Fehler · Beispielaufgaben mit Lösungen</p>
+    </div>
+</header>
+<nav>
+    <span class="nav-label">Springe zu</span><div class="nav-jump"><a href="#k1-ziele">Lernziele</a><a href="#k1-kurz">Zusammenfassung</a><a href="#k1-fehler">Fehler</a><a href="#k1-a1">A1</a><a href="#k1-a2">A2</a><a href="#k1-a3">A3</a><a href="#k1-a4">A4</a><a href="#k1-a5">A5</a><a href="#k1-a6">A6</a><a href="#k1-a7">A7</a></div>
+    <div class="nav-right"><button class="btn" id="sol-toggle" type="button">Alle Lösungen zeigen</button><button class="btn btn-dm" id="dm-toggle" title="Dunkles Design">🌙</button></div>
+</nav>
+<main>
+<div class="notice-box"><strong>Hinweis:</strong> Zusammenstellung aus den Unterlagen der letzten Einheiten (bis 19.11.2026), damit du dich auf die wöchentliche Lernzielkontrolle am Mittwoch vorbereiten kannst. Was genau abgefragt wird, entscheidet die Lehrkraft. Die Aufgaben sind Übungsbeispiele in der Art des Arbeitsblatts, die Lösungen eigene Lösungsvorschläge.</div>
+<div class="sum-wrap" id="k1-ziele"><div class="sum-header"><span class="sum-num">1</span><span class="sum-title">Das solltest du können</span><span class="sum-note">Mi 25.11.2026</span></div><div class="sum-body md-out"><ul class="ziele"><li>Die Größen der Pneumatik mit Formelzeichen und Einheit nennen (p, F, A, V, T, Q, s, v)</li><li>Den Druck mit p = F / A berechnen und zwischen Pa, kPa, MPa und bar umrechnen</li><li>Die theoretische und die wirksame Kolbenkraft berechnen: F<sub>th</sub> = pe · A und F = pe · A · η</li><li>Kolbenfläche und Ringfläche unterscheiden: Ausfahren mit A = π/4 · D², Einfahren mit A = π/4 · (D² − d²)</li><li>Rückwärts rechnen: Durchmesser oder Druck aus einer vorgegebenen Kraft bestimmen</li><li>Bei der Spannvorrichtung den Hebel einbeziehen: F<sub>2</sub> = F<sub>1</sub> · l<sub>1</sub> / l<sub>2</sub></li><li>Vor- und Nachteile der Pneumatik nennen</li></ul></div></div>
+<div class="sum-wrap" id="k1-kurz"><div class="sum-header"><span class="sum-num">2</span><span class="sum-title">Zusammenfassung</span><span class="sum-note">Mi 25.11.2026</span></div><div class="sum-body md-out"><div class="tbl-wrap"><table><tr><td><strong>Pneumatik</strong></td><td>Erzeugung, Aufbereitung, Steuerung und Nutzung von Druckluft; sie erzeugt Bewegungen und Kräfte (spannen, transportieren, Werkzeuge antreiben)</td></tr><tr><td><strong>Vorteile</strong></td><td>Druckluft einfach verfügbar · hohe Arbeitsgeschwindigkeiten · robust · einfache Steuerung und Automatisierung · keine elektrische Energie am Antrieb</td></tr><tr><td><strong>Nachteile</strong></td><td>teuer in der Erzeugung · Luft ist kompressibel · Bewegungen schwer exakt zu positionieren · Geräusch durch ausströmende Luft · Kraft im Vergleich zur Hydraulik begrenzt</td></tr><tr><td><strong>Druck</strong></td><td>p = F / A &nbsp;·&nbsp; 1 bar = 100 000 Pa = 100 kPa = 0,1 MPa = 10 N/cm² = 0,1 N/mm²</td></tr><tr><td><strong>Kolbenkraft</strong></td><td>F<sub>th</sub> = pe · A (theoretisch) &nbsp;·&nbsp; F = pe · A · η (wirksam; η berücksichtigt die Reibungsverluste)</td></tr><tr><td><strong>Flächen</strong></td><td>Ausfahren: A = π/4 · D² &nbsp;·&nbsp; Einfahren (doppelt wirkend): A = π/4 · (D² − d²)</td></tr><tr><td><strong>Hebel</strong></td><td>F<sub>1</sub> · l<sub>1</sub> = F<sub>2</sub> · l<sub>2</sub></td></tr><tr><td><strong>Rechenweg</strong></td><td>① Druck in N/mm² (bar ÷ 10), Längen in mm &nbsp;② passende Fläche &nbsp;③ F<sub>th</sub> = pe · A &nbsp;④ mal η</td></tr></table></div><div class="info-box"><strong>Ausführlich:</strong> <a href="pneumatik-grundlagen.html">AM3 — Pneumatik: Grundlagen</a> mit allen Beispielen und Übungen des Arbeitsblatts.</div></div></div>
+<div class="sum-wrap" id="k1-fehler"><div class="sum-header"><span class="sum-num">3</span><span class="sum-title">Typische Fehler</span><span class="sum-note">Mi 25.11.2026</span></div><div class="sum-body md-out"><ul><li>bar nicht in N/mm² umgerechnet: Das Ergebnis ist um den Faktor 10 zu groß</li><li>Durchmesser statt Fläche eingesetzt (A = π/4 · D² vergessen)</li><li>Beim Einfahren die volle Kolbenfläche statt der Ringfläche genommen</li><li>Wirkungsgrad vergessen oder als 92 statt 0,92 eingesetzt</li><li>mm² und cm² oder Radius und Durchmesser verwechselt</li><li>Zwischenergebnisse zu früh gerundet</li></ul></div></div>
+<div class="sum-wrap" id="k1-a1"><div class="sum-header"><span class="sum-num">A1</span><span class="sum-title">Umrechnen</span><span class="sum-note">Beispielaufgabe</span></div><div class="sum-body md-out"><p>Rechne um: a) 6,3 bar in Pa und in kPa · b) 250 kPa in bar · c) 0,8 MPa in bar</p><details class="loesung"><summary>Lösung zeigen</summary><div class="sum-body md-out"><div class="tbl-wrap"><table class="lsg"><tr><td>a)</td><td>6,3 bar = 6,3 · 100 000 Pa = 630 000 Pa = 630 kPa</td></tr><tr><td>b)</td><td>250 kPa = 250 / 100 bar = 2,5 bar</td></tr><tr class="erg"><td>c)</td><td>0,8 MPa = 0,8 · 10 bar = 8 bar</td></tr></table></div></div></details></div></div>
+<div class="sum-wrap" id="k1-a2"><div class="sum-header"><span class="sum-num">A2</span><span class="sum-title">Druck aus Kraft und Fläche</span><span class="sum-note">Beispielaufgabe</span></div><div class="sum-body md-out"><p>Auf einen Kolben mit der Fläche 12 cm² wirkt die Kraft 900 N. Wie groß ist der Druck in bar?</p><details class="loesung"><summary>Lösung zeigen</summary><div class="sum-body md-out"><div class="tbl-wrap"><table class="lsg"><tr><td>Formel</td><td>p = F / A</td></tr><tr><td>Rechnung</td><td>p = 900 N / 12 cm² = 75 N/cm²</td></tr><tr class="erg"><td>Ergebnis</td><td>1 bar = 10 N/cm² → p = 7,5 bar</td></tr></table></div></div></details></div></div>
+<div class="sum-wrap" id="k1-a3"><div class="sum-header"><span class="sum-num">A3</span><span class="sum-title">Kolbenkraft eines einfach wirkenden Zylinders</span><span class="sum-note">Beispielaufgabe</span></div><div class="sum-body md-out"><p>Ein einfach wirkender Zylinder mit Kolbendurchmesser 40 mm wird mit einem Überdruck von 6 bar beaufschlagt. Der Wirkungsgrad beträgt 90 %. Wie groß ist die wirksame Kolbenkraft?</p><details class="loesung"><summary>Lösung zeigen</summary><div class="sum-body md-out"><div class="tbl-wrap"><table class="lsg"><tr><td>Fläche</td><td>A = π/4 · (40 mm)² = 1256,6 mm²</td></tr><tr><td>Theoretisch</td><td>F<sub>th</sub> = pe · A = 0,6 N/mm² · 1256,6 mm² = 754,0 N</td></tr><tr class="erg"><td>Ergebnis</td><td>F = 754,0 N · 0,9 ≈ 679 N</td></tr></table></div></div></details></div></div>
+<div class="sum-wrap" id="k1-a4"><div class="sum-header"><span class="sum-num">A4</span><span class="sum-title">Ausfahren und Einfahren</span><span class="sum-note">Beispielaufgabe</span></div><div class="sum-body md-out"><p>Ein doppelt wirkender Zylinder hat den Kolbendurchmesser D = 50 mm und den Kolbenstangendurchmesser d = 20 mm. Der Überdruck beträgt 5 bar, der Wirkungsgrad 0,92. Berechne die Kraft a) beim Ausfahren und b) beim Einfahren.</p><details class="loesung"><summary>Lösung zeigen</summary><div class="sum-body md-out"><div class="tbl-wrap"><table class="lsg"><tr class="erg"><td>a) Ausfahren</td><td>A = π/4 · 50² = 1963,5 mm² → F = 0,5 N/mm² · 1963,5 mm² · 0,92 ≈ 903 N</td></tr><tr class="erg"><td>b) Einfahren</td><td>Ringfläche A = π/4 · (50² − 20²) = 1649,3 mm² → F = 0,5 N/mm² · 1649,3 mm² · 0,92 ≈ 759 N</td></tr><tr><td>Hinweis</td><td>Beim Einfahren ist die Kraft kleiner, weil die Kolbenstange Fläche wegnimmt.</td></tr></table></div></div></details></div></div>
+<div class="sum-wrap" id="k1-a5"><div class="sum-header"><span class="sum-num">A5</span><span class="sum-title">Kolbendurchmesser gesucht</span><span class="sum-note">Beispielaufgabe</span></div><div class="sum-body md-out"><p>Ein einfach wirkender Zylinder soll mit einem Überdruck von 6 bar bei einem Wirkungsgrad von 0,85 eine Kraft von 500 N aufbringen. Welchen Kolbendurchmesser braucht er mindestens?</p><details class="loesung"><summary>Lösung zeigen</summary><div class="sum-body md-out"><div class="tbl-wrap"><table class="lsg"><tr><td>Fläche</td><td>A = F / (pe · η) = 500 N / (0,6 N/mm² · 0,85) = 980,4 mm²</td></tr><tr><td>Durchmesser</td><td>D = √(4A / π) = √(4 · 980,4 mm² / π)</td></tr><tr class="erg"><td>Ergebnis</td><td>D ≈ 35,3 mm. In der Praxis wählt man den nächstgrößeren Normdurchmesser, hier 40 mm.</td></tr></table></div></div></details></div></div>
+<div class="sum-wrap" id="k1-a6"><div class="sum-header"><span class="sum-num">A6</span><span class="sum-title">Spannvorrichtung mit Hebel</span><span class="sum-note">Beispielaufgabe</span></div><div class="sum-body md-out"><p>Eine pneumatische Spannvorrichtung hat einen Kolben mit D = 63 mm und wird mit pe = 5,0 bar beaufschlagt. Der Wirkungsgrad beträgt 0,85, das Hebelverhältnis l1 : l2 = 3 : 1. Berechne die Kolbenkraft F1 und die Spannkraft F2.</p><figure class="fig hell" style="width:min(100%,380px)"><div class="bild"><a href="bilder/pneumatisch-spannen.jpg" target="_blank" rel="noopener" title="Bild in voller Größe öffnen"><img src="bilder/pneumatisch-spannen.jpg" alt="Pneumatische Spannvorrichtung: Zylinder drückt mit F1 auf den Hebel mit den Armen l1 und l2, am kurzen Arm entsteht die Spannkraft F2" width="745" height="566" loading="lazy"></a></div><figcaption>Spannvorrichtung (Bild aus dem Arbeitsblatt)</figcaption></figure><details class="loesung"><summary>Lösung zeigen</summary><div class="sum-body md-out"><div class="tbl-wrap"><table class="lsg"><tr><td>Fläche</td><td>A = π/4 · (63 mm)² = 3117,2 mm²</td></tr><tr><td>Kolbenkraft</td><td>F<sub>1</sub> = pe · A · η = 0,5 N/mm² · 3117,2 mm² · 0,85 = 1325 N</td></tr><tr class="erg"><td>Ergebnis</td><td>F<sub>2</sub> = F<sub>1</sub> · l<sub>1</sub> / l<sub>2</sub> = 1325 N · 3 ≈ 3974 N</td></tr></table></div></div></details></div></div>
+<div class="sum-wrap" id="k1-a7"><div class="sum-header"><span class="sum-num">A7</span><span class="sum-title">Verständnisfragen</span><span class="sum-note">Beispielaufgabe</span></div><div class="sum-body md-out"><p>a) Nenne zwei Vorteile und zwei Nachteile der Pneumatik. b) Warum ist die wirksame Kolbenkraft kleiner als die theoretische?</p><details class="loesung"><summary>Lösung zeigen</summary><div class="sum-body md-out"><ul><li><strong>a)</strong> Vorteile zum Beispiel: Druckluft ist einfach verfügbar, hohe Arbeitsgeschwindigkeiten, robust, einfache Steuerung. Nachteile zum Beispiel: teuer in der Erzeugung, Luft ist kompressibel (exaktes Positionieren schwierig), Geräusch, begrenzte Kraft.</li><li><strong>b)</strong> Zwischen Kolben, Kolbenstange, Dichtungen und Zylinderwand entstehen Reibungsverluste. Sie werden durch den Wirkungsgrad η (kleiner als 1) berücksichtigt: F = F<sub>th</sub> · η.</li></ul></div></details></div></div>
+
+</main>
+<script>
+window.addEventListener('scroll',function(){var sh=document.documentElement.scrollHeight-window.innerHeight;
+  document.getElementById('top-progress-bar').style.width=(sh>0?window.scrollY/sh*100:0)+'%';});
+(function(){var btn=document.getElementById('dm-toggle');
+  function apply(d){document.body.classList.toggle('dark',d);btn.textContent=d?'☀️':'🌙';try{localStorage.setItem('lern-seite-theme',d?'dark':'light')}catch(e){}}
+  var s=null;try{s=localStorage.getItem('lern-seite-theme')}catch(e){}
+  apply(s==='dark'||(!s&&window.matchMedia('(prefers-color-scheme: dark)').matches));
+  btn.addEventListener('click',function(){apply(!document.body.classList.contains('dark'))});
+  var all=document.getElementById('sol-toggle');
+  if(all)all.addEventListener('click',function(){var ds=[].slice.call(document.querySelectorAll('details.loesung'));
+    var open=ds.some(function(d){return !d.open});ds.forEach(function(d){d.open=open});all.textContent=open?'Alle Lösungen schließen':'Alle Lösungen zeigen';});
+})();
+</script>
+<script src="../../shared/hub.js"></script>
+</body>
+</html>

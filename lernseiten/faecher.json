@@ -8,6 +8,13 @@
     "info": "Trigonometrie, Funktionen, Wechselstromrechnung, Pneumatik",
     "seiten": [
       {
+        "datei": "faecher/mathematik/lzk-am3.html",
+        "titel": "AM3 — Lernzielkontrolle (Mittwoch)",
+        "art": "Lernzielkontrolle",
+        "info": "Wöchentlich: Lernziele, Zusammenfassung, typische Fehler und Beispielaufgaben, aktuell Pneumatik (Mi 25.11.2026)",
+        "jahr": 3
+      },
+      {
         "datei": "faecher/mathematik/pneumatik-grundlagen.html",
         "titel": "AM3 — Pneumatik: Grundlagen",
         "art": "Lernseite",
@@ -38,6 +45,13 @@
     "farbeDunkel": "#60a5fa",
     "info": "Wechselstromtechnik, RLC-Schaltungen, Leistung, Drehstrom",
     "seiten": [
+      {
+        "datei": "faecher/aee/lzk-aee3.html",
+        "titel": "AEE3 — Lernzielkontrolle (Donnerstag)",
+        "art": "Lernzielkontrolle",
+        "info": "Wöchentlich: Lernziele, Zusammenfassung, typische Fehler und Beispielaufgaben, aktuell Drehstrom (Do 26.11.2026)",
+        "jahr": 3
+      },
       {
         "datei": "faecher/aee/drehstrom-einheit-1.html",
         "titel": "AEE3 — Einheit 1: Drehstrom",

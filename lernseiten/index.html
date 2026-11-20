@@ -72,7 +72,8 @@ button { font-family: inherit; }
 .topnav a.nav { font: 600 0.84rem var(--font); color: rgba(255,255,255,0.86); text-decoration: none; padding: 0.38rem 0.85rem; border-radius: 999px; border: 1px solid transparent; }
 .topnav a.nav:hover { background: rgba(255,255,255,0.14); }
 .topnav a.nav[aria-current="page"] { background: rgba(255,255,255,0.16); border-color: rgba(255,255,255,0.28); color: #fff; }
-.live { margin-left: auto; display: grid; grid-template-columns: auto minmax(0, 1fr); column-gap: 0.6rem; align-items: center; min-width: 0; max-width: 100%; text-decoration: none; color: #fff; background: rgba(255,255,255,0.12); border: 1px solid rgba(255,255,255,0.22); border-radius: 14px; padding: 0.4rem 0.85rem; }
+.pills { margin-left: auto; display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 0.4rem 0.5rem; min-width: 0; max-width: 100%; }
+.live { margin-left: 0; display: grid; grid-template-columns: auto minmax(0, 1fr); column-gap: 0.6rem; align-items: center; min-width: 0; max-width: 100%; text-decoration: none; color: #fff; background: rgba(255,255,255,0.12); border: 1px solid rgba(255,255,255,0.22); border-radius: 14px; padding: 0.4rem 0.85rem; }
 .live:hover { background: rgba(255,255,255,0.2); }
 .live-dot { grid-row: 1 / span 2; width: 0.65rem; height: 0.65rem; border-radius: 50%; background: rgba(255,255,255,0.55); }
 .live-unterricht .live-dot { background: #34d399; }
@@ -214,6 +215,7 @@ footer { margin-top: 2.5rem; font-size: 0.78rem; color: var(--muted); text-align
     .top { padding-block: 1.2rem 1.1rem; }
     .top h1 { font-size: 1.7rem; } .top::after { display: none; } .kbd { display: none; }
     .top-ctl { width: 100%; }
+    .pills { margin-left: 0; width: 100%; flex-direction: column; align-items: stretch; }
     .live { margin-left: 0; width: 100%; }
     .seg { flex: 1; } .seg button { flex: 1; padding-inline: 0.5rem; }
     .search input { padding-right: 1rem; font-size: 1rem; } .search.has-q input { padding-right: 5.5rem; }
@@ -233,7 +235,10 @@ footer { margin-top: 2.5rem; font-size: 0.78rem; color: var(--muted); text-align
             <a class="nav" href="index.html" aria-current="page">Lernseiten</a>
             <a class="nav" href="stundenplan.html">Stundenplan</a>
             <a class="nav" href="schularbeiten.html">Schularbeiten</a>
-            <a class="live" id="live" href="stundenplan.html" hidden><span class="live-dot" aria-hidden="true"></span><span class="live-main"></span><span class="live-sub"></span></a>
+            <div class="pills">
+                <a class="live" id="live" href="stundenplan.html" hidden><span class="live-dot" aria-hidden="true"></span><span class="live-main"></span><span class="live-sub"></span></a>
+                <a class="erinn" id="erinn" href="stundenplan.html" hidden></a>
+            </div>
         </nav>
         <div class="top-row">
             <div>
@@ -299,6 +304,7 @@ footer { margin-top: 2.5rem; font-size: 0.78rem; color: var(--muted); text-align
 <script src="shared/daten.js"></script>
 <script src="shared/stundenplan.js"></script>
 <script src="shared/live.js"></script>
+<script src="shared/erinnerung.js"></script>
 <script>
 (function () {
 'use strict';
