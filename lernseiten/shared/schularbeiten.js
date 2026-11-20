@@ -1,2 +1,0 @@
-/* Automatisch erzeugt von tools/build.mjs – nicht von Hand ändern. */
-window.SCHULARBEITEN = [{"datum":"2026-12-10","fach":"AEE","art":"Test"},{"datum":"2026-12-17","fach":"AWL","art":"Schularbeit"},{"datum":"2027-01-27","fach":"AM","art":"Test"},{"datum":"2027-01-28","fach":"AWL","art":"Schularbeit"},{"datum":"2027-01-28","fach":"AEE","art":"Test"}];
