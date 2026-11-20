@@ -4,7 +4,6 @@
   "domains": [
     "lbs4.salzburg.at"
   ],
-  "basis": "/hololens-instruct/",
   "huelle": {
     "v": 1,
     "iter": 600000,

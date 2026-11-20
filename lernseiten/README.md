@@ -20,13 +20,13 @@ der Browser die Seiten beim Aufruf; sie sehen und funktionieren genau wie vorher
 
 ```
 index.html              Anmeldeseite (öffentlich)
-404.html                leitet unbekannte Adressen zur Anmeldung (wird von zugang.mjs erzeugt)
+404.html                leitet unbekannte Adressen zur Anmeldung; findet sie selbst, ohne festen Pfad (wird von zugang.mjs erzeugt)
 sw.js                   Service Worker: entschlüsselt beim Abruf
 shared/zugang-kern.js   Kryptokern (Browser, Service Worker, Node)
-shared/zugang.json      erlaubte Domain, Basis-Pfad und die Schlüsselhülle (kein Geheimnis ohne das Passwort)
+shared/zugang.json      erlaubte Domain und die Schlüsselhülle (kein Geheimnis ohne das Passwort)
 shared/icons/           Seiten-Symbole (öffentlich)
 inhalt/<hash>.enc       alle Dateien des Portals, verschlüsselt; der Dateiname verbirgt den Pfad
-zugang/zugang.mjs       Kommandozeile: einpacken, auspacken, pruefe, passwort, init
+zugang/zugang.mjs       Kommandozeile: einpacken, auspacken, pruefe, passwort, export, init
 zugang/test-*.mjs       Tests (Kern, Kommandozeile, Browser)
 klar/                   Klartext des Portals – NICHT im Git (nur .gitignore), siehe unten
 ```
@@ -60,6 +60,13 @@ Tests: `node lernseiten/zugang/test-kern.mjs`, `node lernseiten/zugang/test-cli.
   verschlüsselt alles neu; wer nur das alte Passwort kennt, kommt nicht an neue Inhalte. Angemeldete Browser werden beim nächsten Aufruf zur neuen Anmeldung geschickt.
 - Das erzeugte Passwort hat rund 60 Bit (12 Zeichen). Ein selbst gewähltes sollte mindestens so lang und zufällig sein.
 - Der Wiederherstellungsschlüssel (`LERNPORTAL_SCHLUESSEL`, 43 Zeichen) öffnet den Bestand auch ohne Passwort. Er gehört an einen sicheren Ort, nicht ins Repo.
+
+## Umzug in ein neues Repository
+
+Das Portal ist unabhängig vom Repository-Namen: Anmeldeseite, Service Worker und 404-Seite arbeiten mit relativen Pfaden (getestet unter zwei verschiedenen Adressen).
+`node lernseiten/zugang/zugang.mjs export <leerer Ordner>` kopiert nur das Öffentliche (verschlüsselt, ohne Klartext und ohne Git-Verlauf) in einen Ordner, der der Hauptordner
+eines neuen Repositorys wird, samt kurzer README. Dort GitHub Pages einschalten („Deploy from a branch“, Ordner „/ (root)“). So bleibt der frühere Klartext im Verlauf des alten
+Repositorys; das alte Repository kann auf privat gestellt werden (dabei wird die alte Seite abgeschaltet, wenn der Tarif Pages für private Repositories nicht erlaubt).
 
 ## Grenzen
 

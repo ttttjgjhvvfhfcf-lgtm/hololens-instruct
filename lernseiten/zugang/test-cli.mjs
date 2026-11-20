@@ -31,13 +31,13 @@ schreibe('tools/__pycache__/x.pyc', 'junk');
 schreibe('tools/seiten.py', 'print("Seiteninhalt")');
 
 // init
-let r = run(['init', '--domain', 'lbs4.salzburg.at', '--basis', '/hololens-instruct/']);
+let r = run(['init', '--domain', 'lbs4.salzburg.at']);
 ok(r.status === 0, 'init läuft');
 const pw = /Passwort: (\S+)/.exec(r.stdout)?.[1], wk = /Wiederherstellungsschlüssel: (\S+)/.exec(r.stdout)?.[1];
 ok(/^[a-z2-9]{4}-[a-z2-9]{4}-[a-z2-9]{4}$/.test(pw || ''), 'erzeugtes Passwort hat das Format xxxx-xxxx-xxxx');
 ok(wk && wk.length === 43, 'Wiederherstellungsschlüssel (32 Byte, base64url)');
 const konf = JSON.parse(fs.readFileSync(path.join(L, 'shared', 'zugang.json'), 'utf8'));
-ok(konf.domains[0] === 'lbs4.salzburg.at' && konf.basis === '/hololens-instruct/' && konf.huelle.k, 'zugang.json enthält Domain, Basis und Hülle');
+ok(konf.domains[0] === 'lbs4.salzburg.at' && konf.huelle.k && !('basis' in konf), 'zugang.json enthält Domain und Hülle, keinen festen Pfad');
 ok(!JSON.stringify(konf).includes(pw) && !JSON.stringify(konf).includes(wk), 'zugang.json enthält kein Geheimnis im Klartext');
 ok(run(['init']).status !== 0, 'zweites init wird verweigert');
 
@@ -53,7 +53,7 @@ const alles = blobs.map((f) => fs.readFileSync(path.join(L, 'inhalt', f)).toStri
 ok(!/Geheimes|Drehstrom|Sternschaltung|Seiteninhalt|hub/.test(alles), 'kein Klartext in inhalt/');
 ok(fs.existsSync(path.join(L, 'shared', 'icons', 'lernportal.svg')), 'Symbole werden öffentlich gespiegelt');
 const f404 = fs.readFileSync(path.join(L, '404.html'), 'utf8');
-ok(f404.includes('"/hololens-instruct/"') && f404.includes('?weiter='), '404.html verweist auf die Anmeldung');
+ok(f404.includes('shared/zugang.json') && f404.includes('?weiter=') && !f404.includes('/hololens-instruct/'), '404.html sucht die Anmeldeseite selbst (kein fester Pfad)');
 ok(fs.existsSync(path.join(L, '.nojekyll')), '.nojekyll vorhanden');
 
 // idempotent
@@ -61,6 +61,25 @@ const vorher = blobs.map((f) => fs.readFileSync(path.join(L, 'inhalt', f)).toStr
 r = run(['einpacken'], env);
 ok(/0 neu oder geändert, 0 entfernt/.test(r.stdout), 'zweites einpacken ändert nichts');
 ok(fs.readdirSync(path.join(L, 'inhalt')).map((f) => fs.readFileSync(path.join(L, 'inhalt', f)).toString('base64')).join() === vorher, 'Ausgabe ist byte-gleich');
+
+// Export für ein neues Repository
+const neu = path.join(tmp, 'neues-repo');
+ok(run(['export']).status !== 0, 'export ohne Zielordner wird verweigert');
+r = run(['export', neu]);
+ok(r.status === 0 && /exportiert/.test(r.stdout), 'export läuft');
+ok(run(['export', neu]).status !== 0, 'export in einen nicht leeren Ordner wird verweigert');
+const rel = (d) => fs.readdirSync(d, { recursive: true, withFileTypes: true }).filter((e) => e.isFile()).map((e) => path.relative(d, path.join(e.parentPath, e.name)).split(path.sep).join('/')).sort();
+const exp = rel(neu);
+ok(exp.filter((f) => f.startsWith('inhalt/')).length === 6 && exp.includes('404.html') && exp.includes('.nojekyll') && exp.includes('README.md') && exp.includes('shared/zugang.json') && exp.includes('zugang/zugang.mjs') && exp.includes('klar/.gitignore'), 'Export enthält Bestand, Anmeldedaten, Werkzeug und Hinweise');
+ok(!exp.some((f) => f.startsWith('klar/') && f !== 'klar/.gitignore') && !exp.some((f) => /index\.html$/.test(f) && f !== 'index.html'), 'Export enthält keinen Klartext');
+ok(fs.readFileSync(path.join(neu, 'shared', 'zugang.json'), 'utf8') === fs.readFileSync(path.join(L, 'shared', 'zugang.json'), 'utf8'), 'Export hat dieselben Anmeldedaten');
+ok(/node zugang\/zugang\.mjs auspacken/.test(fs.readFileSync(path.join(neu, 'README.md'), 'utf8')), 'Export-README nennt die Befehle für den Hauptordner');
+fs.copyFileSync(cli, path.join(neu, 'zugang', 'zugang.mjs'));
+const runNeu = (args, e = env) => spawnSync('node', [path.join(neu, 'zugang', 'zugang.mjs'), ...args], { encoding: 'utf8', env: { PATH: process.env.PATH, ...e } });
+ok(runNeu(['pruefe']).status === 0, 'pruefe im Export ist in Ordnung');
+r = runNeu(['auspacken']);
+ok(r.status === 0 && /ausgepackt: 5 Dateien/.test(r.stdout), 'der Export lässt sich mit dem Passwort auspacken');
+ok(['index.html', 'faecher/aee/drehstrom.html', 'shared/hub.js', 'tools/seiten.py', 'faecher/aee/bilder/bild.png'].every((f) => fs.readFileSync(path.join(neu, 'klar', f)).equals(fs.readFileSync(path.join(L, 'klar', f)))), 'ausgepackter Export ist byte-gleich zum Original');
 
 // prüfen
 ok(run(['pruefe'], env).status === 0, 'pruefe ist in Ordnung');

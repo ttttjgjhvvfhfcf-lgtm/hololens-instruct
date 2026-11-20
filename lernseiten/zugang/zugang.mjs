@@ -4,7 +4,8 @@
 //   node lernseiten/zugang/zugang.mjs auspacken [--ueberschreiben]   inhalt/ -> klar/   (am Anfang jeder Sitzung, die etwas ändern will)
 //   node lernseiten/zugang/zugang.mjs einpacken                      klar/ -> inhalt/   (nach jeder Änderung, vor dem Commit)
 //   node lernseiten/zugang/zugang.mjs pruefe                         prüft, dass nur Erlaubtes öffentlich ist und alles entschlüsselbar ist
-//   node lernseiten/zugang/zugang.mjs init [--domain d] [--basis /repo/]   erstmalig: Schlüssel und Passwort erzeugen
+//   node lernseiten/zugang/zugang.mjs init [--domain d]              erstmalig: Schlüssel und Passwort erzeugen
+//   node lernseiten/zugang/zugang.mjs export <leerer Ordner>         nur das Öffentliche (verschlüsselt) für ein neues Repository herauskopieren
 //   node lernseiten/zugang/zugang.mjs passwort [--passwort neu]      neues Passwort UND neuer Schlüssel (alle Dateien werden neu verschlüsselt)
 //
 // Das Passwort kommt aus der Umgebung (LERNPORTAL_PASSWORT) oder der Wiederherstellungsschlüssel (LERNPORTAL_SCHLUESSEL), nie aus dem Repo.
@@ -66,7 +67,7 @@ function baum(dir, rel = '') {
   return sortiert(aus_);
 }
 
-function vorlage404(basis, name) {
+function vorlage404(name) {
   return `<!DOCTYPE html>
 <html lang="de">
 <head>
@@ -74,17 +75,33 @@ function vorlage404(basis, name) {
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="robots" content="noindex, nofollow">
 <title>${name}</title>
-<script>
-/* Diese Seite gibt es nicht (öffentlich). Wer angemeldet ist, bekommt sie vom Service Worker; alle anderen landen bei der Anmeldung und danach hier wieder. */
-(function () {
-  var BASIS = ${JSON.stringify(basis)};
-  var p = location.pathname, rel = p.indexOf(BASIS) === 0 ? p.slice(BASIS.length) : '';
-  location.replace(BASIS + '?weiter=' + encodeURIComponent(rel + location.search + location.hash));
-})();
-</script>
 </head>
 <body style="font:16px system-ui,sans-serif;padding:2rem">
-<p>Weiter zur <a href=${JSON.stringify(basis)}>Anmeldung</a> …</p>
+<p>Einen Moment …</p>
+<script>
+/* Diese Adresse gibt es im öffentlichen Ordner nicht. Angemeldete Browser bekommen sie vom Service Worker; hier landen alle anderen. Die Anmeldeseite wird in den
+   übergeordneten Ordnern gesucht (shared/zugang.json), dorthin geht es mit der gewünschten Adresse als ?weiter=. Kein fester Pfad, nichts zu pflegen. */
+(async function () {
+  var T = 'lernportal.404', jetzt = Date.now(), v = null;
+  try { v = JSON.parse(sessionStorage.getItem(T)); } catch (e) {}
+  if (!v || jetzt - v.t > 10000) v = { n: 0, t: jetzt };
+  var nichts = function () { document.body.textContent = 'Diese Seite gibt es nicht.'; };
+  if (++v.n > 3) return nichts();                                  // nie im Kreis laufen
+  try { sessionStorage.setItem(T, JSON.stringify(v)); } catch (e) {}
+  for (var d = 0; d <= 8; d++) {
+    var basis = new URL(d ? '../'.repeat(d) : './', location.href);
+    try {
+      var r = await fetch(new URL('shared/zugang.json', basis), { cache: 'no-cache' });
+      var j = r.ok ? await r.json() : null;
+      if (j && j.huelle) {
+        location.replace(basis.pathname + '?weiter=' + encodeURIComponent(location.pathname.slice(basis.pathname.length) + location.search + location.hash));
+        return;
+      }
+    } catch (e) {}
+  }
+  nichts();
+})();
+</script>
 </body>
 </html>
 `;
@@ -121,7 +138,7 @@ async function einpacken(K, konf) {
   for (const f of fs.readdirSync(ICONS)) if (!iconsKlar.includes(f)) fs.unlinkSync(path.join(ICONS, f));
 
   fs.writeFileSync(path.join(PUB, '.nojekyll'), '');
-  fs.writeFileSync(path.join(PUB, '404.html'), vorlage404(konf.basis, konf.name));
+  fs.writeFileSync(path.join(PUB, '404.html'), vorlage404(konf.name));
   console.log(`eingepackt: ${pfade.length} Dateien (${(gesamt / 1024).toFixed(0)} KiB verschlüsselt), ${neu} neu oder geändert, ${weg} entfernt`);
 }
 
@@ -153,7 +170,7 @@ async function auspacken(K, ueberschreiben) {
 /* ── pruefe ────────────────────────────────────────────────────────────────── */
 function veroeffentlicht() {
   try {
-    const t = execFileSync('git', ['-C', PUB, 'ls-files', '--cached', '--others', '--exclude-standard', '--', '.'], { encoding: 'utf8' });
+    const t = execFileSync('git', ['-C', PUB, 'ls-files', '--cached', '--others', '--exclude-standard', '--', '.'], { encoding: 'utf8', stdio: ['ignore', 'pipe', 'ignore'] });
     return sortiert(t.split('\n').filter(Boolean)).filter((p) => fs.existsSync(path.join(PUB, p)));   // im Git-Index, aber gelöscht: wird nicht veröffentlicht
   } catch (e) { return baum(PUB).filter((p) => !p.startsWith('klar/') || p === 'klar/.gitignore'); }
 }
@@ -201,6 +218,36 @@ async function pruefe(konf, K) {
   console.log(`geprüft: ${pub.length} öffentliche Dateien, ${blobs.length} verschlüsselte Dateien${K ? ', Inhalt entschlüsselbar und aktuell' : ' (ohne Passwort nur die Form geprüft)'} – in Ordnung`);
 }
 
+function exportReadme() {
+  return `# Lernportal (verschlüsselt)
+
+Veröffentlichte, verschlüsselte Fassung des Lernportals: Anmeldung mit LBS-4-E-Mail und Passwort, alle Seiten, Bilder und Daten liegen unter \`inhalt/\` verschlüsselt.
+Dieser Ordner ist der Hauptordner des Repositorys; GitHub Pages veröffentlicht ihn („Deploy from a branch“, Ordner „/ (root)“).
+
+## Arbeiten am Portal
+
+Der Klartext liegt nur in \`klar/\` (vom Git ausgeschlossen) und wird nie committet. Das Passwort steht als Umgebungsvariable \`LERNPORTAL_PASSWORT\`, nie im Repository.
+
+\`\`\`bash
+node zugang/zugang.mjs auspacken                 # inhalt/ -> klar/
+cd klar && node tools/build.mjs                  # ändern, bauen, testen (klar/README.md erklärt das Portal)
+cd .. && node zugang/zugang.mjs einpacken        # klar/ -> inhalt/ (verschlüsselt)
+node zugang/zugang.mjs pruefe                    # nur Erlaubtes öffentlich? alles entschlüsselbar und aktuell?
+git add . && git commit                          # klar/ nie mit git add -f hinzufügen
+\`\`\`
+
+Weitere Befehle: \`passwort\` (neues Passwort und neuer Schlüssel, alles wird neu verschlüsselt), \`export\`. Tests: \`zugang/test-kern.mjs\`, \`zugang/test-cli.mjs\`,
+\`zugang/test-e2e.mjs\` (Browser; mit \`--live https://…/\` gegen die veröffentlichte Seite).
+
+## Grenzen
+
+- Das Passwort ist der Schutz. Die verschlüsselten Dateien sind öffentlich, jeder kann offline Passwörter durchprobieren: langes, zufälliges Passwort, nur an die Klasse weitergeben.
+- Die E-Mail-Adresse wird nicht bestätigt und schützt nichts; die Prüfung auf die Schul-Domain hält nur Unbeteiligte ab.
+- Alle Seiten unter derselben \`…github.io\`-Adresse teilen sich den Browser-Speicher.
+- Der Service Worker braucht HTTPS und einen normalen (nicht privaten Firefox-)Browser.
+`;
+}
+
 /* ── Start ─────────────────────────────────────────────────────────────────── */
 const [, , befehl, ...rest] = process.argv;
 const opt = (n) => { const i = rest.indexOf('--' + n); return i >= 0 ? rest[i + 1] : undefined; };
@@ -209,10 +256,8 @@ const flag = (n) => rest.includes('--' + n);
 if (befehl === 'init') {
   if (fs.existsSync(KONF) && !flag('neu')) aus('shared/zugang.json gibt es schon. Passwort ändern: „passwort“. Alles neu: --neu');
   const domain = (opt('domain') || 'lbs4.salzburg.at').toLowerCase();
-  const basis = opt('basis') || '/hololens-instruct/';
-  if (!/^\/([\w.-]+\/)*$/.test(basis)) aus('--basis muss wie /repo/ aussehen (mit Schrägstrichen).');
   const K = Kern.zufall(32), pw = opt('passwort') || passwortErzeugen();
-  const konf = { v: 1, name: 'Lernportal', domains: [domain], basis, huelle: await Kern.huelleMachen(pw, K) };
+  const konf = { v: 1, name: 'Lernportal', domains: [domain], huelle: await Kern.huelleMachen(pw, K) };
   konfSchreiben(konf);
   console.log(`Passwort: ${pw}\nWiederherstellungsschlüssel: ${Kern.b64(K)}`);
 } else if (befehl === 'passwort') {
@@ -223,6 +268,17 @@ if (befehl === 'init') {
   konfSchreiben(konf);
   await einpacken(K, konf);
   console.log(`Neues Passwort: ${pw}\nNeuer Wiederherstellungsschlüssel: ${Kern.b64(K)}\n(Alle Dateien sind neu verschlüsselt; das alte Passwort öffnet nichts Neues mehr.)`);
+} else if (befehl === 'export') {
+  const ziel = rest[0] && !rest[0].startsWith('--') ? path.resolve(rest[0]) : null;
+  if (!ziel) aus('Aufruf: node lernseiten/zugang/zugang.mjs export <leerer Zielordner>');
+  if (fs.existsSync(ziel) && fs.readdirSync(ziel).length) aus('Der Zielordner ist nicht leer: ' + ziel);
+  const konf = konfLesen();
+  const dateien = veroeffentlicht().filter((p) => OEFFENTLICH.some((re) => re.test(p)) && !['README.md', '404.html', '.nojekyll'].includes(p));
+  for (const p of dateien) { fs.mkdirSync(path.dirname(path.join(ziel, p)), { recursive: true }); fs.copyFileSync(path.join(PUB, p), path.join(ziel, p)); }
+  fs.writeFileSync(path.join(ziel, '404.html'), vorlage404(konf.name));
+  fs.writeFileSync(path.join(ziel, '.nojekyll'), '');
+  fs.writeFileSync(path.join(ziel, 'README.md'), exportReadme());
+  console.log(`exportiert: ${dateien.length + 3} Dateien nach ${ziel}\nDas ist der Hauptordner des neuen Repositorys; GitHub Pages: „Deploy from a branch“, Ordner „/ (root)“. Klartext (klar/) ist nicht enthalten.`);
 } else if (befehl === 'einpacken') {
   const konf = konfLesen(); await einpacken(await schluesselHolen(konf), konf);
 } else if (befehl === 'auspacken') {
@@ -232,6 +288,6 @@ if (befehl === 'init') {
   const hat = process.env.LERNPORTAL_PASSWORT || process.env.LERNPORTAL_SCHLUESSEL;
   await pruefe(konf, hat ? await schluesselHolen(konf) : null);
 } else {
-  console.log(fs.readFileSync(fileURLToPath(import.meta.url), 'utf8').split('\n').slice(1, 11).map((l) => l.replace(/^\/\/ ?/, '')).join('\n'));
+  console.log(fs.readFileSync(fileURLToPath(import.meta.url), 'utf8').split('\n').slice(1, 12).map((l) => l.replace(/^\/\/ ?/, '')).join('\n'));
   process.exit(befehl ? 1 : 0);
 }
