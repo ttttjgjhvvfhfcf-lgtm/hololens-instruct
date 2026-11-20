@@ -181,4 +181,55 @@ t('Wanduhr in Wien (Winterzeit UTC+1, Sommerzeit UTC+2)', () => {
   assert.equal(L.wanduhr(new Date('2026-11-23T06:55:00Z')), wall('2026-11-23 07:55'));
   assert.equal(L.wanduhr(new Date('2026-07-01T06:55:00Z')), wall('2026-07-01 08:55'));
 });
+/* ── Lernzielkontrollen ───────────────────────────────────────────────────── */
+const lzkListe = p => { const m = []; p.wochen.forEach(w => Object.entries(w.tage).forEach(([k, l]) => l.forEach(b => { if (b.lzk) m.push(w.von + ' ' + k + ' ' + b.fach); }))); return m; };
+t('Lernzielkontrollen: AM mittwochs, AEE donnerstags, nicht vor dem 20.11., nicht an Test- und Ferientagen', () => {
+  assert.deepEqual(lzkListe(plan), [
+    '2026-11-23 mi AM', '2026-11-23 do AEE', '2026-11-30 mi AM', '2026-11-30 do AEE', '2026-12-07 mi AM', '2026-12-14 mi AM', '2026-12-14 do AEE', '2026-12-21 mi AM',
+    '2027-01-04 do AEE', '2027-01-11 mi AM', '2027-01-11 do AEE', '2027-01-18 mi AM', '2027-01-18 do AEE', '2027-02-01 mi AM', '2027-02-01 do AEE',
+    '2027-02-08 mi AM', '2027-02-08 do AEE', '2027-02-15 mi AM', '2027-02-15 do AEE', '2027-02-22 mi AM', '2027-02-22 do AEE']);
+  assert.deepEqual(plan.lernzielkontrollen.map(x => x.fach + ' ' + x.tag + ' ' + x.name), ['AM mi Lernzielkontrolle', 'AEE do Lernzielkontrolle']);
+  assert.equal(L.bloecke(plan, '2026-11-25').find(b => b.fach === 'AM').lzk, true);
+  assert.equal(L.bloecke(plan, '2026-11-19').find(b => b.fach === 'AEE').lzk, false);       // vor „ab“
+  assert.equal(L.bloecke(plan, '2026-12-10').find(b => b.fach === 'AEE').lzk, false);       // der Test ersetzt die Kontrolle
+  assert.equal(L.bloecke(plan, '2027-01-27').find(b => b.fach === 'AM').lzk, false);
+  assert.equal(L.bloecke(plan, '2026-12-17').find(b => b.fach === 'AEE').lzk, true);        // Schularbeit in AWL ändert daran nichts
+});
+t('Lernzielkontrollen: Entfall, Fehler in den Regeln, Hinweis ohne passenden Unterricht', () => {
+  const q = klon(quelle);                                   // der AM-Block am Mittwoch fällt aus (in der Vorlage und in der Einzelwoche vom 23.11.)
+  q.vorlage.tage.mi.filter(b => b.fach === 'AM').forEach(b => { b.status = 'entfall'; });
+  q.wochen.forEach(w => (w.tage.mi || []).filter(b => b.fach === 'AM').forEach(b => { b.status = 'entfall'; }));
+  const e = baue(q, portal, sa); assert.equal(lzkListe(e.plan).filter(x => x.endsWith(' AM')).length, 0);
+  assert.match(e.warnungen.join(), /AM, mi\): laut Stundenplan gibt es an diesem Wochentag keinen passenden Unterricht/);
+  const mit = r => baue({ ...klon(quelle), lernzielkontrollen: [r] }, portal, sa).fehler.join();
+  assert.match(mit({ fach: 'XYZ', tag: 'mi' }), /Fach "XYZ" ist im Stundenplan nicht definiert/);
+  assert.match(mit({ fach: 'AM', tag: 'xx' }), /unbekannter Wochentag "xx"/);
+  assert.match(mit({ fach: 'AM', tag: 'mi', ab: '2026-13-01' }), /ungültiges Datum "2026-13-01" bei "ab"/);
+  assert.match(mit({ fach: 'AM', tag: 'mi', seite: 'faecher/gibt-es-nicht.html' }), /steht nicht in faecher.json/);
+  assert.match(baue({ ...klon(quelle), lernzielkontrollen: [{ fach: 'AWL', tag: 'sa' }] }, portal, sa).warnungen.join(), /AWL, sa\)/);
+});
+const lz = (z, n = 1) => L.lernzielkontrollen(plan, wall(z), n);
+t('Erinnerung: nächste Kontrollen ab Fr 20.11. und rund um die Kontrolltage', () => {
+  const a = lz('2026-11-20 10:00', 2);
+  assert.deepEqual(a.map(e => e.datum + ' ' + e.fach + ' ' + e.tage), ['2026-11-25 AM 5', '2026-11-26 AEE 6']);
+  assert.equal(a[0].zeitVon, '10:40'); assert.equal(a[0].zeitBis, '12:20'); assert.equal(a[0].seite, 'faecher/mathematik/lzk-am3.html'); assert.equal(a[0].name, 'Lernzielkontrolle');
+  assert.equal(lz('2026-11-25 09:00')[0].tage, 0); assert.equal(lz('2026-11-25 09:00')[0].laeuft, false);   // heute, die Stunde beginnt erst
+  assert.equal(lz('2026-11-25 11:00')[0].laeuft, true);                                                   // in der Stunde
+  assert.equal(lz('2026-11-25 12:19:59')[0].fach, 'AM');
+  assert.equal(lz('2026-11-25 12:20')[0].fach, 'AEE'); assert.equal(lz('2026-11-25 12:20')[0].tage, 1);   // Stunde vorbei: morgen kommt AEE
+  assert.equal(lz('2026-11-26 14:50')[0].datum, '2026-12-02');                                            // Do nach der AEE-Stunde: nächste Woche
+  assert.equal(lz('2026-12-09 13:00')[0].datum, '2026-12-16');                                            // AEE-Test am 10.12. ersetzt die Kontrolle
+  assert.equal(lz('2026-12-23 13:00')[0].datum, '2027-01-07');                                            // Weihnachtsferien
+  assert.equal(lz('2027-01-26 08:00')[0].datum, '2027-02-03');                                            // Tests am 27.1. und 28.1.
+  assert.equal(lz('2027-02-25 15:00').length, 0);                                                         // letzte Kontrolle vorbei, der Plan endet am 28.2.
+  assert.equal(L.lernzielkontrollen({ wochen: [], einheiten: [] }, wall('2026-11-23 10:00')).length, 0);
+});
+t('Erinnerungstexte: heute, morgen, später', () => {
+  const x = z => L.lzkText(lz(z)[0]);
+  assert.deepEqual(x('2026-11-25 09:00'), { bald: true, haupt: 'Heute: Lernzielkontrolle AM', neben: '10:40–12:20' });
+  assert.equal(x('2026-11-25 11:00').neben, 'Stunde läuft · 10:40–12:20');
+  assert.deepEqual(x('2026-11-24 18:00'), { bald: true, haupt: 'Morgen: Lernzielkontrolle AM', neben: 'Mi 25.11. · 10:40–12:20' });
+  assert.deepEqual(x('2026-11-20 10:00'), { bald: false, haupt: 'Nächste Lernzielkontrolle: AM', neben: 'Mi 25.11. · in 5 Tagen · 10:40–12:20' });
+  assert.equal(x('2026-11-25 13:00').haupt, 'Morgen: Lernzielkontrolle AEE');
+});
 console.log(process.exitCode ? 'Es gab Fehler.' : `Alle ${n} Prüfungen bestanden.`);

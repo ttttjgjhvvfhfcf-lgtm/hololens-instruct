@@ -4,6 +4,8 @@
 //   vorlage  Plan, der Woche für Woche gilt (von/bis = Gültigkeit, tage = Blöcke je Wochentag)
 //   wochen   einzelne Wochen, die von der Vorlage abweichen (ersetzen die Vorlage in dieser Kalenderwoche)
 //   frei     schulfreie Tage mit Grund (an diesen Tagen entfallen alle Blöcke)
+//   lernzielkontrollen  wöchentliche Kontrollen je Fach und Wochentag (fach, tag, optional ab/bis, name, seite): Der Block des Fachs an
+//            diesem Wochentag bekommt lzk = true, außer an Tagen mit Test oder Schularbeit im selben Fach, bei Entfall und an freien Tagen
 
 const KEYS = ['mo', 'di', 'mi', 'do', 'fr', 'sa', 'so'];
 const STATUS = ['aenderung', 'entfall', 'pruefung'];
@@ -108,9 +110,30 @@ export function baue(quelle, portal = [], schularbeiten = []) {
     }
     treffer.forEach(b => { b.status = 'pruefung'; b.hinweis = art; });
   });
+
+  // ── Wöchentliche Lernzielkontrollen: Block des Fachs am Wochentag kennzeichnen ─────────────
+  const lzk = [];
+  (plan.lernzielkontrollen || []).forEach((r, i) => {
+    const wo = `Lernzielkontrolle ${i + 1}`;
+    if (!plan.faecher?.[r.fach]) return fehler.push(`${wo}: Fach "${r.fach}" ist im Stundenplan nicht definiert`);
+    if (!KEYS.includes(r.tag)) return fehler.push(`${wo}: unbekannter Wochentag "${r.tag}"`);
+    for (const k of ['ab', 'bis']) if (r[k] !== undefined && !datumOk(r[k])) return fehler.push(`${wo}: ungültiges Datum "${r[k]}" bei "${k}"`);
+    if (r.seite && portal.length && !portal.some(f => f.seiten.some(s => s.datei === r.seite))) fehler.push(`${wo}: Seite "${r.seite}" steht nicht in faecher.json`);
+    lzk.push({ fach: r.fach, tag: r.tag, name: r.name || 'Lernzielkontrolle', seite: r.seite || '', ab: r.ab || '', bis: r.bis || '' });
+    let treffer = 0;
+    for (const w of alle) {
+      const datum = addDays(montag(w.von), KEYS.indexOf(r.tag));
+      if (datum < w.von || datum > w.bis || (r.ab && datum < r.ab) || (r.bis && datum > r.bis)) continue;
+      for (const b of w.tage[r.tag] || []) {
+        if (b.fach !== r.fach || b.status === 'entfall' || b.status === 'pruefung') continue;   // an Testtagen ersetzt der Test die Kontrolle
+        b.lzk = true; treffer++;
+      }
+    }
+    if (!treffer) warnungen.push(`${wo} (${r.fach}, ${r.tag}): laut Stundenplan gibt es an diesem Wochentag keinen passenden Unterricht, daher nirgends markiert`);
+  });
   sa.sort((a, b) => a.datum.localeCompare(b.datum));
   if (fehler.length) return { plan: null, schularbeiten: [], fehler, warnungen };
 
   const { klasse, stand, zeitzone, einheiten, lehrer, faecher } = plan;
-  return { plan: { klasse, stand, zeitzone, einheiten, lehrer, faecher, wochen: alle }, schularbeiten: sa, fehler, warnungen };
+  return { plan: { klasse, stand, zeitzone, einheiten, lehrer, faecher, lernzielkontrollen: lzk, wochen: alle }, schularbeiten: sa, fehler, warnungen };
 }

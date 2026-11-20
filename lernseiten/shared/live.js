@@ -58,7 +58,7 @@
     var tag = dayKey(d), e = plan.einheiten;
     return (w.tage[tag] || []).map(function (b) {
       var start = toMin(e[b.ab - 1][0]), ende = toMin(e[b.bis - 1][1]);
-      return { id: d + '#' + b.ab, datum: d, tag: tag, ab: b.ab, bis: b.bis, fach: b.fach, gruppen: b.gruppen || [], status: b.status || '', hinweis: b.hinweis || '',
+      return { id: d + '#' + b.ab, datum: d, tag: tag, ab: b.ab, bis: b.bis, fach: b.fach, gruppen: b.gruppen || [], status: b.status || '', hinweis: b.hinweis || '', lzk: !!b.lzk,
                start: start, ende: ende, zeitVon: fromMin(start), zeitBis: fromMin(ende) };
     }).sort(function (a, b) { return a.start - b.start; });
   }
@@ -226,6 +226,35 @@
     }
     return t;
   }
+  /* ── Wöchentliche Lernzielkontrollen ────────────────────────────────────────
+     Der Plan kennzeichnet die Blöcke (lzk), in deren Stunde die Kontrolle stattfindet (plan.lernzielkontrollen nennt Fach, Wochentag
+     und die Seite mit der Zusammenfassung). Diese Funktionen liefern die nächsten Termine und die Texte für die Erinnerung. */
+  var tageZw = function (a, b) { return Math.round((parseIso(b) - parseIso(a)) / 86400000); };
+  // Die nächsten max Lernzielkontrollen ab dem Zeitpunkt; heute zählt, bis die Stunde zu Ende ist
+  function lernzielkontrollen(plan, wall, max) {
+    var out = [], n = max || 1;
+    if (!plan || !plan.wochen || !plan.wochen.length) return out;
+    var d = iso(wall), dt = new Date(wall), sek = dt.getUTCHours() * 3600 + dt.getUTCMinutes() * 60 + dt.getUTCSeconds();
+    var regeln = plan.lernzielkontrollen || [], letzt = letzterTag(plan);
+    for (var x = d; x <= letzt && out.length < n; x = addDays(x, 1)) {
+      aktive(bloecke(plan, x)).forEach(function (b) {
+        if (!b.lzk || out.length >= n || (x === d && b.ende * 60 <= sek)) return;
+        var r = regeln.filter(function (q) { return q.fach === b.fach && q.tag === b.tag; })[0] || {};
+        out.push({ datum: x, tag: b.tag, fach: b.fach, zeitVon: b.zeitVon, zeitBis: b.zeitBis, start: b.start, ende: b.ende, tage: tageZw(d, x),
+                   laeuft: x === d && b.start * 60 <= sek, seite: r.seite || '', name: r.name || 'Lernzielkontrolle' });
+      });
+    }
+    return out;
+  }
+  // Text der Erinnerung: bald = heute oder morgen (wird hervorgehoben)
+  function lzkText(e) {
+    var bald = e.tage <= 1, datum = KURZ[e.tag] + ' ' + ddmm(e.datum), zeit = e.zeitVon + '–' + e.zeitBis;
+    return {
+      bald: bald,
+      haupt: bald ? (e.tage === 0 ? 'Heute' : 'Morgen') + ': ' + e.name + ' ' + e.fach : 'Nächste ' + e.name + ': ' + e.fach,
+      neben: e.tage === 0 ? (e.laeuft ? 'Stunde läuft · ' : '') + zeit : e.tage === 1 ? datum + ' · ' + zeit : datum + ' · in ' + e.tage + ' Tagen · ' + zeit
+    };
+  }
   // „Michael Klein (229) · Johann Stöckl (116)“
   function lehrerText(plan, gruppen, mitRaum) {
     return (gruppen || []).map(function (g) {
@@ -234,7 +263,7 @@
   }
 
   return { jetzt: jetzt, simuliert: simuliert, wanduhr: wanduhr, status: status, text: text, dauer: dauer, wannText: wannText, lehrerText: lehrerText,
-           grund: grund, fachLabel: fachLabel, ddmmyyyy: ddmmyyyy, letzterTag: letzterTag,
+           grund: grund, fachLabel: fachLabel, ddmmyyyy: ddmmyyyy, letzterTag: letzterTag, lernzielkontrollen: lernzielkontrollen, lzkText: lzkText,
            bloecke: bloecke, woche: woche, naechster: naechster, addDays: addDays, dayKey: dayKey, toMin: toMin, fromMin: fromMin, ddmm: ddmm,
            KURZ: KURZ, LANG: LANG };
 });
