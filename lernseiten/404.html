@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="robots" content="noindex, nofollow">
+<title>Lernportal</title>
+<script>
+/* Diese Seite gibt es nicht (öffentlich). Wer angemeldet ist, bekommt sie vom Service Worker; alle anderen landen bei der Anmeldung und danach hier wieder. */
+(function () {
+  var BASIS = "/hololens-instruct/";
+  var p = location.pathname, rel = p.indexOf(BASIS) === 0 ? p.slice(BASIS.length) : '';
+  location.replace(BASIS + '?weiter=' + encodeURIComponent(rel + location.search + location.hash));
+})();
+</script>
+</head>
+<body style="font:16px system-ui,sans-serif;padding:2rem">
+<p>Weiter zur <a href="/hololens-instruct/">Anmeldung</a> …</p>
+</body>
+</html>

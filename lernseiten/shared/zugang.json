@@ -1,0 +1,15 @@
+{
+  "v": 1,
+  "name": "Lernportal",
+  "domains": [
+    "lbs4.salzburg.at"
+  ],
+  "basis": "/hololens-instruct/",
+  "huelle": {
+    "v": 1,
+    "iter": 600000,
+    "salz": "A2bxSr39ANfKNjwTMyXLQQ",
+    "iv": "0kyW6VBHKyN1vJno",
+    "k": "nzU5mQfVKYWmJaCn2soFGLTbkNQZD7wPVej_EF586iXV4xTgHVYBjGhoP8kIog9s"
+  }
+}
