@@ -139,13 +139,17 @@ noscript p { margin: 1rem 1.4rem; font-weight: 600; color: var(--err); }
         meldung('fehler', t);
         $('los').disabled = true; $('email').disabled = true; $('pw').disabled = true;
     }
-    // Wohin es nach der Anmeldung geht: nur Adressen innerhalb dieses Portals
+    // Wohin es nach der Anmeldung geht: nur Adressen innerhalb dieses Portals. Den Anker (#…) behält der Browser bei einer Weiterleitung des Service Workers
+    // an der Anmeldeadresse; er wird an das Ziel gehängt.
     function ziel() {
         var w = new URLSearchParams(location.search).get('weiter');
         if (w) {
             try {
                 var u = new URL(w, basis);
-                if (u.origin === basis.origin && u.pathname.indexOf(basis.pathname) === 0) return u.href;
+                if (u.origin === basis.origin && u.pathname.indexOf(basis.pathname) === 0) {
+                    if (!u.hash && location.hash) u.hash = location.hash;
+                    return u.href;
+                }
             } catch (e) {}
         }
         return basis.href;
@@ -180,7 +184,8 @@ noscript p { margin: 1rem 1.4rem; font-weight: 600; color: var(--err); }
 
     $('form').addEventListener('submit', function (ev) {
         ev.preventDefault();
-        if (!konfig || $('los').disabled) return;
+        if ($('los').disabled) return;
+        if (!konfig) { meldung('info', 'Einen Moment, die Anmeldedaten werden noch geladen …'); return; }
         meldung('', '');
         var chk = Kern.emailPruefen($('email').value, konfig.domains);
         if (!chk.ok) {

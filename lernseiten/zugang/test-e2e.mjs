@@ -30,7 +30,8 @@ const EMAIL = 'max.muster@lbs4.salzburg.at';
 
 /* ── Server wie GitHub Pages ─────────────────────────────────────────────── */
 const konf = JSON.parse(fs.readFileSync(path.join(PUB, 'shared', 'zugang.json'), 'utf8'));
-const BASISPFAD = konf.basis;                       // /hololens-instruct/
+const bi = process.argv.indexOf('--basis');
+const BASISPFAD = LIVE ? new URL(LIVE).pathname : (bi > 0 ? process.argv[bi + 1] : '/hololens-instruct/');   // Pfad, unter dem der Test-Server das Portal ausliefert
 const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'zugang-e2e-'));
 const SITE = path.join(tmp, 'site', BASISPFAD.replace(/^\/|\/$/g, ''));
 let server = null, BASE = LIVE;
@@ -138,6 +139,22 @@ try {
     await page.waitForSelector('#form');
     const u = new URL(page.url());
     ok(u.pathname === BASISPFAD && u.searchParams.get('weiter') === tief + '#abschnitt', 'tiefer Link ohne Anmeldung führt zur Anmeldung und merkt sich das Ziel', page.url());
+
+    // Unbekannte Adresse mit Abfrage und Anker: die 404-Seite findet die Anmeldeseite über mehrere Ordner und merkt sich alles
+    const k404 = await neuerKontext();
+    const p404 = await k404.ctx.newPage();
+    await p404.goto(BASE + 'faecher/xyz/gibt-es-nicht.html?q=1#frag');
+    await p404.waitForSelector('#form');
+    ok(new URL(p404.url()).searchParams.get('weiter') === 'faecher/xyz/gibt-es-nicht.html?q=1#frag', '404.html findet die Anmeldeseite über mehrere Ordner und merkt sich Abfrage und Anker', p404.url());
+    await k404.ctx.close();
+    if (!LIVE) {
+      const kw = await neuerKontext();
+      const weit = await kw.ctx.newPage();
+      await weit.goto(new URL(BASE).origin + '/nirgendwo/seite.html');
+      await weit.waitForFunction(() => /gibt es nicht/.test(document.body.textContent));
+      ok(!weit.url().includes('weiter='), 'ohne Anmeldeseite in der Nähe endet die Weiterleitung mit einer Meldung, nicht in einer Schleife');
+      await kw.ctx.close();
+    }
 
     // Fehleingaben
     await page.fill('#email', 'max@gmail.com'); await page.fill('#pw', PW); await page.click('#los');
@@ -248,7 +265,8 @@ try {
       ok(vk.fehler.length === 0, 'keine Fehler beim Aufruf aller Seiten', vk.fehler.slice(0, 5).join(' | '));
       await vk.ctx.close();
       if (!LIVE) {
-        const fremd = [...new Set(log)].filter((p) => !/^\/hololens-instruct\/(inhalt\/[0-9a-f]{32}\.enc|sw\.js|shared\/(zugang-kern\.js|zugang\.json|icons\/[^/]+)|index\.html|404\.html)?$/.test(p) && !/favicon/.test(p));
+        const erlaubt = new RegExp('^' + BASISPFAD.replace(/[.*+?^${}()|[\]\\/]/g, '\\$&') + '(inhalt/[0-9a-f]{32}\\.enc|sw\\.js|shared/(zugang-kern\\.js|zugang\\.json|icons/[^/]+)|index\\.html|404\\.html)?$');
+        const fremd = [...new Set(log)].filter((p) => !erlaubt.test(p) && !/favicon/.test(p));
         ok(fremd.length === 0, 'der Server sah nur Anmeldeseite, Symbole und verschlüsselte Dateien', fremd.slice(0, 5).join(' | '));
       }
 
@@ -275,6 +293,11 @@ try {
     await page.goto(BASE + 'stundenplan.html');
     await page.waitForSelector('#form');
     ok(new URL(page.url()).searchParams.get('weiter') === 'stundenplan.html', 'nach dem Abmelden führt jede Seite zur Anmeldung');
+    await page.goto(BASE + 'stundenplan.html#x');
+    await page.waitForSelector('#form');
+    ok(new URL(page.url()).hash === '#x', 'der Anker bleibt bei der Weiterleitung des Service Workers erhalten');
+    await anmelden(page);
+    ok(page.url() === BASE + 'stundenplan.html#x', 'nach der Anmeldung öffnet die Seite mit dem Anker', page.url());
     await ctx.close();
   }
 

@@ -5,16 +5,32 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="robots" content="noindex, nofollow">
 <title>Lernportal</title>
-<script>
-/* Diese Seite gibt es nicht (öffentlich). Wer angemeldet ist, bekommt sie vom Service Worker; alle anderen landen bei der Anmeldung und danach hier wieder. */
-(function () {
-  var BASIS = "/hololens-instruct/";
-  var p = location.pathname, rel = p.indexOf(BASIS) === 0 ? p.slice(BASIS.length) : '';
-  location.replace(BASIS + '?weiter=' + encodeURIComponent(rel + location.search + location.hash));
-})();
-</script>
 </head>
 <body style="font:16px system-ui,sans-serif;padding:2rem">
-<p>Weiter zur <a href="/hololens-instruct/">Anmeldung</a> …</p>
+<p>Einen Moment …</p>
+<script>
+/* Diese Adresse gibt es im öffentlichen Ordner nicht. Angemeldete Browser bekommen sie vom Service Worker; hier landen alle anderen. Die Anmeldeseite wird in den
+   übergeordneten Ordnern gesucht (shared/zugang.json), dorthin geht es mit der gewünschten Adresse als ?weiter=. Kein fester Pfad, nichts zu pflegen. */
+(async function () {
+  var T = 'lernportal.404', jetzt = Date.now(), v = null;
+  try { v = JSON.parse(sessionStorage.getItem(T)); } catch (e) {}
+  if (!v || jetzt - v.t > 10000) v = { n: 0, t: jetzt };
+  var nichts = function () { document.body.textContent = 'Diese Seite gibt es nicht.'; };
+  if (++v.n > 3) return nichts();                                  // nie im Kreis laufen
+  try { sessionStorage.setItem(T, JSON.stringify(v)); } catch (e) {}
+  for (var d = 0; d <= 8; d++) {
+    var basis = new URL(d ? '../'.repeat(d) : './', location.href);
+    try {
+      var r = await fetch(new URL('shared/zugang.json', basis), { cache: 'no-cache' });
+      var j = r.ok ? await r.json() : null;
+      if (j && j.huelle) {
+        location.replace(basis.pathname + '?weiter=' + encodeURIComponent(location.pathname.slice(basis.pathname.length) + location.search + location.hash));
+        return;
+      }
+    } catch (e) {}
+  }
+  nichts();
+})();
+</script>
 </body>
 </html>
