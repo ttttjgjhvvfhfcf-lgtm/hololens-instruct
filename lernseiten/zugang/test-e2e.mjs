@@ -147,7 +147,7 @@ try {
     await p404.waitForSelector('#form');
     ok(new URL(p404.url()).searchParams.get('weiter') === 'faecher/xyz/gibt-es-nicht.html?q=1#frag', '404.html findet die Anmeldeseite über mehrere Ordner und merkt sich Abfrage und Anker', p404.url());
     await k404.ctx.close();
-    if (!LIVE) {
+    if (!LIVE && BASISPFAD !== '/') {   // (liegt das Portal im Hauptordner der Adresse, gibt es überall eine Anmeldeseite in der Nähe)
       const kw = await neuerKontext();
       const weit = await kw.ctx.newPage();
       await weit.goto(new URL(BASE).origin + '/nirgendwo/seite.html');
