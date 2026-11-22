@@ -20,4 +20,6 @@ Die veröffentlichte Seite (GitHub Pages) ist **verschlüsselt** und liegt hinte
   `.github/`, andere Ordner dieses Repositorys und andere Repositories.
 - Aus hochgeladenen Unterlagen werden keine Namen, Logos, Fußzeilen oder Autorenkennungen übernommen. Erkennbar Privates (Namen, Noten, Mailadressen, lokale Dateipfade)
   nicht veröffentlichen, sondern erst nachfragen.
-- Geschützte Inhalte anderer (zum Beispiel Seiten von Lehrkräften hinter deren eigener Anmeldung) werden nicht kopiert.
+- Geschützte Inhalte anderer (zum Beispiel Seiten von Lehrkräften hinter deren eigener Anmeldung) werden nur mit Erlaubnis des Urhebers übernommen, mit Credit auf jeder
+  Seite und als eigene Fächer, getrennt von den eigenen Inhalten. Ohne Erlaubnis nichts kopieren. Aktuell erlaubt laut Nutzer: das Mechatronik-Lernportal von
+  Ing. Michael Klein (mechatronik.web.app), Credit an Herrn Klein.
