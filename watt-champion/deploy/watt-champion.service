@@ -1,0 +1,22 @@
+# systemd-Dienst für den watt-champion-Server.
+# Anpassen: User= und die Pfade (hier: Benutzer "pi", Projekt in /home/pi/hololens-instruct).
+#
+#   sudo cp deploy/watt-champion.service /etc/systemd/system/
+#   sudo systemctl daemon-reload
+#   sudo systemctl enable --now watt-champion
+#   journalctl -u watt-champion -f        # Log ansehen
+[Unit]
+Description=watt champion Server
+After=network.target
+
+[Service]
+Type=simple
+User=pi
+WorkingDirectory=/home/pi/hololens-instruct/watt-champion
+# Mit INA219-Sensoren die Python-Umgebung mit smbus2 verwenden: .venv/bin/python
+ExecStart=/usr/bin/python3 server.py --config config.json
+Restart=on-failure
+RestartSec=2
+
+[Install]
+WantedBy=multi-user.target

@@ -1,0 +1,11 @@
+{
+  "title": "watt champion",
+  "host": "127.0.0.1",
+  "port": 8080,
+  "target_wh": 1.0,
+  "sensor": { "type": "ina219", "bus": 1, "shunt_ohm": 0.1 },
+  "players": [
+    { "id": "anna", "name": "Anna", "color": "red",  "address": "0x40" },
+    { "id": "ben",  "name": "Ben",  "color": "cyan", "address": "0x41", "invert": false }
+  ]
+}
