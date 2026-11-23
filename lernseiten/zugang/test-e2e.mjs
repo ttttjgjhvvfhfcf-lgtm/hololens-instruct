@@ -147,7 +147,7 @@ try {
     await p404.waitForSelector('#form');
     ok(new URL(p404.url()).searchParams.get('weiter') === 'faecher/xyz/gibt-es-nicht.html?q=1#frag', '404.html findet die Anmeldeseite über mehrere Ordner und merkt sich Abfrage und Anker', p404.url());
     await k404.ctx.close();
-    if (!LIVE) {
+    if (!LIVE && BASISPFAD !== '/') {   // (liegt das Portal im Hauptordner der Adresse, gibt es überall eine Anmeldeseite in der Nähe)
       const kw = await neuerKontext();
       const weit = await kw.ctx.newPage();
       await weit.goto(new URL(BASE).origin + '/nirgendwo/seite.html');
@@ -250,13 +250,15 @@ try {
       await lokal.addInitScript(festerZufall);
       const alle = seiten;
       const verschiedeneSeiten = [], leer = [];
+      // Die Simulationen (sim/) sind Animationen: Winkel und Spannungen ändern sich laufend. Dort zählt der Text ohne Zahlen.
+      const zahlenlos = (t) => t.replace(/-?\d+(?:[.,]\d+)?/g, '#').replace(/\s+/g, ' ');
       const text = async (pg, url) => { await pg.goto(url, { waitUntil: 'load' }); await pg.waitForTimeout(500); return pg.evaluate(() => { document.querySelectorAll('#konto,#hub-konto').forEach((e) => e.remove()); return document.body.innerText.replace(/\s+/g, ' ').trim(); }); };
       for (const p of alle) {
         const a = await text(vp, BASE + p + Q);
         const lp = await lokal.newPage();
         const b = await text(lp, pathToFileURL(path.join(KLAR, p)).href + Q);
         await lp.close();
-        if (a !== b) { let i = 0; while (a[i] === b[i]) i++; verschiedeneSeiten.push(`${p} @${i}: [${a.slice(Math.max(0, i - 30), i + 50)}] <> [${b.slice(Math.max(0, i - 30), i + 50)}]`); }
+        if (a !== b && !(/(^|\/)sim\//.test(p) && zahlenlos(a) === zahlenlos(b))) { let i = 0; while (a[i] === b[i]) i++; verschiedeneSeiten.push(`${p} @${i}: [${a.slice(Math.max(0, i - 30), i + 50)}] <> [${b.slice(Math.max(0, i - 30), i + 50)}]`); }
         if (a.length < 100) leer.push(p);
       }
       await lokal.close();
