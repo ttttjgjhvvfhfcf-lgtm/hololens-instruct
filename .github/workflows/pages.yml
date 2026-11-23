@@ -19,10 +19,10 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  deploy:
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
+  # Hochladen und Veröffentlichen sind getrennte Jobs (Standardmuster von GitHub): In einem einzigen Job suchte
+  # der Deploy-Schritt das gerade hochgeladene Paket zu früh und fand es nicht ("Found 0 artifact(s)").
+  # Nun lässt sich ein fehlgeschlagener Deploy einzeln wiederholen, ohne erneut hochzuladen.
+  build:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
@@ -35,6 +35,16 @@ jobs:
         uses: actions/upload-pages-artifact@v3
         with:
           path: lernseiten
+
+  deploy:
+    needs: build
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Kurz warten, bis GitHub das Paket auflistet
+        run: sleep 15
 
       - name: Deploy to GitHub Pages
         id: deployment

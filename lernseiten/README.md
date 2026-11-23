@@ -54,6 +54,11 @@ git add lernseiten && git commit                            # klar/ ist vom Git 
 Tests: `node lernseiten/zugang/test-kern.mjs`, `node lernseiten/zugang/test-cli.mjs` und (mit Passwort und ausgepacktem `klar/`)
 `node lernseiten/zugang/test-e2e.mjs` (Browser; mit `--live https://…/hololens-instruct/` gegen die veröffentlichte Seite).
 
+**Veröffentlichung:** Jede Änderung an `lernseiten/` auf `main` startet den Workflow „Deploy Lernportal to GitHub Pages“ (`.github/workflows/pages.yml`, von Hand auch über „Run workflow“).
+Er besteht aus zwei Jobs: `build` lädt den Ordner `lernseiten` als Paket hoch, `deploy` veröffentlicht es. Früher war beides ein einziger Job, und der Deploy-Schritt meldete manchmal
+„Found 0 artifact(s)“, obwohl das Paket gerade hochgeladen war (ein Zeitproblem auf GitHub-Seite, am Inhalt liegt es nicht). Heute genügt es dann, nur den Job `deploy` zu wiederholen
+(„Re-run failed jobs“); das Paket aus `build` bleibt erhalten.
+
 ## Passwort
 
 - Ein neues Passwort gibt es mit `node lernseiten/zugang/zugang.mjs passwort` (oder `--passwort wunsch`). Das erzeugt zugleich einen **neuen Schlüssel** und
