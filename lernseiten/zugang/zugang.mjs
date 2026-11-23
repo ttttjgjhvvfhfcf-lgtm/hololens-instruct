@@ -241,7 +241,7 @@ Weitere Befehle: \`passwort\` (neues Passwort und neuer Schlüssel, alles wird n
 
 ## Grenzen
 
-- Das Passwort ist der Schutz. Die verschlüsselten Dateien sind öffentlich, jeder kann offline Passwörter durchprobieren: langes, zufälliges Passwort, nur an die Klasse weitergeben.
+- Das Passwort ist der Schutz. Die verschlüsselten Dateien sind öffentlich, jeder kann offline Passwörter durchprobieren: langes, zufälliges Passwort, nicht weitergeben (das Portal enthält Inhalte Dritter, nur für den eigenen Gebrauch).
 - Die E-Mail-Adresse wird nicht bestätigt und schützt nichts; die Prüfung auf die Schul-Domain hält nur Unbeteiligte ab.
 - Alle Seiten unter derselben \`…github.io\`-Adresse teilen sich den Browser-Speicher.
 - Der Service Worker braucht HTTPS und einen normalen (nicht privaten Firefox-)Browser.

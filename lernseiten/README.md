@@ -8,7 +8,7 @@ der Browser die Seiten beim Aufruf; sie sehen und funktionieren genau wie vorher
 
 - **E-Mail:** Die Anmeldeseite akzeptiert nur Adressen der Schule (`…@lbs4.salzburg.at`, auch Subdomains). Die Adresse wird nicht bestätigt, es wird keine
   E-Mail verschickt, und sie verlässt das Gerät nicht. Sie dient nur der Anzeige („Angemeldet als …“) und dem Ausschluss fremder Adressen.
-- **Passwort:** Ein gemeinsames Passwort der Klasse öffnet den Inhalt. Groß-/Kleinschreibung, Leerzeichen und Bindestriche zählen nicht.
+- **Passwort:** Ein Passwort öffnet den Inhalt. Es gehört allein dem Eigentümer des Portals und wird nicht weitergegeben (siehe „Grenzen“). Groß-/Kleinschreibung, Leerzeichen und Bindestriche zählen nicht.
   Aus dem Passwort wird mit PBKDF2-SHA-256 (600 000 Runden) ein Schlüssel abgeleitet, der den eigentlichen Inhaltsschlüssel auspackt
   (die „Hülle“ steht in `shared/zugang.json`). Der Inhalt selbst ist mit AES-256-GCM verschlüsselt.
 - **Angemeldet bleiben:** Der Schlüssel liegt danach in IndexedDB des Browsers (30 Tage, ohne Haken 12 Stunden). Der Service Worker `sw.js` liefert
@@ -71,7 +71,8 @@ Repositorys; das alte Repository kann auf privat gestellt werden (dabei wird die
 ## Grenzen
 
 - **Das Passwort ist der Schutz.** Die verschlüsselten Dateien sind öffentlich; jeder kann dort offline Passwörter durchprobieren. Darum ein langes, zufälliges Passwort
-  (kein Wort, kein Datum) und kein Weitergeben außerhalb der Klasse. Wer es kennt, kann alles lesen; auch Kopien, die er früher gespeichert hat, bleiben lesbar.
+  (kein Wort, kein Datum) und **keine Weitergabe, auch nicht an die Klasse**: Das Portal enthält Inhalte Dritter, die nur mit deren Erlaubnis und nur für den eigenen
+  Gebrauch übernommen sind; sie dürfen nicht an andere Personen oder Schulen gelangen. Wer das Passwort kennt, kann alles lesen; auch Kopien, die er früher gespeichert hat, bleiben lesbar.
 - **Die E-Mail-Adresse schützt nichts.** Sie wird nicht bestätigt; die Prüfung auf `@lbs4.salzburg.at` läuft im Browser und hält nur Unbeteiligte ab.
 - **Frühere Stände bleiben öffentlich sichtbar**, soweit sie vor der Umstellung veröffentlicht wurden: im Git-Verlauf dieses Repositorys, in alten Pull Requests und
   möglicherweise in Suchmaschinen oder Web-Archiven. Ist das Repository öffentlich, kann man sie dort lesen. Wirklich entfernen lässt sich das nur mit einem neuen Repository
