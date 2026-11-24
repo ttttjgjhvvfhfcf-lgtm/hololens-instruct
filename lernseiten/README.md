@@ -82,5 +82,6 @@ Repositorys; das alte Repository kann auf privat gestellt werden (dabei wird die
 - **Frühere Stände bleiben öffentlich sichtbar**, soweit sie vor der Umstellung veröffentlicht wurden: im Git-Verlauf dieses Repositorys, in alten Pull Requests und
   möglicherweise in Suchmaschinen oder Web-Archiven. Ist das Repository öffentlich, kann man sie dort lesen. Wirklich entfernen lässt sich das nur mit einem neuen Repository
   oder einem privaten Repository (GitHub Pages aus privaten Repositories braucht einen Tarif, der das erlaubt).
-- Alle Seiten unter derselben `…github.io`-Adresse teilen sich den Browser-Speicher. Fremde Skripte auf anderen Projektseiten derselben Adresse könnten den gemerkten Schlüssel lesen.
+- Alle Seiten unter derselben `…github.io`-Adresse teilen sich den Browser-Speicher. Fremde Skripte auf anderen Projektseiten derselben Adresse könnten den gemerkten Schlüssel lesen,
+  ebenso die Einträge des Notentrackers (Seite „Noten“: persönliche Notenstände, nur im Browser gespeichert, nie gesendet; Sicherung als Datei möglich).
 - Der Service Worker braucht HTTPS und einen normalen (nicht privaten Firefox-)Browser.

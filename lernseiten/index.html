@@ -16,7 +16,7 @@
   addEventListener("pageswap", function (e) {
     var t = e.viewTransition; if (!t) return;
     fangen(t);
-    try { if (!/\/(index|stundenplan|schularbeiten)\.html$|\/$/.test(new URL(e.activation.entry.url).pathname)) t.skipTransition(); } catch (x) { t.skipTransition(); }
+    try { if (!/\/(index|stundenplan|schularbeiten|noten)\.html$|\/$/.test(new URL(e.activation.entry.url).pathname)) t.skipTransition(); } catch (x) { t.skipTransition(); }
   });
 })();
 </script>
