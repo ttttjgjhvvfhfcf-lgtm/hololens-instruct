@@ -15,6 +15,11 @@ der Browser die Seiten beim Aufruf; sie sehen und funktionieren genau wie vorher
   jede Seite unter ihrer gewohnten Adresse entschlüsselt aus und merkt sich die verschlüsselten Dateien für den Betrieb ohne Netz.
   „Abmelden“ (Menü oben, auf Lernseiten in der Leiste) löscht Schlüssel und Zwischenspeicher.
 - Ohne gültigen Schlüssel führt jede Adresse im Portal (auch alte Lesezeichen) zur Anmeldung und danach zurück zur gewünschten Seite.
+- **Ohne Netz und bei Fehlern:** Schon besuchte Seiten kommen aus dem verschlüsselten Zwischenspeicher. Eine Seite, die auf dem Gerät noch nie offen war, zeigt ohne Netz eine eigene
+  Hinweisseite („Kein Netz“, mit „Erneut versuchen“; sie lädt die Seite von selbst neu, sobald das Netz zurück ist), ebenso bei unbekannten Adressen („Seite nicht gefunden“) und
+  Serverfehlern. Die Seiten stehen in `sw.js` (`hinweis()`), sind eigenständig und hell/dunkel wie das Portal. Bilder, Skripte und Daten bekommen weiter nur Text mit dem Statuscode.
+  Die Anmeldeseite meldet „Du bist offline“ bzw. „Die Anmeldedaten konnten nicht geladen werden“ mit „Erneut versuchen“ und macht von selbst weiter, wenn das Netz zurück ist.
+  Fehlerhafte Eingaben kennzeichnet sie auch für Vorlese-Programme (`aria-invalid`); wer über einen Link von außen kommt, liest, dass es nach der Anmeldung mit dieser Seite weitergeht.
 
 ## Was liegt wo
 
@@ -52,7 +57,8 @@ git add lernseiten && git commit                            # klar/ ist vom Git 
 **Nie `klar/` mit `git add -f` hinzufügen.**
 
 Tests: `node lernseiten/zugang/test-kern.mjs`, `node lernseiten/zugang/test-cli.mjs` und (mit Passwort und ausgepacktem `klar/`)
-`node lernseiten/zugang/test-e2e.mjs` (Browser; mit `--live https://…/hololens-instruct/` gegen die veröffentlichte Seite).
+`node lernseiten/zugang/test-e2e.mjs` (Browser; mit `--live https://…/hololens-instruct/` gegen die veröffentlichte Seite, mit `--schnell` ohne die zwei langen Läufe über alle Dateien
+und Seiten: rund 20 Sekunden statt 7 Minuten).
 
 **Veröffentlichung:** Jede Änderung an `lernseiten/` auf `main` startet den Workflow „Deploy Lernportal to GitHub Pages“ (`.github/workflows/pages.yml`, von Hand auch über „Run workflow“).
 Er besteht aus zwei Jobs: `build` lädt den Ordner `lernseiten` als Paket hoch, `deploy` veröffentlicht es. Früher war beides ein einziger Job, und der Deploy-Schritt meldete manchmal

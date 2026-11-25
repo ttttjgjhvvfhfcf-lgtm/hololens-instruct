@@ -16,6 +16,7 @@ const HIER = path.dirname(fileURLToPath(import.meta.url));
 const PUB = path.resolve(HIER, '..');
 const KLAR = path.join(PUB, 'klar');
 const PW = process.env.LERNPORTAL_PASSWORT;
+const SCHNELL = process.argv.includes('--schnell');   // überspringt die zwei langen Läufe über alle Dateien und Seiten (Abschnitt 3 und 4), zum schnellen Prüfen beim Entwickeln
 const liveIdx = process.argv.indexOf('--live');
 const LIVE = liveIdx > 0 ? process.argv[liveIdx + 1].replace(/\/?$/, '/') : null;
 if (!PW || (!LIVE && !fs.existsSync(path.join(KLAR, 'index.html')))) {
@@ -139,6 +140,7 @@ try {
     await page.waitForSelector('#form');
     const u = new URL(page.url());
     ok(u.pathname === BASISPFAD && u.searchParams.get('weiter') === tief + '#abschnitt', 'tiefer Link ohne Anmeldung führt zur Anmeldung und merkt sich das Ziel', page.url());
+    ok(/gewünschten Seite/.test(await page.textContent('#meldung')), 'tiefer Link: die Anmeldeseite sagt, dass es danach mit der Seite weitergeht');
 
     // Unbekannte Adresse mit Abfrage und Anker: die 404-Seite findet die Anmeldeseite über mehrere Ordner und merkt sich alles
     const k404 = await neuerKontext();
@@ -166,6 +168,7 @@ try {
     await page.fill('#pw', 'falsch-falsch-falsch'); await page.click('#los');
     await page.waitForFunction(() => /stimmt nicht/.test(document.getElementById('meldung').textContent));
     ok(await page.isVisible('#form') && page.url().includes('weiter='), 'falsches Passwort: Meldung, Anmeldeseite bleibt');
+    ok((await page.getAttribute('#pw', 'aria-invalid')) === 'true' && (await page.getAttribute('#pw', 'aria-describedby')) === 'meldung', 'falsches Passwort: Feld ist für Vorlese-Programme als fehlerhaft gekennzeichnet');
     ok((await idbLesen(page)) === null, 'falsches Passwort speichert keinen Schlüssel');
 
     // Passwort anzeigen
@@ -214,62 +217,64 @@ try {
 
     /* 3) Jede Datei kommt byte-gleich an ---------------------------------------------------------- */
     if (!LIVE) {
-      const verschieden = [], typFalsch = [];
-      for (const p of dateien) {
-        const r = await page.evaluate(async (u) => {
-          const a = await fetch(u, { cache: 'no-store' });
-          const b = new Uint8Array(await a.arrayBuffer());
-          const h = [...new Uint8Array(await crypto.subtle.digest('SHA-256', b))].map((x) => x.toString(16).padStart(2, '0')).join('');
-          return { s: a.status, h, t: a.headers.get('content-type') };
-        }, BASE + p);
-        if (r.s !== 200 || r.h !== sha(fs.readFileSync(path.join(KLAR, p)))) verschieden.push(`${p} (${r.s})`);
-        if (r.t !== Kern.typ(p)) typFalsch.push(`${p}: ${r.t}`);
-      }
-      ok(verschieden.length === 0, `alle ${dateien.length} Dateien kommen byte-gleich zum Klartext an`, verschieden.slice(0, 5).join(' | '));
-      ok(typFalsch.length === 0, 'Inhaltstypen stimmen', typFalsch.slice(0, 3).join(' | '));
-      const nf = await page.evaluate(async (u) => (await fetch(u)).status, BASE + 'faecher/gibt-es-nicht.html');
-      ok(nf === 404, 'unbekannte Seite liefert 404', String(nf));
-      const nav = await ctx.newPage();
-      await nav.goto(BASE + 'faecher/gibt-es-nicht.html');
-      ok(/Seite nicht gefunden/.test(await nav.content()) && !(await nav.isVisible('#form').catch(() => false)), 'angemeldet gibt es für Unbekanntes eine eigene Fehlerseite, keine Anmeldung');
-      await nav.close();
-      fehler.length = 0;   // das 404 der absichtlich unbekannten Seite ist erwartet
+      if (!SCHNELL) {
+        const verschieden = [], typFalsch = [];
+        for (const p of dateien) {
+          const r = await page.evaluate(async (u) => {
+            const a = await fetch(u, { cache: 'no-store' });
+            const b = new Uint8Array(await a.arrayBuffer());
+            const h = [...new Uint8Array(await crypto.subtle.digest('SHA-256', b))].map((x) => x.toString(16).padStart(2, '0')).join('');
+            return { s: a.status, h, t: a.headers.get('content-type') };
+          }, BASE + p);
+          if (r.s !== 200 || r.h !== sha(fs.readFileSync(path.join(KLAR, p)))) verschieden.push(`${p} (${r.s})`);
+          if (r.t !== Kern.typ(p)) typFalsch.push(`${p}: ${r.t}`);
+        }
+        ok(verschieden.length === 0, `alle ${dateien.length} Dateien kommen byte-gleich zum Klartext an`, verschieden.slice(0, 5).join(' | '));
+        ok(typFalsch.length === 0, 'Inhaltstypen stimmen', typFalsch.slice(0, 3).join(' | '));
+        const nf = await page.evaluate(async (u) => (await fetch(u)).status, BASE + 'faecher/gibt-es-nicht.html');
+        ok(nf === 404, 'unbekannte Seite liefert 404', String(nf));
+        const nav = await ctx.newPage();
+        await nav.goto(BASE + 'faecher/gibt-es-nicht.html');
+        ok(/Seite nicht gefunden/.test(await nav.content()) && !(await nav.isVisible('#form').catch(() => false)), 'angemeldet gibt es für Unbekanntes eine eigene Fehlerseite, keine Anmeldung');
+        await nav.close();
+        fehler.length = 0;   // das 404 der absichtlich unbekannten Seite ist erwartet
 
-      /* 4) Jede Seite so wie vorher: Text gleich dem lokal geöffneten Klartext --------------------- */
-      const Q = '?zeit=2026-11-24T10:15';
-      const festerZufall = () => { Math.random = () => 0.42; };   // manche Seiten zeigen eine zufällige Formel
-      const vk = await neuerKontext();                              // eigener angemeldeter Browser ohne Verlauf (zuletzt geöffnet, letzte Suchen)
-      await vk.ctx.addInitScript(festerZufall);
-      const vp = await vk.ctx.newPage();
-      await vp.goto(BASE);
-      await vp.waitForSelector('#form');
-      await vp.evaluate(() => navigator.serviceWorker.ready);
-      await idbSchreiben(vp, { k: [...K], email: EMAIL, ablauf: Date.now() + 1e7 });
-      await vp.evaluate((e) => localStorage.setItem('lernportal.nutzer', JSON.stringify({ email: e, name: 'Max Muster', ablauf: Date.now() + 1e7 })), EMAIL);
-      const lokal = await browser.newContext({ viewport: { width: 1280, height: 800 } });
-      await lokal.addInitScript(festerZufall);
-      const alle = seiten;
-      const verschiedeneSeiten = [], leer = [];
-      // Die Simulationen (sim/) sind Animationen: Winkel und Spannungen ändern sich laufend. Dort zählt der Text ohne Zahlen.
-      const zahlenlos = (t) => t.replace(/-?\d+(?:[.,]\d+)?/g, '#').replace(/\s+/g, ' ');
-      const text = async (pg, url) => { await pg.goto(url, { waitUntil: 'load' }); await pg.waitForTimeout(500); return pg.evaluate(() => { document.querySelectorAll('#konto,#hub-konto').forEach((e) => e.remove()); return document.body.innerText.replace(/\s+/g, ' ').trim(); }); };
-      for (const p of alle) {
-        const a = await text(vp, BASE + p + Q);
-        const lp = await lokal.newPage();
-        const b = await text(lp, pathToFileURL(path.join(KLAR, p)).href + Q);
-        await lp.close();
-        if (a !== b && !(/(^|\/)sim\//.test(p) && zahlenlos(a) === zahlenlos(b))) { let i = 0; while (a[i] === b[i]) i++; verschiedeneSeiten.push(`${p} @${i}: [${a.slice(Math.max(0, i - 30), i + 50)}] <> [${b.slice(Math.max(0, i - 30), i + 50)}]`); }
-        if (a.length < 100) leer.push(p);
-      }
-      await lokal.close();
-      ok(leer.length === 0, `alle ${alle.length} Seiten haben Inhalt`, leer.join(', '));
-      ok(verschiedeneSeiten.length === 0, `alle ${alle.length} Seiten zeigen denselben Text wie ohne Anmeldung`, verschiedeneSeiten.join(' | '));
-      ok(vk.fehler.length === 0, 'keine Fehler beim Aufruf aller Seiten', vk.fehler.slice(0, 5).join(' | '));
-      await vk.ctx.close();
-      if (!LIVE) {
-        const erlaubt = new RegExp('^' + BASISPFAD.replace(/[.*+?^${}()|[\]\\/]/g, '\\$&') + '(inhalt/[0-9a-f]{32}\\.enc|sw\\.js|shared/(zugang-kern\\.js|zugang\\.json|icons/[^/]+)|index\\.html|404\\.html)?$');
-        const fremd = [...new Set(log)].filter((p) => !erlaubt.test(p) && !/favicon/.test(p));
-        ok(fremd.length === 0, 'der Server sah nur Anmeldeseite, Symbole und verschlüsselte Dateien', fremd.slice(0, 5).join(' | '));
+        /* 4) Jede Seite so wie vorher: Text gleich dem lokal geöffneten Klartext --------------------- */
+        const Q = '?zeit=2026-11-24T10:15';
+        const festerZufall = () => { Math.random = () => 0.42; };   // manche Seiten zeigen eine zufällige Formel
+        const vk = await neuerKontext();                              // eigener angemeldeter Browser ohne Verlauf (zuletzt geöffnet, letzte Suchen)
+        await vk.ctx.addInitScript(festerZufall);
+        const vp = await vk.ctx.newPage();
+        await vp.goto(BASE);
+        await vp.waitForSelector('#form');
+        await vp.evaluate(() => navigator.serviceWorker.ready);
+        await idbSchreiben(vp, { k: [...K], email: EMAIL, ablauf: Date.now() + 1e7 });
+        await vp.evaluate((e) => localStorage.setItem('lernportal.nutzer', JSON.stringify({ email: e, name: 'Max Muster', ablauf: Date.now() + 1e7 })), EMAIL);
+        const lokal = await browser.newContext({ viewport: { width: 1280, height: 800 } });
+        await lokal.addInitScript(festerZufall);
+        const alle = seiten;
+        const verschiedeneSeiten = [], leer = [];
+        // Die Simulationen (sim/) sind Animationen: Winkel und Spannungen ändern sich laufend. Dort zählt der Text ohne Zahlen.
+        const zahlenlos = (t) => t.replace(/-?\d+(?:[.,]\d+)?/g, '#').replace(/\s+/g, ' ');
+        const text = async (pg, url) => { await pg.goto(url, { waitUntil: 'load' }); await pg.waitForTimeout(500); return pg.evaluate(() => { document.querySelectorAll('#konto,#hub-konto').forEach((e) => e.remove()); return document.body.innerText.replace(/\s+/g, ' ').trim(); }); };
+        for (const p of alle) {
+          const a = await text(vp, BASE + p + Q);
+          const lp = await lokal.newPage();
+          const b = await text(lp, pathToFileURL(path.join(KLAR, p)).href + Q);
+          await lp.close();
+          if (a !== b && !(/(^|\/)sim\//.test(p) && zahlenlos(a) === zahlenlos(b))) { let i = 0; while (a[i] === b[i]) i++; verschiedeneSeiten.push(`${p} @${i}: [${a.slice(Math.max(0, i - 30), i + 50)}] <> [${b.slice(Math.max(0, i - 30), i + 50)}]`); }
+          if (a.length < 100) leer.push(p);
+        }
+        await lokal.close();
+        ok(leer.length === 0, `alle ${alle.length} Seiten haben Inhalt`, leer.join(', '));
+        ok(verschiedeneSeiten.length === 0, `alle ${alle.length} Seiten zeigen denselben Text wie ohne Anmeldung`, verschiedeneSeiten.join(' | '));
+        ok(vk.fehler.length === 0, 'keine Fehler beim Aufruf aller Seiten', vk.fehler.slice(0, 5).join(' | '));
+        await vk.ctx.close();
+        if (!LIVE) {
+          const erlaubt = new RegExp('^' + BASISPFAD.replace(/[.*+?^${}()|[\]\\/]/g, '\\$&') + '(inhalt/[0-9a-f]{32}\\.enc|sw\\.js|shared/(zugang-kern\\.js|zugang\\.json|icons/[^/]+)|index\\.html|404\\.html)?$');
+          const fremd = [...new Set(log)].filter((p) => !erlaubt.test(p) && !/favicon/.test(p));
+          ok(fremd.length === 0, 'der Server sah nur Anmeldeseite, Symbole und verschlüsselte Dateien', fremd.slice(0, 5).join(' | '));
+        }
       }
 
       /* 5) Ohne Netz: bereits geöffnete Seiten kommen aus dem verschlüsselten Zwischenspeicher ------ */
@@ -281,6 +286,29 @@ try {
       try { await page.reload({ timeout: 15000 }); await page.waitForSelector('#konto-aus', { timeout: 10000 }); ohneNetz = true; } catch (e) {}
       await ctx.setOffline(false);
       ok(ohneNetz && log.length === vorher, 'ohne Netz lädt eine schon besuchte Seite aus dem Zwischenspeicher (der Server sah nichts)', `Server-Aufrufe: +${log.length - vorher}`);
+
+      // Eine Seite, die auf diesem Gerät noch nie geöffnet wurde, ohne Netz: Erklärung statt Fehlerseite des Browsers; mit dem Netz kommt die Seite von selbst.
+      // Der Zwischenspeicher wird vorher geleert, damit die Seite sicher „nie geöffnet“ ist (der Lauf über alle Seiten hat sie sonst schon abgelegt).
+      await page.evaluate(async () => { for (const k of await caches.keys()) await caches.delete(k); });
+      await ctx.setOffline(true);
+      let off = {};
+      try {
+        const r = await page.goto(BASE + 'faecher/aee/merksaetze.html', { timeout: 15000 });
+        off = { status: r && r.status(), h1: await page.textContent('h1'), knopf: await page.isVisible('button.z'), start: await page.isVisible(`a[href="${BASISPFAD}"]`) };
+      } catch (e) { off = { fehler: String(e.message).slice(0, 100) }; }
+      ok(off.status === 503 && off.h1 === 'Kein Netz' && off.knopf && off.start, 'nie geöffnete Seite ohne Netz: Hinweisseite mit „Erneut versuchen“ und Weg zur Startseite', JSON.stringify(off));
+      await ctx.setOffline(false);
+      await page.waitForSelector('#hub-konto', { timeout: 15000 }).catch(() => {});
+      ok(await page.isVisible('#hub-konto').catch(() => false), 'sobald das Netz zurück ist, lädt die Hinweisseite die Seite von selbst');
+
+      // Unbekannte Adresse (angemeldet): eigene Seite mit Weg zur Startseite, Status 404; Bilder und Skripte bekommen nur Text
+      const nf2 = await ctx.newPage();
+      const r404 = await nf2.goto(BASE + 'faecher/gibt-es-nicht.html');
+      ok(r404.status() === 404 && (await nf2.textContent('h1')) === 'Seite nicht gefunden' && await nf2.isVisible(`a[href="${BASISPFAD}"]`), 'unbekannte Adresse: Hinweisseite mit Weg zur Startseite', String(r404.status()));
+      const bild = await nf2.evaluate(async (u) => { const a = await fetch(u); return { s: a.status, t: a.headers.get('content-type') }; }, BASE + 'faecher/gibt-es-nicht.png');
+      ok(bild.s === 404 && /^text\/plain/.test(bild.t), 'unbekannte Datei (kein Seitenaufruf): nur Text, keine Seite', JSON.stringify(bild));
+      await nf2.close();
+      fehler.length = 0;
     }
 
     /* 6) Abmelden -------------------------------------------------------------------------------- */
@@ -345,6 +373,37 @@ try {
     await p2.waitForSelector('#form');
     ok(/neu anmelden/.test(await p2.textContent('#meldung')) && (await idbLesen(p2)) === null, 'falscher Schlüssel (Passwortwechsel) verlangt eine neue Anmeldung');
     await k2.ctx.close();
+  }
+
+  /* 8b) Anmeldedaten nicht ladbar (kein Netz, Server kurz weg): Meldung mit „Erneut versuchen“, keine Sackgasse; Enter im E-Mail-Feld geht zum Passwort ---------- */
+  {
+    const { ctx } = await neuerKontext();
+    const page = await ctx.newPage();
+    const URL_KONF = '**/shared/zugang.json';
+    await page.route(URL_KONF, (r) => r.abort());
+    await page.goto(BASE);
+    await page.waitForSelector('#nochmal:not([hidden])');
+    ok(/nicht geladen/.test(await page.textContent('#meldung')) && await page.isDisabled('#pw') && await page.isDisabled('#los'), 'Anmeldedaten nicht ladbar: Meldung und „Erneut versuchen“, Felder gesperrt');
+    await page.unroute(URL_KONF);
+    await page.click('#nochmal');
+    await page.waitForFunction(() => !document.getElementById('pw').disabled);
+    ok(await page.isHidden('#meldung') && await page.isHidden('#nochmal') && await page.isEnabled('#los'), '„Erneut versuchen“ lädt die Anmeldedaten nach, ohne die Seite neu zu laden');
+    await page.fill('#email', EMAIL);
+    await page.press('#email', 'Enter');
+    ok((await page.evaluate(() => document.activeElement.id)) === 'pw' && await page.isHidden('#meldung'), 'Enter im E-Mail-Feld springt zum Passwort (keine Fehlermeldung)');
+
+    await page.route(URL_KONF, (r) => r.abort());
+    await page.reload();
+    await page.waitForSelector('#nochmal:not([hidden])');
+    await ctx.setOffline(true);
+    await page.click('#nochmal');
+    await page.waitForFunction(() => /offline/.test(document.getElementById('meldung').textContent));
+    ok(await page.isVisible('#nochmal') && await page.isDisabled('#pw'), 'ohne Netz: „Du bist offline“ statt einer allgemeinen Fehlermeldung');
+    await page.unroute(URL_KONF);
+    await ctx.setOffline(false);
+    await page.waitForFunction(() => !document.getElementById('pw').disabled, null, { timeout: 10000 }).catch(() => {});
+    ok(await page.isEnabled('#pw') && await page.isHidden('#nochmal'), 'sobald das Netz zurück ist, ist die Anmeldung von selbst wieder bedienbar');
+    await ctx.close();
   }
 
   /* 9) Eine zweite Person im selben Browser-Profil gibt es nicht: frischer Kontext sieht nichts ---------- */

@@ -85,6 +85,10 @@ input::placeholder { color: var(--muted); opacity: 0.8; font-weight: 400; }
 .meldung.fehler { color: var(--err); background: var(--err-bg); border-color: var(--err-line); }
 .meldung.ok { color: var(--ok); background: var(--ok-bg); border-color: var(--ok-line); }
 .meldung.info { color: var(--info); background: var(--info-bg); border-color: var(--info-line); }
+.nochmal { font: 600 0.95rem var(--font); color: var(--brand); background: transparent; border: 1.5px solid var(--line); border-radius: 14px; padding: 0.7rem 1rem; min-height: 2.9rem; cursor: pointer; }
+.nochmal:hover { background: color-mix(in srgb, var(--ink) 8%, transparent); }
+.nochmal:focus-visible { outline: 3px solid var(--focus); outline-offset: 2px; }
+input[aria-invalid="true"] { border-color: var(--err); }
 #los {
     font: 700 1rem var(--font); color: #fff; border: 0; border-radius: 12px; padding: 0.85rem 1rem; cursor: pointer; min-height: 3rem;
     background: linear-gradient(135deg, var(--brand-2), #2f45b8); box-shadow: 0 4px 14px rgba(59,91,219,0.35);
@@ -195,6 +199,7 @@ input:focus { outline: none; border-color: var(--focus); box-shadow: 0 0 0 4px c
     <noscript><p>Für die Anmeldung wird JavaScript gebraucht.</p></noscript>
     <form id="form" novalidate>
         <div id="meldung" class="meldung" role="alert" hidden></div>
+        <button type="button" id="nochmal" class="nochmal" hidden>Erneut versuchen</button>
         <label class="feld" for="email">E-Mail-Adresse
             <input id="email" name="email" type="email" inputmode="email" autocomplete="username" autocapitalize="off" autocorrect="off" spellcheck="false" enterkeyhint="next" placeholder="vorname.nachname@lbs4.salzburg.at" required>
         </label>
@@ -227,9 +232,12 @@ input:focus { outline: none; border-color: var(--focus); box-shadow: 0 0 0 4px c
 
     function meldung(art, t) {
         var m = $('meldung');
+        $('email').removeAttribute('aria-invalid'); $('pw').removeAttribute('aria-invalid');
         if (!t) { m.hidden = true; return; }
         m.className = 'meldung ' + art; m.textContent = t; m.hidden = false;
     }
+    // Das Feld, um das es in der Meldung geht, für Vorlese-Programme kennzeichnen (nach meldung() aufrufen)
+    function markiere(id) { $(id).setAttribute('aria-invalid', 'true'); $(id).setAttribute('aria-describedby', 'meldung'); }
     function beschaeftigt(an, t) {
         $('los').disabled = an; $('los').textContent = an ? (t || 'Prüfe …') : 'Anmelden';
         $('form').setAttribute('aria-busy', an ? 'true' : 'false');
@@ -289,10 +297,10 @@ input:focus { outline: none; border-color: var(--focus); box-shadow: 0 0 0 4px c
         var chk = Kern.emailPruefen($('email').value, konfig.domains);
         if (!chk.ok) {
             meldung('fehler', chk.grund === 'domain' ? 'Nur Adressen der LBS 4 (…@' + konfig.domains[0] + ') sind zugelassen.' : 'Bitte eine gültige E-Mail-Adresse eingeben.');
-            $('email').focus(); return;
+            markiere('email'); $('email').focus(); return;
         }
         var pw = $('pw').value;
-        if (!pw.trim()) { meldung('fehler', 'Bitte das Passwort eingeben.'); $('pw').focus(); return; }
+        if (!pw.trim()) { meldung('fehler', 'Bitte das Passwort eingeben.'); markiere('pw'); $('pw').focus(); return; }
         beschaeftigt(true);
         Kern.huelleOeffnen(pw, konfig.huelle).then(function (K) {
             var ablauf = Date.now() + ($('bleiben').checked ? 30 * 864e5 : 12 * 36e5);
@@ -310,34 +318,53 @@ input:focus { outline: none; border-color: var(--focus); box-shadow: 0 0 0 4px c
             });
         }, function (e) {
             beschaeftigt(false);
-            if (e && e.code === 'PASSWORT') { meldung('fehler', 'Das Passwort stimmt nicht.'); $('pw').value = ''; $('pw').focus(); }
+            if (e && e.code === 'PASSWORT') { meldung('fehler', 'Das Passwort stimmt nicht.'); markiere('pw'); $('pw').value = ''; $('pw').focus(); }
             else meldung('fehler', 'Die Anmeldung ist nicht möglich: ' + (e && e.message || e));
         });
     });
+
+    // Enter im E-Mail-Feld geht zum Passwort, solange dort noch nichts steht (statt gleich „Bitte das Passwort eingeben“ zu melden)
+    $('email').addEventListener('keydown', function (e) { if (e.key === 'Enter' && !$('pw').value) { e.preventDefault(); $('pw').focus(); } });
 
     // ── Start ──
     var q = new URLSearchParams(location.search);
     if (q.get('neu')) meldung('info', 'Das Passwort wurde geändert. Bitte neu anmelden.');
     else if (q.get('abgemeldet')) meldung('ok', 'Du bist abgemeldet.');
+    else if (q.get('weiter')) meldung('info', 'Bitte anmelden, danach geht es mit der gewünschten Seite weiter.');
     try { var letzte = localStorage.getItem(LETZTE); if (letzte) $('email').value = letzte; } catch (e) {}
 
     if (!Kern || !window.crypto || !crypto.subtle || !('serviceWorker' in navigator)) {
         sperren('Dieser Browser kann die Anmeldung nicht ausführen (nötig sind HTTPS und ein Service Worker; in privaten Firefox-Fenstern fehlt er). Bitte ein normales Fenster oder einen anderen Browser nehmen.');
         return;
     }
-    fetch('shared/zugang.json', { cache: 'no-cache' }).then(function (r) { if (!r.ok) throw new Error('http ' + r.status); return r.json(); }).then(function (k) {
-        konfig = k;
-        $('email').placeholder = 'vorname.nachname@' + k.domains[0];
-        $('domain').textContent = '@' + k.domains[0];
-        swFertig = swEinrichten();
-        swFertig.catch(function () {});
-        if (!$('email').value) $('email').focus(); else $('pw').focus();
-        return Kern.sitzung.lesen().catch(function () { return null; });
-    }).then(function (s) {
-        if (s && selbstErlaubt()) { beschaeftigt(true, 'Lade …'); weiter().catch(swFehler); }
-    }).catch(function () {
-        sperren('Die Anmeldedaten konnten nicht geladen werden. Bitte die Seite neu laden.');
-    });
+    // Die Anmeldedaten (shared/zugang.json) laden. Gelingt das nicht (kein Netz, Server kurz weg), bleibt die Seite benutzbar: Meldung mit „Erneut versuchen“,
+    // und es geht von selbst weiter, sobald das Netz zurück ist (statt in einer Sackgasse „Bitte die Seite neu laden“).
+    var ladend = false;
+    function ladefehler() {
+        konfig = null;
+        $('email').disabled = true; $('pw').disabled = true; $('los').disabled = true; $('nochmal').hidden = false;
+        if (navigator.onLine === false) meldung('info', 'Du bist offline. Zum Anmelden braucht das Lernportal einmal eine Internetverbindung; es geht von selbst weiter, sobald sie da ist.');
+        else meldung('fehler', 'Die Anmeldedaten konnten nicht geladen werden. Bitte die Verbindung prüfen und es noch einmal versuchen.');
+    }
+    function starten(wieder) {
+        if (ladend) return;
+        ladend = true;
+        if (wieder) { meldung('', ''); $('nochmal').hidden = true; $('email').disabled = false; $('pw').disabled = false; $('los').disabled = false; }
+        fetch('shared/zugang.json', { cache: 'no-cache' }).then(function (r) { if (!r.ok) throw new Error('http ' + r.status); return r.json(); }).then(function (k) {
+            konfig = k;
+            $('email').placeholder = 'vorname.nachname@' + k.domains[0];
+            $('domain').textContent = '@' + k.domains[0];
+            swFertig = swEinrichten();
+            swFertig.catch(function () {});
+            if (!$('email').value) $('email').focus(); else $('pw').focus();
+            return Kern.sitzung.lesen().catch(function () { return null; });
+        }).then(function (s) {
+            if (s && selbstErlaubt()) { beschaeftigt(true, 'Lade …'); weiter().catch(swFehler); }
+        }).catch(ladefehler).then(function () { ladend = false; });
+    }
+    $('nochmal').addEventListener('click', function () { starten(true); });
+    addEventListener('online', function () { if (!konfig) starten(true); });
+    starten(false);
 })();
 </script>
 </body>
