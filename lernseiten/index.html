@@ -73,7 +73,8 @@ input[type="email"], input[type="password"], input[type="text"] {
     -webkit-appearance: none; appearance: none;
 }
 input:focus { outline: 3px solid var(--focus); outline-offset: 1px; border-color: transparent; }
-input::placeholder { color: var(--muted); opacity: 0.8; font-weight: 400; }
+input::placeholder { color: var(--muted); opacity: 1; font-weight: 400; text-overflow: ellipsis; }
+@media (max-width: 26rem) { input::placeholder { font-size: 0.875rem; } }
 .eingabe input { padding-right: 3rem; }
 .zeigen { position: absolute; right: 0.3rem; top: 50%; transform: translateY(-50%); width: 2.4rem; height: 2.4rem; display: grid; place-items: center; background: transparent; border: 0; border-radius: 10px; color: var(--muted); cursor: pointer; }
 .zeigen:hover { color: var(--ink); background: var(--line); }
