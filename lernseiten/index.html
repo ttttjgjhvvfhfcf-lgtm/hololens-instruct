@@ -181,6 +181,36 @@ input:focus { outline: none; border-color: var(--focus); box-shadow: 0 0 0 4px c
     #los:active:not(:disabled) { transform: scale(0.97); }
     input { transition: box-shadow 0.3s, border-color 0.2s; }
 }
+/* Ladezustand der Anmeldung: Drehring im Knopf; die Schloss-Marke am Logo klappert beim Prüfen, schüttelt sich bei falschem Passwort und öffnet sich bei Erfolg.
+   Bewegung nur ohne den Wunsch nach reduzierter Bewegung; dann bleibt es beim Text im Knopf („Prüfe …“, „Lade …“) und das Schloss wechselt ohne Übergang. */
+#los { display: inline-flex; align-items: center; justify-content: center; gap: 0.6rem; }
+.los-spin { display: none; width: 1.05rem; height: 1.05rem; flex: none; border-radius: 50%; border: 2.5px solid color-mix(in srgb, currentColor 35%, transparent); border-top-color: currentColor; }
+/* Im dunklen Design ist der Knopf hell (--brand-2 = #7c9cff): weiße Schrift erreichte darauf nur rund 2,5 : 1, dunkle Schrift 7 : 1 */
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) #los { color: #0b1226; } }
+:root[data-theme="dark"] #los { color: #0b1226; }
+#form[aria-busy="true"] .los-spin { display: block; }
+.kopf-logo { position: relative; display: block; flex: none; width: 3rem; height: 3rem; line-height: 0; }
+.schloss {
+    position: absolute; right: -0.5rem; bottom: -0.5rem; width: 1.5rem; height: 1.5rem; padding: 0.27rem; border-radius: 50%;
+    color: var(--brand); background: linear-gradient(var(--g-fill-hi), var(--g-fill-hi)) padding-box, linear-gradient(135deg, var(--g-rim-a), var(--g-rim-b)) border-box;
+    border: 1px solid transparent; box-shadow: 0 3px 8px -2px rgba(31,41,96,0.35), var(--g-inner);
+    fill: none; stroke: currentColor; stroke-width: 2.3; stroke-linecap: round; stroke-linejoin: round; overflow: visible;
+}
+.schloss .bogen { transform-origin: 8px 11px; transform-box: view-box; }
+.karte[data-zustand="offen"] .schloss { color: var(--ok); }
+.karte[data-zustand="offen"] .schloss .bogen { transform: translateY(-2.4px) rotate(-34deg); }
+@media (prefers-reduced-motion: no-preference) {
+    #form[aria-busy="true"] .los-spin { animation: lade-dreh 0.8s linear infinite; }
+    .schloss { transition: color 0.4s; }
+    .schloss .bogen { transition: transform 0.6s var(--spring); }
+    .karte[data-zustand="pruefe"] .schloss .bogen { animation: lade-klappern 0.9s ease-in-out infinite; }
+    .karte[data-zustand="fehler"] .schloss { animation: lade-wackeln 0.5s ease-in-out; }
+    @keyframes lade-dreh { to { transform: rotate(1turn); } }
+    @keyframes lade-klappern { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-1.1px); } }
+    @keyframes lade-wackeln { 20%, 60% { transform: translateX(-3px); } 40%, 80% { transform: translateX(3px); } }
+}
+@media (prefers-reduced-motion: reduce) { #form[aria-busy="true"] .los-spin { display: none; } }
+@media (forced-colors: active) { .schloss { background: Canvas; border-color: CanvasText; color: CanvasText; } .los-spin { border-color: ButtonText; border-top-color: transparent; } }
 @supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) { .karte { background: linear-gradient(var(--card), var(--card)) border-box padding-box, linear-gradient(var(--line), var(--line)) border-box; } }
 @media (prefers-reduced-transparency: reduce) { .karte { -webkit-backdrop-filter: none; backdrop-filter: none; background: linear-gradient(var(--card), var(--card)) border-box padding-box, linear-gradient(var(--line), var(--line)) border-box; } }
 @media (prefers-contrast: more) { :root { --field-line: currentColor; } .karte { background: var(--card); border-color: var(--ink); } }
@@ -191,7 +221,10 @@ input:focus { outline: none; border-color: var(--focus); box-shadow: 0 0 0 4px c
 <body>
 <main class="karte">
     <div class="kopf">
-        <img src="shared/icons/lernportal.svg" alt="" width="48" height="48">
+        <span class="kopf-logo">
+            <img src="shared/icons/lernportal.svg" alt="" width="48" height="48">
+            <svg class="schloss" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path class="bogen" d="M8 11V8a4 4 0 0 1 8 0v3"/><rect x="5" y="11" width="14" height="10" rx="2.5"/><path d="M12 15.2v1.8"/></svg>
+        </span>
         <div>
             <h1>Lernportal</h1>
             <p>Anmeldung mit deiner LBS-4-Adresse</p>
@@ -213,7 +246,7 @@ input:focus { outline: none; border-color: var(--focus); box-shadow: 0 0 0 4px c
             </span>
         </label>
         <label class="haken"><input type="checkbox" id="bleiben" checked> Angemeldet bleiben (30 Tage)</label>
-        <button id="los" type="submit">Anmelden</button>
+        <button id="los" type="submit"><span class="los-spin" aria-hidden="true"></span><span id="los-t">Anmelden</span></button>
     </form>
     <div class="hinweis">
         <p><b>Nur Adressen der Schule</b> (<span id="domain">@lbs4.salzburg.at</span>) sind zugelassen. Es wird keine E-Mail verschickt und nichts bestätigt; die Adresse bleibt auf deinem Gerät.</p>
@@ -239,9 +272,12 @@ input:focus { outline: none; border-color: var(--focus); box-shadow: 0 0 0 4px c
     }
     // Das Feld, um das es in der Meldung geht, für Vorlese-Programme kennzeichnen (nach meldung() aufrufen)
     function markiere(id) { $(id).setAttribute('aria-invalid', 'true'); $(id).setAttribute('aria-describedby', 'meldung'); }
+    // Zustand der Karte für das Schloss am Logo: pruefe (Passwort wird geprüft), offen (angemeldet, Seite wird geladen), fehler (Passwort falsch) oder leer
+    function zustand(z) { var k = document.querySelector('.karte'); if (z) k.setAttribute('data-zustand', z); else k.removeAttribute('data-zustand'); }
     function beschaeftigt(an, t) {
-        $('los').disabled = an; $('los').textContent = an ? (t || 'Prüfe …') : 'Anmelden';
+        $('los').disabled = an; $('los-t').textContent = an ? (t || 'Prüfe …') : 'Anmelden';
         $('form').setAttribute('aria-busy', an ? 'true' : 'false');
+        zustand(an ? (t ? 'offen' : 'pruefe') : '');
     }
     function sperren(t) {
         meldung('fehler', t);
@@ -319,7 +355,7 @@ input:focus { outline: none; border-color: var(--focus); box-shadow: 0 0 0 4px c
             });
         }, function (e) {
             beschaeftigt(false);
-            if (e && e.code === 'PASSWORT') { meldung('fehler', 'Das Passwort stimmt nicht.'); markiere('pw'); $('pw').value = ''; $('pw').focus(); }
+            if (e && e.code === 'PASSWORT') { meldung('fehler', 'Das Passwort stimmt nicht.'); markiere('pw'); $('pw').value = ''; $('pw').focus(); zustand('fehler'); }
             else meldung('fehler', 'Die Anmeldung ist nicht möglich: ' + (e && e.message || e));
         });
     });

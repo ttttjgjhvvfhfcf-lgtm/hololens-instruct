@@ -15,6 +15,8 @@ der Browser die Seiten beim Aufruf; sie sehen und funktionieren genau wie vorher
   jede Seite unter ihrer gewohnten Adresse entschlüsselt aus und merkt sich die verschlüsselten Dateien für den Betrieb ohne Netz.
   „Abmelden“ (Menü oben, auf Lernseiten in der Leiste) löscht Schlüssel und Zwischenspeicher.
 - Ohne gültigen Schlüssel führt jede Adresse im Portal (auch alte Lesezeichen) zur Anmeldung und danach zurück zur gewünschten Seite.
+- **Ladezustand:** Während das Passwort geprüft und die Seite geladen wird, dreht sich ein Ring im Knopf, und das Schloss am Logo klappert; bei falschem Passwort schüttelt es sich, bei Erfolg öffnet es sich. Mit dem Wunsch nach
+  reduzierter Bewegung bleibt es beim Text im Knopf („Prüfe …“, „Lade …“). Auf den Seiten selbst zeigt ein dünner Balken am oberen Rand den Seitenwechsel (`klar/shared/laden.js`, Näheres in `klar/README.md`, „Animationen“).
 - **Ohne Netz und bei Fehlern:** Schon besuchte Seiten kommen aus dem verschlüsselten Zwischenspeicher. Eine Seite, die auf dem Gerät noch nie offen war, zeigt ohne Netz eine eigene
   Hinweisseite („Kein Netz“, mit „Erneut versuchen“; sie lädt die Seite von selbst neu, sobald das Netz zurück ist), ebenso bei unbekannten Adressen („Seite nicht gefunden“) und
   Serverfehlern. Die Seiten stehen in `sw.js` (`hinweis()`), sind eigenständig und hell/dunkel wie das Portal. Bilder, Skripte und Daten bekommen weiter nur Text mit dem Statuscode.
