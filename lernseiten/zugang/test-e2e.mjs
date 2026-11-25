@@ -213,6 +213,14 @@ try {
     await zweite.waitForSelector('#konto-aus');
     ok(/Stundenplan/.test(await zweite.title()), 'Neuladen und neuer Tab bleiben angemeldet');
     await zweite.close();
+
+    // „← Zur Suche“: Nach dem Sprung aus der Suche führt der Link oben mit dem Suchbegriff zum Portal zurück; das Portal stellt die Suche aus der Adresse wieder her
+    // (der Service Worker reicht die Adresse mit ?q=… unverändert durch)
+    ok((await page.textContent('#hub-back')) === '← Zur Suche', 'nach dem Sprung aus der Suche heißt der Link oben „← Zur Suche“');
+    await page.click('#hub-back');
+    await page.waitForSelector('#results a.res', { timeout: 10000 });
+    ok(new URL(page.url()).searchParams.get('q') === 'Sternschaltung' && (await page.inputValue('#q')) === 'Sternschaltung', 'Zurück zur Suche: das Portal stellt die Suche aus der Adresse wieder her');
+
     ok(fehler.length === 0, 'keine Fehler in Konsole und Netz während der Sitzung', fehler.slice(0, 5).join(' | '));
 
     /* 3) Jede Datei kommt byte-gleich an ---------------------------------------------------------- */
@@ -280,6 +288,8 @@ try {
       /* 5) Ohne Netz: bereits geöffnete Seiten kommen aus dem verschlüsselten Zwischenspeicher ------ */
       await page.goto(BASE + 'stundenplan.html');
       await page.waitForSelector('#konto-aus');
+      await page.waitForLoadState('networkidle').catch(() => {});   // späte Anfragen der Seite (Schriften, Symbol) sollen nicht als „Server-Aufruf ohne Netz“ zählen
+      await page.waitForTimeout(300);
       const vorher = log.length;
       await ctx.setOffline(true);
       let ohneNetz = false;
@@ -289,11 +299,12 @@ try {
 
       // Eine Seite, die auf diesem Gerät noch nie geöffnet wurde, ohne Netz: Erklärung statt Fehlerseite des Browsers; mit dem Netz kommt die Seite von selbst.
       // Der Zwischenspeicher wird vorher geleert, damit die Seite sicher „nie geöffnet“ ist (der Lauf über alle Seiten hat sie sonst schon abgelegt).
+      // Die Seite lädt nichts von fremden Servern außer den Schriften: Eine Seite mit Bibliothek von cdnjs (z. B. aee/merksaetze) lädt in Umgebungen mit gesperrtem cdnjs zu langsam für die Wartezeit unten.
       await page.evaluate(async () => { for (const k of await caches.keys()) await caches.delete(k); });
       await ctx.setOffline(true);
       let off = {};
       try {
-        const r = await page.goto(BASE + 'faecher/aee/merksaetze.html', { timeout: 15000 });
+        const r = await page.goto(BASE + 'faecher/pb/sozialversicherung.html', { timeout: 15000 });
         off = { status: r && r.status(), h1: await page.textContent('h1'), knopf: await page.isVisible('button.z'), start: await page.isVisible(`a[href="${BASISPFAD}"]`) };
       } catch (e) { off = { fehler: String(e.message).slice(0, 100) }; }
       ok(off.status === 503 && off.h1 === 'Kein Netz' && off.knopf && off.start, 'nie geöffnete Seite ohne Netz: Hinweisseite mit „Erneut versuchen“ und Weg zur Startseite', JSON.stringify(off));
