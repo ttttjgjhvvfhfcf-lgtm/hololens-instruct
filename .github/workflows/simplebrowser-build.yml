@@ -1,0 +1,28 @@
+name: Build SimpleBrowser (UWP)
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'SimpleBrowser/**'
+      - '.github/workflows/simplebrowser-build.yml'
+  pull_request:
+    paths:
+      - 'SimpleBrowser/**'
+      - '.github/workflows/simplebrowser-build.yml'
+  workflow_dispatch:
+
+jobs:
+  build:
+    # Pinned (not windows-latest): verified to ship VS2022 with the UWP workload
+    # and Windows SDK 10.0.17763.0, which SimpleBrowser.csproj targets.
+    runs-on: windows-2022
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup MSBuild
+        uses: microsoft/setup-msbuild@v2
+
+      - name: Restore and build SimpleBrowser (Debug/x86)
+        run: msbuild SimpleBrowser\SimpleBrowser.csproj /restore /p:Configuration=Debug /p:Platform=x86 /p:AppxPackageSigningEnabled=false /v:minimal
