@@ -73,7 +73,8 @@ input[type="email"], input[type="password"], input[type="text"] {
     -webkit-appearance: none; appearance: none;
 }
 input:focus { outline: 3px solid var(--focus); outline-offset: 1px; border-color: transparent; }
-input::placeholder { color: var(--muted); opacity: 0.8; font-weight: 400; }
+input::placeholder { color: var(--muted); opacity: 1; font-weight: 400; text-overflow: ellipsis; }
+@media (max-width: 26rem) { input::placeholder { font-size: 0.875rem; } }
 .eingabe input { padding-right: 3rem; }
 .zeigen { position: absolute; right: 0.3rem; top: 50%; transform: translateY(-50%); width: 2.4rem; height: 2.4rem; display: grid; place-items: center; background: transparent; border: 0; border-radius: 10px; color: var(--muted); cursor: pointer; }
 .zeigen:hover { color: var(--ink); background: var(--line); }
@@ -85,6 +86,10 @@ input::placeholder { color: var(--muted); opacity: 0.8; font-weight: 400; }
 .meldung.fehler { color: var(--err); background: var(--err-bg); border-color: var(--err-line); }
 .meldung.ok { color: var(--ok); background: var(--ok-bg); border-color: var(--ok-line); }
 .meldung.info { color: var(--info); background: var(--info-bg); border-color: var(--info-line); }
+.nochmal { font: 600 0.95rem var(--font); color: var(--brand); background: transparent; border: 1.5px solid var(--line); border-radius: 14px; padding: 0.7rem 1rem; min-height: 2.9rem; cursor: pointer; }
+.nochmal:hover { background: color-mix(in srgb, var(--ink) 8%, transparent); }
+.nochmal:focus-visible { outline: 3px solid var(--focus); outline-offset: 2px; }
+input[aria-invalid="true"] { border-color: var(--err); }
 #los {
     font: 700 1rem var(--font); color: #fff; border: 0; border-radius: 12px; padding: 0.85rem 1rem; cursor: pointer; min-height: 3rem;
     background: linear-gradient(135deg, var(--brand-2), #2f45b8); box-shadow: 0 4px 14px rgba(59,91,219,0.35);
@@ -176,6 +181,36 @@ input:focus { outline: none; border-color: var(--focus); box-shadow: 0 0 0 4px c
     #los:active:not(:disabled) { transform: scale(0.97); }
     input { transition: box-shadow 0.3s, border-color 0.2s; }
 }
+/* Ladezustand der Anmeldung: Drehring im Knopf; die Schloss-Marke am Logo klappert beim Prüfen, schüttelt sich bei falschem Passwort und öffnet sich bei Erfolg.
+   Bewegung nur ohne den Wunsch nach reduzierter Bewegung; dann bleibt es beim Text im Knopf („Prüfe …“, „Lade …“) und das Schloss wechselt ohne Übergang. */
+#los { display: inline-flex; align-items: center; justify-content: center; gap: 0.6rem; }
+.los-spin { display: none; width: 1.05rem; height: 1.05rem; flex: none; border-radius: 50%; border: 2.5px solid color-mix(in srgb, currentColor 35%, transparent); border-top-color: currentColor; }
+/* Im dunklen Design ist der Knopf hell (--brand-2 = #7c9cff): weiße Schrift erreichte darauf nur rund 2,5 : 1, dunkle Schrift 7 : 1 */
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) #los { color: #0b1226; } }
+:root[data-theme="dark"] #los { color: #0b1226; }
+#form[aria-busy="true"] .los-spin { display: block; }
+.kopf-logo { position: relative; display: block; flex: none; width: 3rem; height: 3rem; line-height: 0; }
+.schloss {
+    position: absolute; right: -0.5rem; bottom: -0.5rem; width: 1.5rem; height: 1.5rem; padding: 0.27rem; border-radius: 50%;
+    color: var(--brand); background: linear-gradient(var(--g-fill-hi), var(--g-fill-hi)) padding-box, linear-gradient(135deg, var(--g-rim-a), var(--g-rim-b)) border-box;
+    border: 1px solid transparent; box-shadow: 0 3px 8px -2px rgba(31,41,96,0.35), var(--g-inner);
+    fill: none; stroke: currentColor; stroke-width: 2.3; stroke-linecap: round; stroke-linejoin: round; overflow: visible;
+}
+.schloss .bogen { transform-origin: 8px 11px; transform-box: view-box; }
+.karte[data-zustand="offen"] .schloss { color: var(--ok); }
+.karte[data-zustand="offen"] .schloss .bogen { transform: translateY(-2.4px) rotate(-34deg); }
+@media (prefers-reduced-motion: no-preference) {
+    #form[aria-busy="true"] .los-spin { animation: lade-dreh 0.8s linear infinite; }
+    .schloss { transition: color 0.4s; }
+    .schloss .bogen { transition: transform 0.6s var(--spring); }
+    .karte[data-zustand="pruefe"] .schloss .bogen { animation: lade-klappern 0.9s ease-in-out infinite; }
+    .karte[data-zustand="fehler"] .schloss { animation: lade-wackeln 0.5s ease-in-out; }
+    @keyframes lade-dreh { to { transform: rotate(1turn); } }
+    @keyframes lade-klappern { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-1.1px); } }
+    @keyframes lade-wackeln { 20%, 60% { transform: translateX(-3px); } 40%, 80% { transform: translateX(3px); } }
+}
+@media (prefers-reduced-motion: reduce) { #form[aria-busy="true"] .los-spin { display: none; } }
+@media (forced-colors: active) { .schloss { background: Canvas; border-color: CanvasText; color: CanvasText; } .los-spin { border-color: ButtonText; border-top-color: transparent; } }
 @supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) { .karte { background: linear-gradient(var(--card), var(--card)) border-box padding-box, linear-gradient(var(--line), var(--line)) border-box; } }
 @media (prefers-reduced-transparency: reduce) { .karte { -webkit-backdrop-filter: none; backdrop-filter: none; background: linear-gradient(var(--card), var(--card)) border-box padding-box, linear-gradient(var(--line), var(--line)) border-box; } }
 @media (prefers-contrast: more) { :root { --field-line: currentColor; } .karte { background: var(--card); border-color: var(--ink); } }
@@ -186,7 +221,10 @@ input:focus { outline: none; border-color: var(--focus); box-shadow: 0 0 0 4px c
 <body>
 <main class="karte">
     <div class="kopf">
-        <img src="shared/icons/lernportal.svg" alt="" width="48" height="48">
+        <span class="kopf-logo">
+            <img src="shared/icons/lernportal.svg" alt="" width="48" height="48">
+            <svg class="schloss" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path class="bogen" d="M8 11V8a4 4 0 0 1 8 0v3"/><rect x="5" y="11" width="14" height="10" rx="2.5"/><path d="M12 15.2v1.8"/></svg>
+        </span>
         <div>
             <h1>Lernportal</h1>
             <p>Anmeldung mit deiner LBS-4-Adresse</p>
@@ -195,6 +233,7 @@ input:focus { outline: none; border-color: var(--focus); box-shadow: 0 0 0 4px c
     <noscript><p>Für die Anmeldung wird JavaScript gebraucht.</p></noscript>
     <form id="form" novalidate>
         <div id="meldung" class="meldung" role="alert" hidden></div>
+        <button type="button" id="nochmal" class="nochmal" hidden>Erneut versuchen</button>
         <label class="feld" for="email">E-Mail-Adresse
             <input id="email" name="email" type="email" inputmode="email" autocomplete="username" autocapitalize="off" autocorrect="off" spellcheck="false" enterkeyhint="next" placeholder="vorname.nachname@lbs4.salzburg.at" required>
         </label>
@@ -207,7 +246,7 @@ input:focus { outline: none; border-color: var(--focus); box-shadow: 0 0 0 4px c
             </span>
         </label>
         <label class="haken"><input type="checkbox" id="bleiben" checked> Angemeldet bleiben (30 Tage)</label>
-        <button id="los" type="submit">Anmelden</button>
+        <button id="los" type="submit"><span class="los-spin" aria-hidden="true"></span><span id="los-t">Anmelden</span></button>
     </form>
     <div class="hinweis">
         <p><b>Nur Adressen der Schule</b> (<span id="domain">@lbs4.salzburg.at</span>) sind zugelassen. Es wird keine E-Mail verschickt und nichts bestätigt; die Adresse bleibt auf deinem Gerät.</p>
@@ -227,12 +266,18 @@ input:focus { outline: none; border-color: var(--focus); box-shadow: 0 0 0 4px c
 
     function meldung(art, t) {
         var m = $('meldung');
+        $('email').removeAttribute('aria-invalid'); $('pw').removeAttribute('aria-invalid');
         if (!t) { m.hidden = true; return; }
         m.className = 'meldung ' + art; m.textContent = t; m.hidden = false;
     }
+    // Das Feld, um das es in der Meldung geht, für Vorlese-Programme kennzeichnen (nach meldung() aufrufen)
+    function markiere(id) { $(id).setAttribute('aria-invalid', 'true'); $(id).setAttribute('aria-describedby', 'meldung'); }
+    // Zustand der Karte für das Schloss am Logo: pruefe (Passwort wird geprüft), offen (angemeldet, Seite wird geladen), fehler (Passwort falsch) oder leer
+    function zustand(z) { var k = document.querySelector('.karte'); if (z) k.setAttribute('data-zustand', z); else k.removeAttribute('data-zustand'); }
     function beschaeftigt(an, t) {
-        $('los').disabled = an; $('los').textContent = an ? (t || 'Prüfe …') : 'Anmelden';
+        $('los').disabled = an; $('los-t').textContent = an ? (t || 'Prüfe …') : 'Anmelden';
         $('form').setAttribute('aria-busy', an ? 'true' : 'false');
+        zustand(an ? (t ? 'offen' : 'pruefe') : '');
     }
     function sperren(t) {
         meldung('fehler', t);
@@ -289,10 +334,10 @@ input:focus { outline: none; border-color: var(--focus); box-shadow: 0 0 0 4px c
         var chk = Kern.emailPruefen($('email').value, konfig.domains);
         if (!chk.ok) {
             meldung('fehler', chk.grund === 'domain' ? 'Nur Adressen der LBS 4 (…@' + konfig.domains[0] + ') sind zugelassen.' : 'Bitte eine gültige E-Mail-Adresse eingeben.');
-            $('email').focus(); return;
+            markiere('email'); $('email').focus(); return;
         }
         var pw = $('pw').value;
-        if (!pw.trim()) { meldung('fehler', 'Bitte das Passwort eingeben.'); $('pw').focus(); return; }
+        if (!pw.trim()) { meldung('fehler', 'Bitte das Passwort eingeben.'); markiere('pw'); $('pw').focus(); return; }
         beschaeftigt(true);
         Kern.huelleOeffnen(pw, konfig.huelle).then(function (K) {
             var ablauf = Date.now() + ($('bleiben').checked ? 30 * 864e5 : 12 * 36e5);
@@ -310,34 +355,53 @@ input:focus { outline: none; border-color: var(--focus); box-shadow: 0 0 0 4px c
             });
         }, function (e) {
             beschaeftigt(false);
-            if (e && e.code === 'PASSWORT') { meldung('fehler', 'Das Passwort stimmt nicht.'); $('pw').value = ''; $('pw').focus(); }
+            if (e && e.code === 'PASSWORT') { meldung('fehler', 'Das Passwort stimmt nicht.'); markiere('pw'); $('pw').value = ''; $('pw').focus(); zustand('fehler'); }
             else meldung('fehler', 'Die Anmeldung ist nicht möglich: ' + (e && e.message || e));
         });
     });
+
+    // Enter im E-Mail-Feld geht zum Passwort, solange dort noch nichts steht (statt gleich „Bitte das Passwort eingeben“ zu melden)
+    $('email').addEventListener('keydown', function (e) { if (e.key === 'Enter' && !$('pw').value) { e.preventDefault(); $('pw').focus(); } });
 
     // ── Start ──
     var q = new URLSearchParams(location.search);
     if (q.get('neu')) meldung('info', 'Das Passwort wurde geändert. Bitte neu anmelden.');
     else if (q.get('abgemeldet')) meldung('ok', 'Du bist abgemeldet.');
+    else if (q.get('weiter')) meldung('info', 'Bitte anmelden, danach geht es mit der gewünschten Seite weiter.');
     try { var letzte = localStorage.getItem(LETZTE); if (letzte) $('email').value = letzte; } catch (e) {}
 
     if (!Kern || !window.crypto || !crypto.subtle || !('serviceWorker' in navigator)) {
         sperren('Dieser Browser kann die Anmeldung nicht ausführen (nötig sind HTTPS und ein Service Worker; in privaten Firefox-Fenstern fehlt er). Bitte ein normales Fenster oder einen anderen Browser nehmen.');
         return;
     }
-    fetch('shared/zugang.json', { cache: 'no-cache' }).then(function (r) { if (!r.ok) throw new Error('http ' + r.status); return r.json(); }).then(function (k) {
-        konfig = k;
-        $('email').placeholder = 'vorname.nachname@' + k.domains[0];
-        $('domain').textContent = '@' + k.domains[0];
-        swFertig = swEinrichten();
-        swFertig.catch(function () {});
-        if (!$('email').value) $('email').focus(); else $('pw').focus();
-        return Kern.sitzung.lesen().catch(function () { return null; });
-    }).then(function (s) {
-        if (s && selbstErlaubt()) { beschaeftigt(true, 'Lade …'); weiter().catch(swFehler); }
-    }).catch(function () {
-        sperren('Die Anmeldedaten konnten nicht geladen werden. Bitte die Seite neu laden.');
-    });
+    // Die Anmeldedaten (shared/zugang.json) laden. Gelingt das nicht (kein Netz, Server kurz weg), bleibt die Seite benutzbar: Meldung mit „Erneut versuchen“,
+    // und es geht von selbst weiter, sobald das Netz zurück ist (statt in einer Sackgasse „Bitte die Seite neu laden“).
+    var ladend = false;
+    function ladefehler() {
+        konfig = null;
+        $('email').disabled = true; $('pw').disabled = true; $('los').disabled = true; $('nochmal').hidden = false;
+        if (navigator.onLine === false) meldung('info', 'Du bist offline. Zum Anmelden braucht das Lernportal einmal eine Internetverbindung; es geht von selbst weiter, sobald sie da ist.');
+        else meldung('fehler', 'Die Anmeldedaten konnten nicht geladen werden. Bitte die Verbindung prüfen und es noch einmal versuchen.');
+    }
+    function starten(wieder) {
+        if (ladend) return;
+        ladend = true;
+        if (wieder) { meldung('', ''); $('nochmal').hidden = true; $('email').disabled = false; $('pw').disabled = false; $('los').disabled = false; }
+        fetch('shared/zugang.json', { cache: 'no-cache' }).then(function (r) { if (!r.ok) throw new Error('http ' + r.status); return r.json(); }).then(function (k) {
+            konfig = k;
+            $('email').placeholder = 'vorname.nachname@' + k.domains[0];
+            $('domain').textContent = '@' + k.domains[0];
+            swFertig = swEinrichten();
+            swFertig.catch(function () {});
+            if (!$('email').value) $('email').focus(); else $('pw').focus();
+            return Kern.sitzung.lesen().catch(function () { return null; });
+        }).then(function (s) {
+            if (s && selbstErlaubt()) { beschaeftigt(true, 'Lade …'); weiter().catch(swFehler); }
+        }).catch(ladefehler).then(function () { ladend = false; });
+    }
+    $('nochmal').addEventListener('click', function () { starten(true); });
+    addEventListener('online', function () { if (!konfig) starten(true); });
+    starten(false);
 })();
 </script>
 </body>
